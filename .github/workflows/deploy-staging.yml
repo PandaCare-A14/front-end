@@ -7,16 +7,16 @@ on:
 jobs:
   deploy:
     name: Deploy to Railway
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install Railway CLI
-        run: npm install -g @railway/cli
+        run: npm i -g @railway/cli
 
-      - name: Trigger Railway deployment
-        run: railway deploy --service 843606fb-081b-4c83-b572-72e581f5f593
+      - name: Deploy to Railway
+        run: railway up
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
