@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block meta %}
+<title>PandaCare - Konsultasi Online Terpercaya!</title>
+{% endblock meta %}
+
+{% block navbar %}
+{% include "components/navbar.html" with is_logged_in=False user_role="" %}
+{% endblock navbar %}
+
+{% block content %}
+<div class="min-h-screen flex flex-col font-body bg-[#f9fafc]">
+    <div class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Hero Section -->
+        <div class="welcome-banner p-8 md:p-12 mb-12 text-white">
+            <div class="md:flex items-center">
+                <div class="md:w-1/2 mb-8 md:mb-0 z-10">
+                    <h3 class="text-white md:text-5xl font-header font-bold mb-4">Konsultasi Dokter Online Terpercaya
+                    </h3>
+                    <p class="text-lg opacity-90 mb-8">Dapatkan layanan konsultasi kesehatan dari dokter spesialis
+                        terbaik kapan saja dan di mana saja</p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="#"
+                            class="px-6 py-3 bg-white text-primary font-medium rounded-full hover:bg-opacity-90 text-center transition-all">
+                            <i class="fas fa-user-md mr-2"></i> Lihat Dokter
+                        </a>
+                        <a href="#"
+                            class="px-6 py-3 bg-transparent border-2 border-white text-white font-medium rounded-full hover:bg-white hover:bg-opacity-10 text-center transition-all">
+                            Daftar Sekarang
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/2 flex justify-center relative z-10">
+                    <img src="{% static 'img/foto-dokter-konsultasi.jpg' %}" alt="Konsultasi Dokter"
+                        class="rounded-lg shadow-lg max-w-full h-auto transform hover:rotate-0 duration-300" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="text-center mb-12">
+            <h3 class="text-3xl font-header font-bold text-gray-800 mb-4">Mengapa Konsultasi dengan PandaCare</h3>
+            <p class="text-gray-600 max-w-3xl mx-auto mb-10">Layanan konsultasi dokter terbaik untuk kesehatan Anda</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature Card 1 -->
+                <div class="card bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all">
+                    <div class="w-16 h-16 mx-auto bg-secondary rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-user-md text-2xl text-primary"></i>
+                    </div>
+                    <h6 class="text-xl font-header font-bold text-gray-800 mb-2">Dokter Berpengalaman</h6>
+                    <p class="text-gray-600 mb-4">Konsultasi dengan dokter terpercaya dan tersertifikasi dalam bidangnya
+                    </p>
+                </div>
+
+                <!-- Feature Card 2 -->
+                <div class="card bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all">
+                    <div class="w-16 h-16 mx-auto bg-secondary rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-clock text-2xl text-primary"></i>
+                    </div>
+                    <h6 class="text-xl font-header font-bold text-gray-800 mb-2">Layanan 24/7</h6>
+                    <p class="text-gray-600 mb-4">Akses layanan konsultasi kapan saja, bahkan di tengah malam</p>
+                </div>
+
+                <!-- Feature Card 3 -->
+                <div class="card bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all">
+                    <div class="w-16 h-16 mx-auto bg-secondary rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-shield-alt text-2xl text-primary"></i>
+                    </div>
+                    <h6 class="text-xl font-header font-bold text-gray-800 mb-2">Privasi Terjamin</h6>
+                    <p class="text-gray-600 mb-4">Data kesehatan Anda sepenuhnya terlindungi dan aman</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-secondary p-8 rounded-xl text-center mb-8">
+            <h4 class="text-2xl font-header font-bold text-gray-800 mb-4">Mulai Konsultasi Dokter Sekarang</h4>
+            <p class="text-gray-600 mb-6 max-w-2xl mx-auto">Dapatkan layanan konsultasi melalui video-call maupun chat
+            </p>
+            <a href="#"
+                class="inline-block px-6 py-3 bg-primary text-white font-medium rounded-full hover:bg-accent-500 transition-all">
+                <i class="fas fa-user-md mr-2"></i> Lihat Dokter Sekarang
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+    const navLinks = document.querySelectorAll('.nav-link');
+    const currentPath = window.location.pathname;
+
+    navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (currentPath === href || (currentPath.startsWith(href) && href !== '/')) {
+            link.classList.add('active');
+            link.classList.add('bg-white');
+            link.classList.add('bg-opacity-10');
+        } else {
+            link.classList.remove('active');
+            link.classList.remove('bg-white');
+            link.classList.remove('bg-opacity-10');
+        }
+    });
+</script>
+{% endblock extra_js %}
