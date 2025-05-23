@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block meta %}
+<title>PandaCare - Create an Account</title>
+{% endblock meta %}
+
+{% block navbar %}
+{% include "components/navbar.html" with is_logged_in=False user_role="" %}
+{% endblock navbar %}
+
+{% block content %}
+<!-- Main Content -->
+<div class="min-h-screen flex flex-col">
+    <div class="flex-1 flex items-center justify-center px-4 py-12">
+        <div class="max-w-2xl w-full">
+            <!-- Registration Card -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <!-- Header -->
+                <div class="welcome-banner p-8 text-center text-white bg-gradient-to-r from-primary to-accent">
+                    <div
+                        class="w-20 h-20 mx-auto bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+                        <span class="text-3xl">👨‍⚕️</span>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-2">Join PandaCare</h2>
+                    <p class="text-white text-opacity-90">Create account to start consultation</p>
+                </div>
+
+                <!-- Role Selector -->
+                <div class="flex border-b border-gray-200">
+                    <button onclick="switchRole('pacilian')"
+                        class="flex-1 py-4 text-center font-medium transition-colors duration-300 text-primary border-b-2 border-primary"
+                        id="pacilian-tab">
+                        <div class="flex items-center justify-center">
+                            <span>Pacilian</span>
+                        </div>
+                    </button>
+                    <button onclick="switchRole('caregiver')"
+                        class="flex-1 py-4 text-center font-medium transition-colors duration-300 text-secondary hover:text-primary"
+                        id="caregiver-tab">
+                        <div class="flex items-center justify-center">
+                            <span>Caregiver</span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Form Container -->
+                <div class="p-8">
+                    {% for role in roles %}
+                    {% if role == "pacilian" %}
+                    <form id="pacilian-form" method="post" action="" class="space-y-6">
+                        {% csrf_token %}
+                        <input type="hidden" name="role" value="pacilian">
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📧 Email</label>
+                            <input type="email" name="email" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                placeholder="email@example.com">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">🔒 Password</label>
+                            <div class="relative">
+                                <input type="password" name="password" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all pr-12"
+                                    placeholder="Password">
+                                <button type="button" onclick="togglePassword(this)"
+                                    class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-primary">👁️</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">👤 Nama Lengkap</label>
+                            <input type="text" name="name" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                placeholder="Nama lengkap">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">💳 NIK</label>
+                            <input type="text" name="nik" required maxlength="16"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                placeholder="16 digit NIK" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📍 Alamat</label>
+                            <textarea name="address" required rows="3"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                placeholder="Alamat lengkap"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📱 Nomor Telepon</label>
+                            <input type="tel" name="phone" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                placeholder="08xxxxxxxxxx">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📋 Riwayat Penyakit <span
+                                    class="text-gray-500">(Opsional)</span></label>
+                            <textarea name="medical_history" rows="4"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                placeholder="Ceritakan riwayat penyakit atau kondisi medis yang pernah dialami (opsional)"></textarea>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full bg-primary text-white font-semibold py-3 px-4 rounded-lg hover:bg-primary/80 transition-all transform hover:scale-105 flex items-center justify-center">
+                            👤 Daftar Sebagai Pacilian
+                        </button>
+                    </form>
+
+                    {% else %}
+                    <form id="caregiver-form" method="post" action="" class="space-y-6 hidden">
+                        {% csrf_token %}
+                        <input type="hidden" name="role" value="caregiver">
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📧 Email</label>
+                            <input type="email" name="email" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                placeholder="email@example.com">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">🔒 Password</label>
+                            <div class="relative">
+                                <input type="password" name="password" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all pr-12"
+                                    placeholder="Password">
+                                <button type="button" onclick="togglePassword(this)"
+                                    class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-primary">👁️</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">👤 Nama Lengkap</label>
+                            <input type="text" name="name" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                placeholder="Nama lengkap">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">💳 NIK</label>
+                            <input type="text" name="nik" required maxlength="16"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                placeholder="16 digit NIK" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">🏥 Alamat Kerja</label>
+                            <textarea name="work_address" required rows="3"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                placeholder="Alamat tempat praktik"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📱 Nomor Telepon</label>
+                            <input type="tel" name="phone" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                placeholder="08xxxxxxxxxx">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">👨‍⚕️ Spesialisasi</label>
+                            <input type="text" name="speciality" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                placeholder="Contoh: Dokter Umum, Spesialis Jantung, dll">
+                        </div>
+
+                        <button type="submit"
+                            class="w-full bg-primary text-white font-semibold py-3 px-4 rounded-lg hover:bg-primary/80 transition-all transform hover:scale-105 flex items-center justify-center">
+                            👨‍⚕️ Daftar Sebagai Caregiver
+                        </button>
+                    </form>
+                    {% endif %}
+                    {% endfor %}
+
+                    <!-- Divider -->
+                    <div class="my-6 flex items-center">
+                        <div class="flex-1 border-t border-gray-300"></div>
+                        <span class="px-4 text-sm text-gray-500">atau</span>
+                        <div class="flex-1 border-t border-gray-300"></div>
+                    </div>
+
+                    <!-- Login Link -->
+                    <div class="text-center mt-6">
+                        <p class="text-gray-600">
+                            Sudah punya akun?
+                            <a href="{% url 'main:login' %}" class="text-primary font-semibold hover:text-primary/80">
+                                Masuk sekarang
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+    function switchRole(role) {
+        const pacilianTab = document.getElementById('pacilian-tab');
+        const caregiverTab = document.getElementById('caregiver-tab');
+        const pacilianForm = document.getElementById('pacilian-form');
+        const caregiverForm = document.getElementById('caregiver-form');
+
+        if (role === 'pacilian') {
+            pacilianTab.classList.add('text-primary', 'border-b-2', 'border-primary');
+            pacilianTab.classList.remove('text-secondary');
+            caregiverTab.classList.remove('text-primary', 'border-b-2', 'border-primary');
+            caregiverTab.classList.add('text-secondary');
+            pacilianForm.classList.remove('hidden');
+            caregiverForm.classList.add('hidden');
+        } else {
+            caregiverTab.classList.add('text-primary', 'border-b-2', 'border-primary');
+            caregiverTab.classList.remove('text-secondary');
+            pacilianTab.classList.remove('text-primary', 'border-b-2', 'border-primary');
+            pacilianTab.classList.add('text-secondary');
+            caregiverForm.classList.remove('hidden');
+            pacilianForm.classList.add('hidden');
+        }
+    }
+
+    function togglePassword(button) {
+        const input = button.parentElement.querySelector('input');
+        if (input.type === 'password') {
+            input.type = 'text';
+            button.textContent = '🔒';
+        } else {
+            input.type = 'password';
+            button.textContent = '👁️';
+        }
+    }
+</script>
+{% endblock extra_js %}
