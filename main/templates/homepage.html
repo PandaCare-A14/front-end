@@ -6,7 +6,7 @@
 {% endblock meta %}
 
 {% block navbar %}
-{% include "components/navbar.html" with is_logged_in=False user_role="" %}
+{% include "components/navbar.html" with is_logged_in=is_logged_in user_role=user_role %}
 {% endblock navbar %}
 
 {% block content %}
@@ -25,10 +25,12 @@
                             class="px-6 py-3 bg-white text-primary font-medium rounded-full hover:bg-opacity-90 text-center transition-all">
                             <i class="fas fa-user-md mr-2"></i> Lihat Dokter
                         </a>
+                        {% if not is_logged_in %}
                         <a href="#"
                             class="px-6 py-3 bg-transparent border-2 border-white text-white font-medium rounded-full hover:bg-white hover:bg-opacity-10 text-center transition-all">
                             Daftar Sekarang
                         </a>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="md:w-1/2 flex justify-center relative z-10">

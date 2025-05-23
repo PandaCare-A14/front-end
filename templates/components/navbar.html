@@ -2,7 +2,7 @@
 Usage:
 {% include "components/navbar.html" with
 is_logged_in=True/False
-user_role="caregiver"/"pacilian"/"guest"
+user_role="caregiver"/"pacilian"
 %}
 {% endcomment %}
 
@@ -29,7 +29,16 @@ user_role="caregiver"/"pacilian"/"guest"
                 {% if logged_in %}
                 <!-- Menu for logged-in users -->
                 <div class="flex space-x-1">
-                    {% if role == "caregiver" or role == "pacilian" %}
+                    {% if role == "caregiver" %}
+                    <a href="/jadwal-konsultasi"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                        <i class="fas fa-calendar-alt mr-2"></i> Jadwal
+                    </a>
+                    <a href="/chat"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                        <i class="fas fa-comments mr-2"></i> Chat
+                    </a>
+                    {% elif role == "pacilian" %}
                     <a href="/jadwal-konsultasi"
                         class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-calendar-alt mr-2"></i> Jadwal
@@ -52,19 +61,25 @@ user_role="caregiver"/"pacilian"/"guest"
                 <!-- Profile -->
                 <div class="relative profile-dropdown">
                     <button
-                        class="w-10 h-10 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all hover:scale-110 flex items-center justify-center relative">
+                        class="w-10 h-10 rounded-full bg-white bg-opacity-20 transition-all hover:scale-110 flex items-center justify-center relative">
                         <i class="fas fa-user text-white"></i>
                     </button>
                 </div>
+
+                <!-- Logout -->
+                <a href="/logout"
+                    class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </a>
                 {% else %}
                 <!-- Menu for Guests -->
                 <div class="flex space-x-1">
-                    <a href="/login"
-                        class="nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                    <a href="{% url 'main:login' %}"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-sign-in-alt mr-2"></i> Login
                     </a>
-                    <a href="/register"
-                        class="nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                    <a href="{% url 'main:register' %}"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-user-plus mr-2"></i> Register
                     </a>
                 </div>

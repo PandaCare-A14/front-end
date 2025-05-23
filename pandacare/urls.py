@@ -22,5 +22,7 @@ from main.views import HomePageView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', HomePageView.as_view(), name='home'), 
-    path('', include('main.urls'))
+    path('', include('main.urls')),
+    path('', include('schedule.urls')),
+    path('', include('reservasi_caregiver.urls'))
 ]
