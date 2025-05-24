@@ -13,4 +13,4 @@ db.sqlite3/
 
 # python cache
 __pycache__/
-*.py[cod]
+*.py[cod]__pycache__/
