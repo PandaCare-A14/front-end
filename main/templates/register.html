@@ -20,11 +20,32 @@
                 <div class="welcome-banner p-8 text-center text-white bg-gradient-to-r from-primary to-accent">
                     <div
                         class="w-20 h-20 mx-auto bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4">
-                        <span class="text-3xl">👨‍⚕️</span>
+                        <i class="fas fa-user-plus text-3xl"></i>
                     </div>
                     <h2 class="text-2xl font-bold mb-2">Join PandaCare</h2>
                     <p class="text-white text-opacity-90">Create account to start consultation</p>
                 </div>
+
+                <!-- Error Messages -->
+                {% if messages %}
+                <div class="mx-8 mt-6">
+                    {% for message in messages %}
+                    <div
+                        class="alert {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-800{% elif message.tags == 'success' %}bg-green-50 border border-green-200 text-green-800{% else %}bg-blue-50 border border-blue-200 text-blue-800{% endif %} px-4 py-3 rounded-lg mb-4">
+                        <div class="flex items-center">
+                            {% if message.tags == 'error' %}
+                            <i class="fas fa-exclamation-circle mr-3"></i>
+                            {% elif message.tags == 'success' %}
+                            <i class="fas fa-check-circle mr-3"></i>
+                            {% else %}
+                            <i class="fas fa-info-circle mr-3"></i>
+                            {% endif %}
+                            <span>{{ message }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
 
                 <!-- Role Selector -->
                 <div class="flex border-b border-gray-200">
@@ -32,6 +53,7 @@
                         class="flex-1 py-4 text-center font-medium transition-colors duration-300 text-primary border-b-2 border-primary"
                         id="pacilian-tab">
                         <div class="flex items-center justify-center">
+                            <i class="fas fa-user mr-2"></i>
                             <span>Pacilian</span>
                         </div>
                     </button>
@@ -39,6 +61,7 @@
                         class="flex-1 py-4 text-center font-medium transition-colors duration-300 text-secondary hover:text-primary"
                         id="caregiver-tab">
                         <div class="flex items-center justify-center">
+                            <i class="fas fa-user-md mr-2"></i>
                             <span>Caregiver</span>
                         </div>
                     </button>
@@ -53,54 +76,70 @@
                         <input type="hidden" name="role" value="pacilian">
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">📧 Email</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-envelope mr-2 text-primary"></i>Email
+                            </label>
                             <input type="email" name="email" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 placeholder="email@example.com">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">🔒 Password</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-lock mr-2 text-primary"></i>Password
+                            </label>
                             <div class="relative">
                                 <input type="password" name="password" required
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all pr-12"
                                     placeholder="Password">
                                 <button type="button" onclick="togglePassword(this)"
-                                    class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-primary">👁️</button>
+                                    class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-primary">
+                                    <i class="fas fa-eye"></i>
+                                </button>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">👤 Nama Lengkap</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user mr-2 text-primary"></i>Nama Lengkap
+                            </label>
                             <input type="text" name="name" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 placeholder="Nama lengkap">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">💳 NIK</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-id-card mr-2 text-primary"></i>NIK
+                            </label>
                             <input type="text" name="nik" required maxlength="16"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 placeholder="16 digit NIK" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">📍 Alamat</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-map-marker-alt mr-2 text-primary"></i>Alamat
+                            </label>
                             <textarea name="address" required rows="3"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 placeholder="Alamat lengkap"></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">📱 Nomor Telepon</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-phone mr-2 text-primary"></i>Nomor Telepon
+                            </label>
                             <input type="tel" name="phone" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 placeholder="08xxxxxxxxxx">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">📋 Riwayat Penyakit <span
-                                    class="text-gray-500">(Opsional)</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-notes-medical mr-2 text-primary"></i>Riwayat Penyakit <span
+                                    class="text-gray-500">(Opsional)</span>
+                            </label>
                             <textarea name="medical_history" rows="4"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 placeholder="Ceritakan riwayat penyakit atau kondisi medis yang pernah dialami (opsional)"></textarea>
@@ -108,7 +147,8 @@
 
                         <button type="submit"
                             class="w-full bg-primary text-white font-semibold py-3 px-4 rounded-lg hover:bg-primary/80 transition-all transform hover:scale-105 flex items-center justify-center">
-                            👤 Daftar Sebagai Pacilian
+                            <i class="fas fa-user-plus mr-2"></i>
+                            Daftar Sebagai Pacilian
                         </button>
                     </form>
 
@@ -118,53 +158,69 @@
                         <input type="hidden" name="role" value="caregiver">
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">📧 Email</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-envelope mr-2 text-primary"></i>Email
+                            </label>
                             <input type="email" name="email" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 placeholder="email@example.com">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">🔒 Password</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-lock mr-2 text-primary"></i>Password
+                            </label>
                             <div class="relative">
                                 <input type="password" name="password" required
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all pr-12"
                                     placeholder="Password">
                                 <button type="button" onclick="togglePassword(this)"
-                                    class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-primary">👁️</button>
+                                    class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-primary">
+                                    <i class="fas fa-eye"></i>
+                                </button>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">👤 Nama Lengkap</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user mr-2 text-primary"></i>Nama Lengkap
+                            </label>
                             <input type="text" name="name" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 placeholder="Nama lengkap">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">💳 NIK</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-id-card mr-2 text-primary"></i>NIK
+                            </label>
                             <input type="text" name="nik" required maxlength="16"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 placeholder="16 digit NIK" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">🏥 Alamat Kerja</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-hospital mr-2 text-primary"></i>Alamat Kerja
+                            </label>
                             <textarea name="work_address" required rows="3"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 placeholder="Alamat tempat praktik"></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">📱 Nomor Telepon</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-phone mr-2 text-primary"></i>Nomor Telepon
+                            </label>
                             <input type="tel" name="phone" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 placeholder="08xxxxxxxxxx">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">👨‍⚕️ Spesialisasi</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-stethoscope mr-2 text-primary"></i>Spesialisasi
+                            </label>
                             <input type="text" name="speciality" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 placeholder="Contoh: Dokter Umum, Spesialis Jantung, dll">
@@ -172,7 +228,8 @@
 
                         <button type="submit"
                             class="w-full bg-primary text-white font-semibold py-3 px-4 rounded-lg hover:bg-primary/80 transition-all transform hover:scale-105 flex items-center justify-center">
-                            👨‍⚕️ Daftar Sebagai Caregiver
+                            <i class="fas fa-user-md mr-2"></i>
+                            Daftar Sebagai Caregiver
                         </button>
                     </form>
                     {% endif %}
@@ -228,12 +285,15 @@
 
     function togglePassword(button) {
         const input = button.parentElement.querySelector('input');
+        const icon = button.querySelector('i');
         if (input.type === 'password') {
             input.type = 'text';
-            button.textContent = '🔒';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
         } else {
             input.type = 'password';
-            button.textContent = '👁️';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
         }
     }
 </script>
