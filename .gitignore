@@ -1,0 +1,16 @@
+.gradle
+build/
+.git
+node_modules
+build
+/env/
+db.sqlite3/
+.env/
+
+# sqlite
+*.sqlite3
+*.sqlite
+
+# python cache
+__pycache__/
+*.py[cod]__pycache__/

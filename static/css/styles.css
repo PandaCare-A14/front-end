@@ -1,0 +1,115 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap");
+
+body {
+    font-family: 'Poppins', sans-serif;
+    color: #121212;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Montserrat', sans-serif;
+    color: #121212;
+}
+
+h1 {
+    font-size: 48px !important;
+}
+
+h2 {
+    font-size: 36px !important;
+}
+
+h3 {
+    font-size: 30px !important;
+}
+
+h4 {
+    font-size: 24px !important;
+}
+
+h5 {
+    font-size: 20px !important;
+}
+
+h6 {
+    font-size: 18px !important;
+    line-height: 140% !important;
+}
+
+.navbar-gradient {
+    background: linear-gradient(to right, #1A76D2, #0D5CAB);
+    color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.nav-link {
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 50%;
+    background-color: white;
+    transform: translateX(-50%);
+    transition: width 0.3s ease;
+}
+
+.nav-link.active::after {
+    width: 70%;
+}
+
+.welcome-banner {
+    background: linear-gradient(135deg, #1A76D2 0%, #0D5CAB 100%);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-banner::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 1;
+}
+
+.welcome-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    left: -80px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 1;
+}
+
+.welcome-content {
+    position: relative;
+    z-index: 2;
+}
+
+.card {
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}

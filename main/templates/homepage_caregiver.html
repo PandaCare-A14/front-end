@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block meta %}
+<title>Caregiver Dashboard</title>
+{% endblock meta %}
+
+{% block navbar %}
+{% include "components/navbar.html" with is_logged_in=True user_role="caregiver" %}
+{% endblock navbar %}
+
+{% block content %}
+<div class="flex-grow container mx-auto p-6 max-w-7xl">
+    <!-- Banner -->
+    <div class="welcome-banner p-8 mb-8 flex justify-between items-center overflow-hidden">
+        <div class="welcome-content text-white z-10">
+            <h3 class="text-white font-header font-bold mb-2">Good Day, {{ caregiver_name }}!</h3>
+            <p class="text-white text-opacity-90">You have {{ waiting_count }} pending requests</p>
+        </div>
+        <div class="hidden md:block relative z-10">
+            <img src="{% static 'img/profile-dokter.png' %}" alt="Doctor illustration"
+                class="h-48 object-cover rounded-lg shadow-lg transform -rotate-3 transition-transform hover:rotate-0 duration-300" />
+        </div>
+    </div>
+
+    <!-- Main Area -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <!-- Today's Schedule -->
+        <div class="lg:col-span-1">
+            <div class="card bg-white p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h6 class="text-gray-800 text-xl font-header font-semibold">Today's Schedule</h6>
+                    <div class="flex items-center space-x-2">
+                        <a href="{% url 'reservation_list' caregiver_id=caregiver_id %}"
+                            class="text-primary text-sm hover:underline flex items-center">
+                            View All
+                            <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Today's appointments only -->
+                {% if today_schedule %}
+                {% for reservation in today_schedule %}
+                <div class="border-l-4 border-primary bg-blue-50 p-4 mb-3 rounded-r-lg">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-medium text-gray-900">Patient: {{ reservation.pacilian_id }}</p>
+                            <p class="text-sm text-gray-600">
+                                <i class="fas fa-clock mr-1"></i>
+                                {{ reservation.schedule.start_time|time:"H:i" }} - {{
+                                reservation.schedule.end_time|time:"H:i" }}
+                            </p>
+                        </div>
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                            {{ reservation.status_reservasi }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-gray-500 text-center py-8">
+                    <i class="fas fa-calendar-check text-3xl mb-2 block"></i>
+                    No appointments today
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Middle and Right Columns -->
+        <div class="lg:col-span-2">
+            <!-- New Requests -->
+            <div class="card bg-white p-6 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h6 class="text-gray-800 text-xl font-header font-semibold">New Requests</h6>
+                    <a href="/caregiver/waiting-reservations/?caregiver_id={{ caregiver_id }}"
+                        class="text-primary text-sm hover:underline flex items-center">
+                        View All
+                        <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% if pending_requests %}
+                    {% for request in pending_requests|slice:":4" %}
+                    <div
+                        class="request-item p-4 bg-secondary-20 rounded-lg hover:shadow-md transition-all duration-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-medium text-gray-800">{{ request.namaPasien }}</p>
+                                <p class="text-sm text-gray-600">{{ request.tanggal }}, {{ request.jamMulai|slice:":5"
+                                    }}-{{ request.jamSelesai|slice:":5" }}</p>
+                                <div class="mt-2">
+                                    <button onclick="updateReservationStatus('{{ request.id }}', 'APPROVED')"
+                                        class="bg-primary hover:bg-primary-80 text-white text-xs py-1 px-3 rounded-full mr-2 transition-all">Accept</button>
+                                    <button onclick="showRejectModal('{{ request.id }}')"
+                                        class="bg-red-400 hover:bg-red-500 text-white text-xs py-1 px-3 rounded-full transition-all">Reject</button>
+                                    <button onclick="showRescheduleModal('{{ request.id }}')"
+                                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs py-1 px-3 rounded-full transition-all">Reschedule</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="col-span-2 text-center py-4 text-gray-500">
+                        <p>No pending requests</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h3 class="text-xl font-bold mb-4">Reject Reservation</h3>
+        <input type="hidden" id="reject_reservation_id">
+        <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Reason for rejection:</label>
+            <textarea id="rejection_reason" class="w-full border border-gray-300 rounded p-2"></textarea>
+        </div>
+        <div class="flex justify-end">
+            <button onclick="closeRejectModal()"
+                class="bg-gray-200 text-gray-700 px-4 py-2 rounded mr-2">Cancel</button>
+            <button onclick="rejectReservation()" class="bg-red-500 text-white px-4 py-2 rounded">Reject</button>
+        </div>
+    </div>
+</div>
+
+<!-- Reschedule Modal -->
+<div id="rescheduleModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h3 class="text-xl font-bold mb-4">Reschedule Reservation</h3>
+        <input type="hidden" id="reschedule_reservation_id">
+        <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Select new schedule:</label>
+            <select id="new_schedule_id" class="w-full border border-gray-300 rounded p-2">
+                <option value="">Select a schedule...</option>
+                {% for schedule in available_schedules %}
+                <option value="{{ schedule.id }}">{{ schedule.day }} - {{ schedule.startTime|slice:":5" }} to {{
+                    schedule.endTime|slice:":5" }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="flex justify-end">
+            <button onclick="closeRescheduleModal()"
+                class="bg-gray-200 text-gray-700 px-4 py-2 rounded mr-2">Cancel</button>
+            <button onclick="rescheduleReservation()"
+                class="bg-primary text-white px-4 py-2 rounded">Reschedule</button>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_style %}
+<style>
+    .doctor-avatar {
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-bar {
+        height: 8px;
+        border-radius: 4px;
+        background-color: #e6e9f5;
+    }
+
+    .progress-value {
+        height: 8px;
+        border-radius: 4px;
+    }
+
+    .busyness-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: conic-gradient(#1A76D2 0% 72%, #f783ac 72% 95%, #e6e9f5 95% 100%);
+        position: relative;
+    }
+
+    .busyness-circle::after {
+        content: '';
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: white;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .event-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 10px;
+    }
+
+    .schedule-item {
+        transition: all 0.2s ease;
+    }
+
+    .schedule-item:hover {
+        transform: translateX(4px);
+    }
+
+    .request-item {
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+    }
+
+    .request-item:hover {
+        border-left-color: #1A76D2;
+        transform: translateX(2px);
+    }
+
+    .urgency-tag {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .search-input:focus {
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+    }
+
+    .time-slot {
+        width: 60px;
+        text-align: center;
+        background: #e8f1fc;
+        padding: 8px 0;
+        border-radius: 8px;
+    }
+
+    .add-schedule-button {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .add-schedule-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: 0.5s;
+    }
+
+    .add-schedule-button:hover::before {
+        left: 100%;
+    }
+
+    .quick-action-btn {
+        transition: all 0.3s ease;
+    }
+
+    .quick-action-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .welcome-banner {
+        background: linear-gradient(to right, #1A76D2, #4A9BE8);
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .welcome-banner::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('{% static "img/pattern-bg.svg" %}') repeat;
+        opacity: 0.1;
+    }
+</style>
+{% endblock extra_style %}
+
+{% block extra_js %}
+<script>
+    function updateReservationStatus(reservationId, status, newScheduleId = null) {
+        const csrftoken = getCookie('csrftoken');
+        const data = {
+            reservation_id: reservationId,
+            status: status
+        };
+
+        if (newScheduleId) {
+            data.newScheduleId = newScheduleId;
+        }
+
+        fetch("/caregiver/update-reservation-status/", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating the reservation status');
+            });
+    }
+
+    function showRejectModal(reservationId) {
+        document.getElementById('reject_reservation_id').value = reservationId;
+        document.getElementById('rejectModal').classList.remove('hidden');
+    }
+
+    function closeRejectModal() {
+        document.getElementById('rejectModal').classList.add('hidden');
+    }
+
+    function rejectReservation() {
+        const reservationId = document.getElementById('reject_reservation_id').value;
+        const reason = document.getElementById('rejection_reason').value;
+
+        updateReservationStatus(reservationId, 'REJECTED');
+        closeRejectModal();
+    }
+
+    function showRescheduleModal(reservationId) {
+        document.getElementById('reschedule_reservation_id').value = reservationId;
+        document.getElementById('rescheduleModal').classList.remove('hidden');
+    }
+
+    function closeRescheduleModal() {
+        document.getElementById('rescheduleModal').classList.add('hidden');
+    }
+
+    function rescheduleReservation() {
+        const reservationId = document.getElementById('reschedule_reservation_id').value;
+        const newScheduleId = document.getElementById('new_schedule_id').value;
+
+        if (!newScheduleId) {
+            alert('Please select a new schedule');
+            return;
+        }
+
+        updateReservationStatus(reservationId, 'ON_RESCHEDULE', newScheduleId);
+        closeRescheduleModal();
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock extra_js %}
