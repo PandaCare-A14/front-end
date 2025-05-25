@@ -21,6 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 CHAT_API_URL = os.environ["CHAT_API_URL"]
 
+JWKS_URL = os.environ["JWKS_URL"]
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
