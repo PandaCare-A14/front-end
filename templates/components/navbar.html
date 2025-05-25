@@ -30,19 +30,19 @@ user_role="caregiver"/"pacilian"
                 {% if logged_in %}
                 <!-- Menu for logged-in users -->
                 <div class="flex space-x-1">
-                    {% if role == "caregiver" %}
-                    <a href="#" class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium
-            hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                    {% if role == "caregiver" and caregiver_id %}
+                    <a href="{% url 'schedule_list' caregiver_id=caregiver_id %}"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-calendar-alt mr-2"></i> Jadwal Konsultasi
                     </a>
-                    <a href="{% url 'reservation_list' caregiver_id=user_id %}"
+                    <a href="{% url 'reservation_list' caregiver_id=caregiver_id %}"
                         class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-calendar-check mr-2"></i> Reservasi
-                    </a>
-                    <a href="/chat"
+                    </a>                    <a href="#"
                         class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-comments mr-2"></i> Chat
-                    </a>                    {% elif role == "pacilian" %}
+                    </a>
+                    {% elif role == "pacilian" %}
                     <a href="/jadwal-konsultasi"
                         class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-calendar-alt mr-2"></i> Jadwal
@@ -57,14 +57,6 @@ user_role="caregiver"/"pacilian"
                         <i class="fas fa-comments mr-2"></i> Chat
                     </a>
                     {% endif %}
-                </div>
-
-                <!-- Notification -->
-                <div class="relative group notification-dropdown">
-                    <button
-                        class="w-10 h-10 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all hover:scale-110 flex items-center justify-center relative">
-                        <i class="fas fa-bell text-white"></i>
-                    </button>
                 </div>
 
                 <!-- Profile -->
