@@ -42,12 +42,16 @@ user_role="caregiver"/"pacilian"
                     <a href="/chat"
                         class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-comments mr-2"></i> Chat
-                    </a>
-                    {% elif role == "pacilian" %}
+                    </a>                    {% elif role == "pacilian" %}
                     <a href="/jadwal-konsultasi"
                         class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-calendar-alt mr-2"></i> Jadwal
                     </a>
+                    {% if user_id %}
+                    <a href="{% url 'pacilian_reservasi_list' id_pacilian=user_id %}" class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                        <i class="fas fa-calendar-check mr-2"></i> Reservasi
+                    </a>
+                    {% endif %}
                     <a href="/chat"
                         class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-comments mr-2"></i> Chat

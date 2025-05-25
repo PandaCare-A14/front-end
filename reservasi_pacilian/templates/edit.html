@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block meta %}
+<title>Edit Reservation - PandaCare</title>
+{% endblock meta %}
+
+{% block navbar %}
+{% include "components/navbar.html" with is_logged_in=True user_role="pacilian" %}
+{% endblock navbar %}
+
+{% block content %}
+<div class="flex-grow container mx-auto p-6 max-w-4xl">
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h3 class="text-2xl font-bold text-gray-800">Edit Reservation</h3>
+        <p class="text-sm text-gray-600">Modify your consultation schedule</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card bg-white p-8">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="bg-blue-50 p-4 rounded-lg mb-6">
+                <h4 class="font-medium text-blue-800 mb-2">
+                    <i class="fas fa-info-circle mr-2"></i>Reservation ID: {{ idReservasi }}
+                </h4>
+                <p class="text-sm text-blue-600">You can change the schedule for this reservation.</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2" for="idSchedule">
+                    <i class="fas fa-calendar-alt mr-2"></i>New Schedule
+                </label>
+                <select id="idSchedule" name="idSchedule" required
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                    <option value="">Choose new schedule...</option>
+                    <!-- Schedule options will be populated from backend -->
+                </select>
+            </div>
+
+            <div class="flex space-x-4">
+                <button type="submit"
+                    class="flex-1 bg-primary text-white py-3 px-4 rounded-lg hover:bg-primary-dark flex items-center justify-center">
+                    <i class="fas fa-save mr-2"></i>
+                    Save Changes
+                </button>
+                <a href="{% url 'pacilian_reservasi_list' id_pacilian='placeholder' %}"
+                    class="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 flex items-center justify-center">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to List
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_style %}
+<style>
+    .card {
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .bg-primary {
+        background-color: #3B82F6;
+    }
+
+    .bg-primary-dark {
+        background-color: #2563EB;
+    }
+
+    .focus\:ring-primary:focus {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .focus\:border-primary:focus {
+        border-color: #3B82F6;
+    }
+</style>
+{% endblock extra_style %}

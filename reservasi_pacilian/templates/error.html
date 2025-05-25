@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block meta %}
+<title>Error - PandaCare</title>
+{% endblock meta %}
+
+{% block navbar %}
+{% include "components/navbar.html" with is_logged_in=is_logged_in|default:False user_role=user_role|default:"pacilian" user_id=user_id %}
+{% endblock navbar %}
+
+{% block content %}
+<div class="flex-grow container mx-auto p-6 max-w-7xl">
+    <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg">
+        <div class="flex items-center mb-2">
+            <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+            <h2 class="font-bold text-lg">Error</h2>
+        </div>
+        <p class="mb-4">{{ message|default:"An error occurred while processing your request." }}</p>
+        <a href="{% url 'main:pacilian_dashboard' %}" 
+           class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 inline-flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Return to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

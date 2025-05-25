@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'schedule',
-    'reservasi_caregiver'
+    'reservasi_caregiver',
+    'reservasi_pacilian',
 ]
 
 MIDDLEWARE = [
