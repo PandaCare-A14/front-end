@@ -30,7 +30,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -42,7 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'schedule',
-    'reservasi_caregiver'
+    'reservasi_caregiver',
+    'doctor_profile',
+    'chat',
 ]
 
 MIDDLEWARE = [
