@@ -1,0 +1,98 @@
+{% comment %}
+Usage:
+{% include "components/navbar.html" with
+is_logged_in=True/False
+user_role="caregiver"/"pacilian"
+%}
+{% endcomment %}
+
+{% load static %}
+{% with logged_in=is_logged_in|default:False role=user_role|default:"" %}
+
+{# components/navbar.html #}
+<nav class="navbar-gradient sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-20 items-center">
+
+            <!-- Logo -->
+            <div class="flex items-center space-x-6">
+                <a href="{% if logged_in and role == 'caregiver' and user_id %}{% url 'main:caregiver_dashboard' caregiver_id=user_id %}{% elif logged_in and role == 'pacilian' %}{% url 'main:pacilian_dashboard' %}{% else %}/{% endif %}"
+                    class="flex items-center group hover:scale-105 transition-transform duration-300">
+                    <div class="w-10 h-10 mr-3 rounded-lg flex items-center justify-center overflow-hidden">
+                        <img src="{% static 'img/logo-panda.png' %}" alt="PandaCare Logo"
+                            class="w-full h-full object-cover" />
+                    </div>
+                    <span class="font-header font-bold text-xl text-white">PandaCare</span>
+                </a>
+            </div>
+
+            <!-- Right Menu -->
+            <div class="hidden md:flex items-center space-x-4">
+                {% if logged_in %}
+                <!-- Menu for logged-in users -->
+                <div class="flex space-x-1">
+                    {% if role == "caregiver" and caregiver_id %}
+                    <a href="{% url 'schedule_list' caregiver_id=caregiver_id %}"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                        <i class="fas fa-calendar-alt mr-2"></i> Jadwal Konsultasi
+                    </a>
+                    <a href="{% url 'reservation_list' caregiver_id=caregiver_id %}"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                        <i class="fas fa-calendar-check mr-2"></i> Reservasi
+                    </a> <a href="#"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                        <i class="fas fa-comments mr-2"></i> Chat
+                    </a> {% elif role == "pacilian" %}
+                    <a href="/jadwal-konsultasi"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                        <i class="fas fa-calendar-alt mr-2"></i> Jadwal
+                    </a>
+                    <a href="{/doctor-list}"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                        <i class="fas fa-user-md mr-2"></i> Dokter
+                    </a>
+                    {% if user_id %}
+                    <a href="{% url 'pacilian_reservasi_list' id_pacilian=user_id %}"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                        <i class="fas fa-calendar-check mr-2"></i> Reservasi
+                    </a>
+                    {% endif %}
+                    <a href="/chat"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                        <i class="fas fa-comments mr-2"></i> Chat
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- Profile -->
+                <div class="relative profile-dropdown">
+                    <button
+                        class="w-10 h-10 rounded-full bg-white bg-opacity-20 transition-all hover:scale-110 flex items-center justify-center relative">
+                        <i class="fas fa-user text-white"></i>
+                    </button>
+                </div>
+
+                <!-- Logout -->
+                <a href="/logout"
+                    class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </a>
+                {% else %}
+                <!-- Menu for Guests -->
+                <div class="flex space-x-1">
+                    <a href="{% url 'main:login' %}"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Login
+                    </a>
+                    <a href="{% url 'main:register' %}"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                        <i class="fas fa-user-plus mr-2"></i> Register
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+{% endwith %}

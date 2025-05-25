@@ -1,0 +1,6 @@
+django
+gunicorn
+whitenoise
+requests
+dotenv
+pyjwt
