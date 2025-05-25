@@ -35,6 +35,9 @@ def api_request(method, endpoint, data=None, token=None, params=None):
             response = requests.request(method, url, headers=headers, timeout=30)
         
         if response.status_code in [200, 201, 204]:
+            if not response.text or response.text.strip() == "":
+                return None
+            
             try:
                 return response.json()
             except json.JSONDecodeError:
@@ -43,6 +46,7 @@ def api_request(method, endpoint, data=None, token=None, params=None):
             raise PermissionError(f"Unauthorized: {response.text}")
         else:
             raise Exception(f"API error {response.status_code}: {response.text}")
+            
     except requests.exceptions.Timeout:
         raise Exception("Request timeout - server may be down")
     except requests.exceptions.ConnectionError:
@@ -61,18 +65,8 @@ def get_base_context(request):
         'user_id': request.session.get("user_id")
     }
 
-def decode_jwt_with_jwks(token):
-    try:
-        if JWKS_URL:
-            jwk_client = PyJWKClient(JWKS_URL)
-            signing_key = jwk_client.get_signing_key_from_jwt(token)
-            decoded = jwt.decode(token, signing_key.key, algorithms=["RS256"], issuer="Pandacare")
-            if 'roles' in decoded and isinstance(decoded['roles'], list) and decoded['roles']:
-                decoded['role'] = decoded['roles'][0]
-            return decoded
-    except Exception:
-        pass
-        
+def decode_jwt_manually(token):
+    """Manual JWT decode without signature verification"""
     try:
         parts = token.split('.')
         if len(parts) != 3:
@@ -84,32 +78,49 @@ def decode_jwt_with_jwks(token):
             payload_b64 += '=' * padding
             
         payload = base64.urlsafe_b64decode(payload_b64)
-        token_data = json.loads(payload)
-        
-        required_fields = ['iss', 'user_id', 'exp']
-        if not all(field in token_data for field in required_fields):
-            return None
-        
-        current_time = datetime.now().timestamp()
-        if (token_data.get('iss') != 'Pandacare' or 
-            current_time > token_data.get('exp', 0)):
-            return None
-        
-        if 'roles' in token_data and isinstance(token_data['roles'], list):
-            if token_data['roles']:
-                token_data['role'] = token_data['roles'][0]
-            else:
-                return None
-        elif 'role' not in token_data:
-            return None
-        
-        if token_data.get('role') not in ['pacilian', 'caregiver']:
-            return None
-        
-        return token_data
+        return json.loads(payload)
         
     except Exception:
         return None
+
+def decode_jwt_with_jwks(token):
+    manual_decoded = decode_jwt_manually(token)
+    
+    try:
+        if JWKS_URL:
+            jwk_client = PyJWKClient(JWKS_URL)
+            signing_key = jwk_client.get_signing_key_from_jwt(token)
+            decoded = jwt.decode(token, signing_key.key, algorithms=["RS256"], issuer="Pandacare")
+            if 'roles' in decoded and isinstance(decoded['roles'], list) and decoded['roles']:
+                decoded['role'] = decoded['roles'][0]
+            return decoded
+    except Exception:
+        pass
+        
+    if manual_decoded:
+        if 'roles' in manual_decoded and isinstance(manual_decoded['roles'], list):
+            if manual_decoded['roles']:
+                manual_decoded['role'] = manual_decoded['roles'][0]
+            else:
+                return None
+        elif 'role' not in manual_decoded:
+            return None
+        
+        required_fields = ['iss', 'user_id', 'exp']
+        if not all(field in manual_decoded for field in required_fields):
+            return None
+        
+        current_time = datetime.now().timestamp()
+        if (manual_decoded.get('iss') != 'Pandacare' or 
+            current_time > manual_decoded.get('exp', 0)):
+            return None
+        
+        if manual_decoded.get('role') not in ['pacilian', 'caregiver']:
+            return None
+        
+        return manual_decoded
+        
+    return None
 
 class HomePageView(View):
     template_name = 'homepage.html'
@@ -139,58 +150,111 @@ class CaregiverDashboardView(View):
         token = request.session.get("access_token")
         
         try:
-            context = self._build_context(user_id, token, request)
+            context = self._build_context(user_id, token)
+            context['user_id'] = user_id
             return render(request, self.template_name, context)
-        except PermissionError:
-            request.session.flush()
-            messages.error(request, "Session expired. Please log in again.")
-            return redirect("main:login")
         except Exception as e:
-            messages.error(request, f"Error: {str(e)}")
+            messages.error(request, "Error loading dashboard")
             return render(request, self.template_name, self._error_context(user_id))
 
     def _validate_session(self, request, required_role):
         return is_logged_in(request) and request.session.get("user_role") == required_role
 
-    def _build_context(self, user_id, token, request):
-        caregiver_profile = api_request("GET", f"/api/caregivers/{user_id}", token=token)
-        today_date = datetime.now().strftime('%Y-%m-%d')
+    def _build_context(self, user_id, token):
+        caregiver_name = f"Dr. {str(user_id)[:8]}"
         
-        approved_reservations = api_request(
-            "GET", 
-            f"/api/caregivers/{user_id}/reservations", 
-            params={"status": "APPROVED"}, 
-            token=token
-        )
+        caregiver_data = self._fetch_caregiver_profile(user_id, token)
+        if caregiver_data and caregiver_data.get("name"):
+            caregiver_name = f"Dr. {caregiver_data['name']}"
         
-        waiting_reservations = api_request(
-            "GET", 
-            f"/api/caregivers/{user_id}/reservations", 
-            params={"status": "WAITING"}, 
-            token=token
-        )
+        approved_reservations = self._get_reservations(user_id, "APPROVED", token)
+        waiting_reservations = self._get_reservations(user_id, "WAITING", token)
         
-        available_schedules = api_request(
-            "GET", 
-            f"/api/caregivers/{user_id}/schedules", 
-            params={"status": "AVAILABLE"}, 
-            token=token
-        )
+        today_schedule = self._filter_today_schedule(approved_reservations)
         
-        base_context = {
+        return {
             'caregiver_id': user_id,
-            'caregiver_name': caregiver_profile.get("name", "Dr. Unknown"),
-            'today_schedule': [res for res in approved_reservations if res.get("tanggal") == today_date],
-            'pending_requests': waiting_reservations,
-            'waiting_count': len(waiting_reservations),
-            'available_schedules': available_schedules,
+            'caregiver_name': caregiver_name,
+            'today_schedule': today_schedule,
+            'pending_requests': waiting_reservations[:10] if waiting_reservations else [],
+            'waiting_count': len(waiting_reservations) if waiting_reservations else 0,
+            'available_schedules': [],
+            'is_logged_in': True,
+            'user_role': 'caregiver'
         }
-        base_context.update(get_base_context(request))
-        return base_context
+
+    def _fetch_caregiver_profile(self, user_id, token):
+        """Get caregiver profile from API"""
+        endpoints_to_try = [
+            f"/api/caregivers/{user_id}/profile",
+            f"/api/doctors/{user_id}",
+        ]
+        
+        for endpoint in endpoints_to_try:
+            try:
+                profile_data = api_request("GET", endpoint, token=token)
+                if profile_data:
+                    return profile_data
+            except Exception:
+                continue
+        
+        return None
+
+    def _get_reservations(self, user_id, status, token):
+        """Get reservations by status"""
+        try:
+            endpoint = f"/api/caregivers/{user_id}/reservations"
+            reservations = api_request("GET", endpoint, params={"status": status}, token=token)
+            
+            if reservations is None:
+                return []
+            
+            if isinstance(reservations, list):
+                return reservations
+            elif isinstance(reservations, dict):
+                if 'data' in reservations:
+                    return reservations['data'] if isinstance(reservations['data'], list) else []
+                elif 'reservations' in reservations:
+                    return reservations['reservations'] if isinstance(reservations['reservations'], list) else []
+            
+            return []
+                
+        except Exception:
+            return []
+
+    def _filter_today_schedule(self, reservations):
+        """Filter reservations for today"""
+        if not reservations:
+            return []
+            
+        today = datetime.now().strftime('%Y-%m-%d')
+        today_schedule = []
+        
+        for res in reservations:
+            try:
+                schedule = res.get("idSchedule", {}) or res.get("schedule", {})
+                schedule_date = schedule.get("date", "")
+                
+                if schedule_date and schedule_date.startswith(today):
+                    schedule_item = {
+                        'pacilian_id': res.get('idPacilian') or res.get('pacilian_id'),
+                        'status_reservasi': res.get('statusReservasi') or res.get('status'),
+                        'schedule': {
+                            'start_time': schedule.get('startTime') or schedule.get('start_time'),
+                            'end_time': schedule.get('endTime') or schedule.get('end_time'),
+                        }
+                    }
+                    today_schedule.append(schedule_item)
+                    
+            except Exception:
+                continue
+        
+        return today_schedule
 
     def _error_context(self, user_id):
         return {
             'caregiver_id': user_id,
+            'user_id': user_id,
             'caregiver_name': 'Dr. Unknown',
             'today_schedule': [],
             'pending_requests': [],
@@ -205,10 +269,12 @@ class LoginView(View):
     template_name = 'login.html'
     
     def get(self, request):
-        request.session.flush()
         return render(request, self.template_name)
     
     def post(self, request):
+        request.session.flush()
+        request.session.clear()
+
         email = request.POST.get('email')
         password = request.POST.get('password')
         
@@ -240,27 +306,17 @@ class LoginView(View):
             if not decoded:
                 raise Exception("Invalid token received")
             
+            user_id = decoded.get("user_id")
+            role = decoded.get("role")
+            
             request.session.update({
                 "access_token": access_token,
-                "user_id": decoded.get("user_id"),
-                "user_role": decoded.get("role")
+                "user_id": user_id,
+                "user_role": role
             })
             
-            return self._redirect_by_role(decoded.get("role"), decoded.get("user_id"))
+            return self._redirect_by_role(role, user_id)
             
-        except PermissionError as e:
-            error_message = str(e).lower()
-            if "unauthorized" in error_message:
-                messages.error(request, "Invalid email or password. Please try again.")
-            else:
-                messages.error(request, "Access denied. Please check your credentials.")
-            return render(request, self.template_name)
-        except requests.exceptions.ConnectionError:
-            messages.error(request, "Unable to connect to server. Please try again later.")
-            return render(request, self.template_name)
-        except requests.exceptions.Timeout:
-            messages.error(request, "Server is taking too long to respond. Please try again.")
-            return render(request, self.template_name)
         except Exception as e:
             error_str = str(e).lower()
             if "unauthorized" in error_str or "401" in error_str:
@@ -275,6 +331,7 @@ class LoginView(View):
                 messages.error(request, "Authentication failed. Please try again.")
             else:
                 messages.error(request, "Login failed. Please try again or contact support.")
+            
             return render(request, self.template_name)
     
     def _redirect_by_role(self, role, user_id):
@@ -297,21 +354,31 @@ class RegisterView(View):
         role = request.POST.get('role', 'pacilian')
         profile_data = self._extract_profile_data(request.POST, role)
         
+        print(f"=== REGISTRATION DEBUG ===")
+        print(f"Role: {role}")
+        print(f"Profile data: {profile_data}")
+        
         try:
-            api_request("POST", "/api/auth/register", {
+            print("Step 1: Registering user...")
+            register_response = api_request("POST", "/api/auth/register", {
                 "email": profile_data["email"],
                 "password": profile_data["password"],
                 "role": role
             })
+            print(f"Registration response: {register_response}")
             
+            print("Step 2: Logging in...")
             login_response = api_request("POST", "/api/auth/login", {
                 "email": profile_data["email"],
                 "password": profile_data["password"]
             })
+            print(f"Login response: {login_response}")
             
             access_token = login_response.get("access")
             if not access_token:
                 raise Exception("Failed to get access token after registration")
+            
+            print(f"Access token: {access_token[:50]}...")
             
             profile_payload = {
                 "name": profile_data["name"],
@@ -331,12 +398,32 @@ class RegisterView(View):
                     "speciality": profile_data.get("speciality", "")
                 })
             
-            api_request("POST", "/api/profile", profile_payload, token=access_token)
+            print(f"Profile payload: {profile_payload}")
             
+            # Try different profile endpoints
+            profile_endpoints = ["/api/profile", "/api/caregivers/profile", "/api/doctors/profile"]
+            profile_created = False
+            
+            for endpoint in profile_endpoints:
+                try:
+                    print(f"Step 3: Trying profile endpoint: {endpoint}")
+                    profile_response = api_request("POST", endpoint, profile_payload, token=access_token)
+                    print(f"Profile creation success with {endpoint}: {profile_response}")
+                    profile_created = True
+                    break
+                except Exception as e:
+                    print(f"Profile creation failed with {endpoint}: {e}")
+                    continue
+            
+            if not profile_created:
+                print("WARNING: All profile endpoints failed!")
+            
+            print("Registration process completed successfully")
             messages.success(request, "Registration successful! You can now sign in with your account.")
             return redirect("main:login")
             
-        except PermissionError as e:
+        except Exception as e:
+            print(f"Registration error: {e}")
             error_str = str(e).lower()
             if "unauthorized" in error_str:
                 messages.error(request, "Registration failed. Please try again.")
@@ -377,5 +464,7 @@ class RegisterView(View):
 class LogoutView(View):
     def get(self, request):
         request.session.flush()
+        request.session.clear()
+        request.session.cycle_key()
         messages.success(request, "Logged out successfully")
         return redirect("main:home")

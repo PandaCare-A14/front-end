@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block meta %}
+<title>Create Schedule - PandaCare</title>
+{% endblock meta %}
+
+{% block navbar %}
+{% include "components/navbar.html" with is_logged_in=True user_role="caregiver" user_id=user_id %}
+{% endblock navbar %}
+
+{% block content %}
+<div class="flex-grow container mx-auto p-4 md:p-6 max-w-4xl">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center mb-4">
+            <a href="{% url 'schedule_list' caregiver_id=caregiver_id %}"
+                class="text-primary hover:text-primary-dark mr-4">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">Create New Schedule</h1>
+                <p class="text-gray-600">Set your availability for patient appointments</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Messages -->
+    {% if messages %}
+    <div class="mb-6">
+        {% for message in messages %}
+        <div
+            class="alert {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-800{% elif message.tags == 'success' %}bg-green-50 border border-green-200 text-green-800{% else %}bg-blue-50 border border-blue-200 text-blue-800{% endif %} px-4 py-3 rounded-lg mb-4">
+            <div class="flex items-center">
+                {% if message.tags == 'error' %}
+                <i class="fas fa-exclamation-circle mr-3"></i>
+                {% elif message.tags == 'success' %}
+                <i class="fas fa-check-circle mr-3"></i>
+                {% else %}
+                <i class="fas fa-info-circle mr-3"></i>
+                {% endif %}
+                <span>{{ message }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Create Schedule Form -->
+    <div class="card bg-white p-8">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Day Selection -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2" for="day">
+                    <i class="fas fa-calendar-day mr-2 text-primary"></i>Day of Week *
+                </label>
+                <select id="day" name="day" required
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                    <option value="">Select a day</option>
+                    {% for day in days %}
+                    <option value="{{ day }}">{{ day|title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Time Selection -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" for="start_time">
+                        <i class="fas fa-clock mr-2 text-primary"></i>Start Time *
+                    </label>
+                    <input type="time" id="start_time" name="start_time" required
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" for="end_time">
+                        <i class="fas fa-clock mr-2 text-primary"></i>End Time *
+                    </label>
+                    <input type="time" id="end_time" name="end_time" required
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                </div>
+            </div>
+
+            <!-- Advanced Options -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-medium text-gray-800 mb-4">
+                    <i class="fas fa-cog mr-2 text-primary"></i>Advanced Options
+                </h3>
+
+                <!-- Repeat for Multiple Weeks -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" for="weeks">
+                        Repeat for how many weeks? (Optional)
+                    </label>
+                    <input type="number" id="weeks" name="weeks" min="1" max="52" placeholder="e.g., 4 for next 4 weeks"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                    <p class="text-sm text-gray-500 mt-1">Leave empty to create just one schedule</p>
+                </div>
+
+                <!-- Create Multiple Time Slots -->
+                <div class="flex items-center">
+                    <input type="checkbox" id="create_multiple" name="create_multiple"
+                        class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                    <label for="create_multiple" class="ml-2 block text-sm text-gray-700">
+                        Create multiple 1-hour time slots between start and end time
+                    </label>
+                </div>
+                <p class="text-sm text-gray-500 mt-1 ml-6">
+                    This will create separate 1-hour slots (e.g., 09:00-10:00, 10:00-11:00, etc.)
+                </p>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t">
+                <button type="submit"
+                    class="flex-1 bg-primary text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-dark transition-all flex items-center justify-center">
+                    <i class="fas fa-save mr-2"></i>
+                    Create Schedule
+                </button>
+
+                <a href="{% url 'schedule_list' caregiver_id=caregiver_id %}"
+                    class="flex-1 border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 transition-all flex items-center justify-center">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Help Section -->
+    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h3 class="text-lg font-medium text-blue-800 mb-3">
+            <i class="fas fa-info-circle mr-2"></i>How to Create Schedules
+        </h3>
+        <div class="text-sm text-blue-700 space-y-2">
+            <p><strong>Basic Schedule:</strong> Select a day and time range to create a single availability slot.</p>
+            <p><strong>Recurring Schedule:</strong> Add number of weeks to repeat the same schedule weekly.</p>
+            <p><strong>Multiple Slots:</strong> Check the "multiple time slots" option to break large time ranges into
+                1-hour chunks.</p>
+            <p><strong>Example:</strong> Monday 09:00-12:00 with "multiple slots" creates: 09:00-10:00, 10:00-11:00,
+                11:00-12:00</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const startTimeInput = document.getElementById('start_time');
+        const endTimeInput = document.getElementById('end_time');
+        const weeksInput = document.getElementById('weeks');
+        const createMultipleCheckbox = document.getElementById('create_multiple');
+
+        // Validate end time is after start time
+        function validateTimes() {
+            if (startTimeInput.value && endTimeInput.value) {
+                const startTime = new Date('2000-01-01 ' + startTimeInput.value);
+                const endTime = new Date('2000-01-01 ' + endTimeInput.value);
+
+                if (endTime <= startTime) {
+                    endTimeInput.setCustomValidity('End time must be after start time');
+                } else {
+                    endTimeInput.setCustomValidity('');
+                }
+            }
+        }
+
+        startTimeInput.addEventListener('change', validateTimes);
+        endTimeInput.addEventListener('change', validateTimes);
+
+        // Show/hide weeks input based on multiple slots checkbox
+        createMultipleCheckbox.addEventListener('change', function () {
+            if (this.checked) {
+                weeksInput.placeholder = 'e.g., 4 weeks (recommended for multiple slots)';
+            } else {
+                weeksInput.placeholder = 'e.g., 4 for next 4 weeks';
+            }
+        });
+
+        // Set default times
+        if (!startTimeInput.value) startTimeInput.value = '09:00';
+        if (!endTimeInput.value) endTimeInput.value = '17:00';
+    });
+</script>
+{% endblock content %}
+
+{% block extra_style %}
+<style>
+    .card {
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .bg-primary {
+        background-color: #1A76D2;
+    }
+
+    .bg-primary-dark {
+        background-color: #1565C0;
+    }
+
+    .text-primary {
+        color: #1A76D2;
+    }
+
+    .text-primary-dark {
+        color: #1565C0;
+    }
+
+    .focus\:ring-primary:focus {
+        box-shadow: 0 0 0 3px rgba(26, 118, 210, 0.1);
+    }
+
+    .focus\:border-primary:focus {
+        border-color: #1A76D2;
+    }
+
+    input[type="time"]::-webkit-calendar-picker-indicator {
+        color: #1A76D2;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+</style>
+{% endblock extra_style %}

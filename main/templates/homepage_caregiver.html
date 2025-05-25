@@ -31,7 +31,7 @@
                 <div class="flex justify-between items-center mb-6">
                     <h6 class="text-gray-800 text-xl font-header font-semibold">Today's Schedule</h6>
                     <div class="flex items-center space-x-2">
-                        <a href="/caregiver/reservations/?caregiver_id={{ caregiver_id }}&status=APPROVED"
+                        <a href="{% url 'reservation_list' caregiver_id=caregiver_id %}"
                             class="text-primary text-sm hover:underline flex items-center">
                             View All
                             <i class="fas fa-chevron-right ml-1 text-xs"></i>
@@ -39,31 +39,31 @@
                     </div>
                 </div>
 
-                <!-- Schedules -->
-                <div class="space-y-4">
-                    {% if today_schedule %}
-                    {% for reservation in today_schedule %}
-                    <div
-                        class="schedule-item flex items-center p-4 border-l-4 border-primary bg-secondary-20 rounded-r-lg">
-                        <div class="time-slot mr-4">
-                            <span class="block text-sm font-medium text-gray-500">{{ reservation.jamMulai|slice:":5"
-                                }}</span>
-                            <span class="block text-xs text-gray-400">{{
-                                reservation.startTime|slice:":2"|add:"0"|divisibleby:"12"|yesno:"AM,PM" }}
-                            </span>
-                        </div>
+                <!-- Today's appointments only -->
+                {% if today_schedule %}
+                {% for reservation in today_schedule %}
+                <div class="border-l-4 border-primary bg-blue-50 p-4 mb-3 rounded-r-lg">
+                    <div class="flex justify-between items-start">
                         <div>
-                            <p class="font-medium text-gray-800">Konsultasi Online</p>
-                            <p class="text-sm text-gray-600">{{ reservation.namaPasien }}</p>
+                            <p class="font-medium text-gray-900">Patient: {{ reservation.pacilian_id }}</p>
+                            <p class="text-sm text-gray-600">
+                                <i class="fas fa-clock mr-1"></i>
+                                {{ reservation.schedule.start_time|time:"H:i" }} - {{
+                                reservation.schedule.end_time|time:"H:i" }}
+                            </p>
                         </div>
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                            {{ reservation.status_reservasi }}
+                        </span>
                     </div>
-                    {% endfor %}
-                    {% else %}
-                    <div class="text-center py-4 text-gray-500">
-                        <p>No appointments scheduled for today</p>
-                    </div>
-                    {% endif %}
                 </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-gray-500 text-center py-8">
+                    <i class="fas fa-calendar-check text-3xl mb-2 block"></i>
+                    No appointments today
+                </p>
+                {% endif %}
             </div>
         </div>
 
