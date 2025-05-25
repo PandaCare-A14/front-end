@@ -13,10 +13,6 @@ class DoctorListView(View):
     template_name = 'doctor_list.html'
 
     def get(self, request):
-        if not is_logged_in(request):
-            messages.error(request, "Please login first")
-            return redirect("main:login")
-        
         context = get_base_context(request)
         search_type = request.GET.get('search_type')
         query = request.GET.get('query')
@@ -101,17 +97,12 @@ class DoctorProfileView(View):
     template_name = 'doctor_profile.html'
     
     def get(self, request, doctor_id):
-        if not is_logged_in(request):
-            messages.error(request, "Please login first")
-            return redirect("main:login")
-        
         context = get_base_context(request)
         patient_id = request.session.get("user_id")
         
         try:
             # Validate UUID format
             uuid.UUID(str(doctor_id))
-            uuid.UUID(str(patient_id))
             
             # Get basic doctor profile
             doctor_response = api_request(
