@@ -23,6 +23,6 @@ def render_chat(req: HttpRequest):
     except requests.JSONDecodeError:
         return render(req, "chat/error.html", {"error": "Invalid response from chat API"})
 
-    chat_rooms = process_chat_data(raw_room_data)
+    chat_rooms_and_messages = process_chat_data(raw_room_data)
 
-    return render(req, "chat/chat.html", {"chat_rooms": chat_rooms, "user_id": req.user_id})
+    return render(req, "chat/chat.html", {"chat_rooms": chat_rooms_and_messages, "user_id": req.user_id})
