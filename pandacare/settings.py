@@ -18,6 +18,7 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+CHAT_API_URL = os.environ["CHAT_API_URL"]
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -42,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'schedule',
-    'reservasi_caregiver'
+    'reservasi_caregiver',
+    'chat'
 ]
 
 MIDDLEWARE = [

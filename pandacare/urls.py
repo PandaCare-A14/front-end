@@ -23,7 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', HomePageView.as_view(), name='home'), 
     path('', include('main.urls')),
-    path('', include('chat.urls')),
+    path('chat/', include('chat.urls')),
     path('', include('reservasi_caregiver.urls')),
     path('', include('schedule.urls')),
 ]
