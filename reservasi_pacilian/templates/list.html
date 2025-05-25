@@ -30,7 +30,9 @@
     <div class="space-y-4">
         {% if reservasis %}
         {% for reservasi in reservasis %}
-        <div class="reservation-card bg-white border border-gray-100 hover:border-gray-200 transition-all duration-300">
+        <div class="reservation-card bg-white border border-gray-100 hover:border-gray-200 transition-all duration-300"
+            data-reservation-id="{{ reservasi.id }}"
+            data-caregiver-id="{{ reservasi.idSchedule.idCaregiver }}">
             <div class="card-header">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center">
@@ -41,7 +43,7 @@
                             <h3 class="reservation-title">Reservation #{{ reservasi.id }}</h3>
                             <p class="reservation-subtitle">
                                 <i class="fas fa-user-md mr-1"></i>
-                                Doctor ID: {{ reservasi.idSchedule.idCaregiver|default:"Not assigned" }}
+                                Doctor ID: {{ reservasi.idSchedule.idCaregiver}}
                             </p>
                         </div>
                     </div>
@@ -221,8 +223,22 @@
             });
         }
     }    function editReservation(reservationId) {
-        // Redirect to edit page
-        window.location.href = `/pacilian/reservasi/${reservationId}/edit/`;
+        // Get the caregiver ID from the reservation data
+        const reservationCard = document.querySelector(`[data-reservation-id="${reservationId}"]`);
+        const caregiverId = reservationCard?.dataset?.caregiverId;
+        
+        // Use console.log instead of print for debugging
+        console.log('Reservation ID:', reservationId);
+        console.log('Caregiver ID:', caregiverId);
+        console.log('Reservation Card:', reservationCard);
+        console.log('Dataset:', reservationCard?.dataset);
+
+        if (caregiverId) {
+            // Redirect to doctor schedules with reservation ID for edit mode
+            window.location.href = `/pacilian/schedules/${caregiverId}/?reservation_id=${reservationId}`;
+        } else {
+            alert('Unable to find doctor information for this reservation');
+        }
     }
 
     function viewDetails(reservationId) {

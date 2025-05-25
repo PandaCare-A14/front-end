@@ -9,6 +9,7 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.conf import settings
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
+from django.views import View
 from django.utils.decorators import method_decorator
 
 # API Configuration
@@ -16,8 +17,16 @@ API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8080")
 SPRINGBOOT_API_URL = f"{API_BASE_URL}/api/reservasi-konsultasi"
 
 def is_logged_in(request):
-    """Check if user is logged in"""
     return bool(request.session.get("access_token"))
+
+def validate_session(request):
+    required_keys = ['access_token', 'user_id', 'user_role']
+    return all(request.session.get(key) for key in required_keys)
+
+def clear_session_and_redirect(request, message="Session expired. Please login again."):
+    request.session.flush()
+    messages.error(request, message)
+    return redirect("main:login")
 
 def get_user_context(request):
     """Get user context from session"""
@@ -294,136 +303,103 @@ def reject_change(request, id):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
     
-# # DEBUGGING: Test authentication with detailed token information
-# def debug_auth_test(request, id_pacilian):
-#     print("DEBUG AUTH TEST ENDPOINT CALLED")
+# Update your DoctorScheduleListView in views.py
+@method_decorator(csrf_exempt, name='dispatch')
+class DoctorScheduleListView(View):
+    template_name = 'doctor_schedules.html'
     
-#     # Check session data
-#     print(f"=== SESSION DEBUG ===")
-#     print(f"Session keys: {list(request.session.keys())}")
-#     print(f"access_token exists: {'access_token' in request.session}")
-#     print(f"user_id exists: {'user_id' in request.session}")
-#     print(f"user_role exists: {'user_role' in request.session}")
-    
-#     token = request.session.get("access_token")
-#     user_id = request.session.get("user_id")
-#     user_role = request.session.get("user_role")
-    
-#     print(f"Token length: {len(token) if token else 'None'}")
-#     print(f"Token preview: {token[:100] if token else 'None'}...")
-#     print(f"User ID: {user_id}")
-#     print(f"User Role: {user_role}")
-    
-#     # Test 1: Basic health check
-#     print(f"\n=== TEST 1: Backend Health Check ===")
-#     try:
-#         health_response = requests.get(f"{API_BASE_URL}/health", timeout=5)
-#         print(f"✅ Health check: {health_response.status_code}")
-#         print(f"Health response: {health_response.text[:200]}")
-#     except Exception as e:
-#         print(f"❌ Health check failed: {e}")
-    
-#     # Test 2: API call without authentication
-#     print(f"\n=== TEST 2: API Call WITHOUT Auth ===")
-#     try:
-#         endpoint = f"/api/reservasi-konsultasi/{id_pacilian}"
-#         url = f"{API_BASE_URL}{endpoint}"
-#         print(f"URL: {url}")
+    def get(self, request, caregiver_id):
+        if not is_logged_in(request):
+            messages.error(request, "Please login first")
+            return redirect("main:login")
         
-#         no_auth_response = requests.get(url, timeout=10)
-#         print(f"No-auth response code: {no_auth_response.status_code}")
-#         print(f"No-auth response: {no_auth_response.text[:500]}")
-#     except Exception as e:
-#         print(f"❌ No-auth test failed: {e}")
-    
-#     # Test 3: API call with authentication
-#     print(f"\n=== TEST 3: API Call WITH Auth ===")
-#     if token:
-#         try:
-#             headers = {
-#                 "Content-Type": "application/json",
-#                 "Authorization": f"Bearer {token}"
-#             }
-#             print(f"Headers: {headers}")
-#             print(f"Authorization header: {headers['Authorization'][:100]}...")
+        user_context = get_user_context(request)
+        if user_context.get('user_role') != 'pacilian':
+            messages.error(request, "Access denied")
+            return redirect("main:home")
+        
+        token = request.session.get("access_token")
+        reservation_id = request.GET.get('reservation_id')
+        
+        try:
+            # Call the Spring Boot API endpoint with AVAILABLE status filter
+            # This matches your controller: /api/caregivers/{idCaregiver}/schedules?status=AVAILABLE
+            params = {"status": "AVAILABLE"}
             
-#             auth_response = requests.get(url, headers=headers, timeout=10)
-#             print(f"Auth response code: {auth_response.status_code}")
-#             print(f"Auth response headers: {dict(auth_response.headers)}")
-#             print(f"Auth response: {auth_response.text[:500]}")
+            print(f"=== SCHEDULE API DEBUG ===")
+            print(f"Caregiver ID: {caregiver_id}")
+            print(f"API Endpoint: /api/caregivers/{caregiver_id}/schedules")
+            print(f"Params: {params}")
+            print(f"Token exists: {bool(token)}")
             
-#             # Test if it's a CORS issue
-#             print(f"Response headers - CORS related:")
-#             cors_headers = {k: v for k, v in auth_response.headers.items() if 'access-control' in k.lower() or 'cors' in k.lower()}
-#             print(f"CORS headers: {cors_headers}")
+            schedules_response = api_request(
+                "GET", 
+                f"/api/caregivers/{caregiver_id}/schedules", 
+                params=params,
+                token=token
+            )
             
-#         except Exception as e:
-#             print(f"❌ Auth test failed: {e}")
-#     else:
-#         print("❌ No token available for auth test")
-    
-#     # Test 4: Try different endpoints
-#     print(f"\n=== TEST 4: Alternative Endpoints ===")
-#     alternative_endpoints = [
-#         "/api/reservasi-konsultasi",
-#         "/api/reservations",
-#         "/api/consultations",
-#         f"/api/pacilian/{id_pacilian}/reservations"
-#     ]
-    
-#     for alt_endpoint in alternative_endpoints:
-#         try:
-#             alt_url = f"{API_BASE_URL}{alt_endpoint}"
-#             headers = {"Authorization": f"Bearer {token}"} if token else {}
-#             alt_response = requests.get(alt_url, headers=headers, timeout=5)
-#             print(f"Endpoint {alt_endpoint}: {alt_response.status_code} - {alt_response.text[:100]}")
-#         except Exception as e:
-#             print(f"Endpoint {alt_endpoint}: ERROR - {e}")
-    
-#     # Test 5: JWT Token details
-#     print(f"\n=== TEST 5: JWT Token Analysis ===")
-#     if token:
-#         try:
-#             parts = token.split('.')
-#             print(f"JWT parts count: {len(parts)}")
+            print(f"API Response: {schedules_response}")
             
-#             if len(parts) == 3:
-#                 # Decode header
-#                 header_b64 = parts[0]
-#                 padding = 4 - len(header_b64) % 4
-#                 if padding != 4:
-#                     header_b64 += '=' * padding
-#                 header = json.loads(base64.urlsafe_b64decode(header_b64))
-#                 print(f"JWT Header: {header}")
-                
-#                 # Decode payload
-#                 payload_b64 = parts[1]
-#                 padding = 4 - len(payload_b64) % 4
-#                 if padding != 4:
-#                     payload_b64 += '=' * padding
-#                 payload = json.loads(base64.urlsafe_b64decode(payload_b64))
-#                 print(f"JWT Payload: {payload}")
-                
-#                 # Check expiry
-#                 if 'exp' in payload:
-#                     import datetime
-#                     exp_time = datetime.datetime.fromtimestamp(payload['exp'])
-#                     current_time = datetime.datetime.now()
-#                     print(f"Token expires: {exp_time}")
-#                     print(f"Current time: {current_time}")
-#                     print(f"Token expired: {current_time > exp_time}")
-                
-#         except Exception as e:
-#             print(f"❌ JWT analysis failed: {e}")
-    
-#     # Return a debug response
-#     return JsonResponse({
-#         "debug": "Authentication debug test completed",
-#         "session_data": {
-#             "has_token": bool(token),
-#             "token_length": len(token) if token else 0,
-#             "user_id": user_id,
-#             "user_role": user_role
-#         },
-#         "check_console": "Check Django console for detailed debug output"
-#     })
+            # Parse the response based on your Spring Boot ApiResponse structure
+            schedules = []
+            if schedules_response:
+                if isinstance(schedules_response, dict):
+                    # Your Spring Boot returns ApiResponse with 'data' field
+                    if "data" in schedules_response:
+                        schedules = schedules_response["data"]
+                    else:
+                        schedules = [schedules_response]
+                elif isinstance(schedules_response, list):
+                    schedules = schedules_response
+            
+            # Ensure schedules is a list
+            if not isinstance(schedules, list):
+                schedules = []
+            
+            print(f"Parsed schedules count: {len(schedules)}")
+            
+            # Transform the schedule data to match your template expectations
+            available_schedules = []
+            for schedule in schedules:
+                try:
+                    transformed_schedule = {
+                        'id': schedule.get('id', ''),
+                        'date': schedule.get('date', ''),
+                        'day': schedule.get('day', ''),
+                        'startTime': schedule.get('startTime', ''),
+                        'endTime': schedule.get('endTime', ''),
+                        'status': schedule.get('status', 'UNKNOWN').upper(),
+                    }
+                    available_schedules.append(transformed_schedule)
+                    print(f"Schedule: {transformed_schedule}")
+                except Exception as e:
+                    print(f"Error processing schedule: {e}")
+                    continue
+            
+            context = {
+                'schedules': available_schedules,
+                'caregiver_id': str(caregiver_id),
+                'reservation_id': reservation_id,
+                'is_edit_mode': bool(reservation_id),
+                'total_schedules': len(available_schedules),
+                **user_context
+            }
+            
+            return render(request, self.template_name, context)
+            
+        except Exception as e:
+            print(f"Error loading doctor schedules: {str(e)}")
+            messages.error(request, f"Error loading doctor schedules: {str(e)}")
+            
+            context = {
+                'schedules': [],
+                'caregiver_id': str(caregiver_id),
+                'reservation_id': reservation_id,
+                'is_edit_mode': bool(reservation_id),
+                'total_schedules': 0,
+                'error': str(e),
+                **user_context
+            }
+            
+            return render(request, self.template_name, context)
