@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block meta %}
-<title>{% if is_edit_mode %}Edit Reservation{% else %}Available Schedules{% endif %} - PandaCare</title>
+<title>{% if is_edit_mode %}Change Schedule{% else %}Available Schedules{% endif %} - PandaCare</title>
 {% endblock meta %}
 
 {% block navbar %}
@@ -14,7 +14,7 @@
     <!-- Page Header -->
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center">
-            <a href="{% if is_edit_mode %}{% url 'pacilian_reservasi_list' id_pacilian=user_id %}{% else %}{% url 'pacilian_doctor_list' %}{% endif %}" 
+            <a href="{% url 'pacilian_reservasi_list' id_pacilian=user_id %}" 
                class="text-primary hover:text-primary-dark mr-4">
                 <i class="fas fa-arrow-left text-xl"></i>
             </a>
@@ -28,10 +28,11 @@
                 </h3>
                 <p class="text-sm text-gray-600">
                     {% if caregiver_info %}
-                        Dr. {{ caregiver_info.name|default:"Unknown Doctor" }}
+                        Dr. {{ caregiver_info.data.name|default:"Unknown Doctor" }}
                     {% else %}
                         Doctor ID: {{ caregiver_id }}
                     {% endif %}
+                    • {{ total_schedules }} available slot{{ total_schedules|pluralize }}
                 </p>
             </div>
         </div>
@@ -47,16 +48,16 @@
 
     <!-- Schedules List -->
     {% if schedules %}
-    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {% for schedule in schedules %}
-        <div class="schedule-card bg-white border border-gray-200 rounded-lg p-6 hover:border-primary hover:shadow-md transition-all duration-300">
+        <div class="schedule-card bg-white border border-gray-200 rounded-xl p-6 hover:border-primary hover:shadow-lg transition-all duration-300">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
-                    <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
-                        <i class="fas fa-calendar-alt text-primary text-xl"></i>
+                    <div class="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-calendar-alt text-white text-xl"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-gray-800">{{ schedule.day }}</h4>
+                        <h4 class="font-bold text-gray-800">{{ schedule.day|title }}</h4>
                         <p class="text-sm text-gray-600">{{ schedule.date }}</p>
                     </div>
                 </div>
@@ -66,7 +67,7 @@
                 </span>
             </div>
             
-            <div class="mb-4">
+            <div class="mb-6">
                 <div class="flex items-center text-gray-600 mb-2">
                     <i class="fas fa-clock mr-2 text-primary"></i>
                     <span class="font-medium">{{ schedule.startTime }} - {{ schedule.endTime }}</span>
@@ -81,7 +82,7 @@
                 {% endif %}
                 
                 <button type="submit" 
-                        class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-dark transition-colors duration-300 flex items-center justify-center">
+                        class="w-full bg-gradient-to-r from-primary to-primary-dark text-white py-3 px-4 rounded-lg hover:from-primary-dark hover:to-primary transition-all duration-300 flex items-center justify-center font-medium">
                     <i class="fas fa-{% if is_edit_mode %}exchange-alt{% else %}plus{% endif %} mr-2"></i>
                     {% if is_edit_mode %}
                         Change to This Schedule
@@ -100,13 +101,13 @@
             <i class="fas fa-calendar-times text-gray-400 text-6xl mb-6"></i>
             <h3 class="text-xl font-bold text-gray-800 mb-4">No Available Schedules</h3>
             <p class="text-gray-600 mb-6">
-                {% if error %}
-                    Error loading schedules: {{ error }}
+                {% if error_message %}
+                    Error: {{ error_message }}
                 {% else %}
                     This doctor currently has no available time slots.
                 {% endif %}
             </p>
-            <a href="{% if is_edit_mode %}{% url 'pacilian_reservasi_list' id_pacilian=user_id %}{% else %}{% url 'pacilian_doctor_list' %}{% endif %}" 
+            <a href="{% url 'pacilian_reservasi_list' id_pacilian=user_id %}" 
                class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors duration-300">
                 <i class="fas fa-arrow-left mr-2"></i>Go Back
             </a>

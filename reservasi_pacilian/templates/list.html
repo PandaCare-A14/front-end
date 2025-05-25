@@ -184,7 +184,7 @@
 <script>
     function acceptChange(reservationId) {
         if (confirm('Are you sure you want to accept this schedule change?')) {
-            fetch(`/pacilian/reservasi/${reservationId}/accept-change/`, {
+            fetch(`/reservasi/${reservationId}/accept-change/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': getCookie('csrftoken')
@@ -195,6 +195,7 @@
                     alert('Schedule change accepted successfully!');
                     window.location.reload();
                 } else {
+                    console.error('Failed to accept change:', response.statusText);
                     throw new Error('Failed to accept change');
                 }
             })
@@ -204,7 +205,7 @@
         }
     }    function rejectChange(reservationId) {
         if (confirm('Are you sure you want to reject this schedule change?')) {
-            fetch(`/pacilian/reservasi/${reservationId}/reject-change/`, {
+            fetch(`/reservasi/${reservationId}/reject-change/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': getCookie('csrftoken')
@@ -226,16 +227,13 @@
         // Get the caregiver ID from the reservation data
         const reservationCard = document.querySelector(`[data-reservation-id="${reservationId}"]`);
         const caregiverId = reservationCard?.dataset?.caregiverId;
-        
-        // Use console.log instead of print for debugging
+
         console.log('Reservation ID:', reservationId);
-        console.log('Caregiver ID:', caregiverId);
-        console.log('Reservation Card:', reservationCard);
-        console.log('Dataset:', reservationCard?.dataset);
+        console.log('Caregiver ID:', caregiverId);  
 
         if (caregiverId) {
-            // Redirect to doctor schedules with reservation ID for edit mode
-            window.location.href = `/pacilian/schedules/${caregiverId}/?reservation_id=${reservationId}`;
+            // Redirect to doctor schedules with caregiver ID for edit mode
+            window.location.href = `/schedules/${caregiverId}/available/?reservation_id=${reservationId}`;
         } else {
             alert('Unable to find doctor information for this reservation');
         }
