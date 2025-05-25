@@ -8,7 +8,5 @@ urlpatterns = [
     path('reservasi/<uuid:id>/accept-change/', views.accept_change, name='pacilian_accept_change'),
     path('reservasi/<uuid:id>/reject-change/', views.reject_change, name='pacilian_reject_change'),
 
-    # Doctor selection flow
-    path('doctors/', views.list_doctors, name='pacilian_doctor_list'),
     path('schedules/<uuid:caregiver_id>/', views.DoctorScheduleListView.as_view(), name='doctor_schedules'),
 ]

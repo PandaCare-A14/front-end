@@ -29,7 +29,6 @@ def clear_session_and_redirect(request, message="Session expired. Please login a
     return redirect("main:login")
 
 def get_user_context(request):
-    """Get user context from session"""
     return {
         'is_logged_in': is_logged_in(request),
         'user_role': request.session.get("user_role", 'guest'),
@@ -37,7 +36,6 @@ def get_user_context(request):
     }
 
 def api_request(method, endpoint, data=None, token=None, params=None):
-    """Make API requests with proper error handling"""
     if not API_BASE_URL:
         raise Exception("API_BASE_URL environment variable not set")
     
@@ -89,7 +87,7 @@ def list_reservasi(request, id_pacilian):
     # Check if user is logged in and has proper permissions
     print(f"=== DEBUG: User trying to access reservations for Pacilian ID {id_pacilian} ===")
     if not is_logged_in(request):
-        print("❌ User not logged in, redirecting to login")
+        print("User not logged in, redirecting to login")
         messages.error(request, "Please login first")
         return redirect("main:login")
     
@@ -205,57 +203,6 @@ def request_reservasi(request):
     
     # GET request - show form
     return render(request, "request.html", user_context)
-
-# GET: List available doctors/caregivers
-def list_doctors(request):
-    if not is_logged_in(request):
-        messages.error(request, "Please login first")
-        return redirect("main:login")
-    
-    user_context = get_user_context(request)
-    if user_context.get('user_role') != 'pacilian':
-        messages.error(request, "Access denied")
-        return redirect("main:home")
-    
-    token = request.session.get("access_token")
-    
-    try:
-        # Get list of doctors/caregivers from API
-        endpoint = "/api/caregivers"
-        doctors_response = api_request("GET", endpoint, token=token)
-        
-        doctors = []
-        if doctors_response:
-            if isinstance(doctors_response, dict):
-                if "data" in doctors_response:
-                    doctors = doctors_response["data"]
-                elif "caregivers" in doctors_response:
-                    doctors = doctors_response["caregivers"]
-                elif "results" in doctors_response:
-                    doctors = doctors_response["results"]
-                else:
-                    doctors = [doctors_response]
-            elif isinstance(doctors_response, list):
-                doctors = doctors_response
-        
-        if not isinstance(doctors, list):
-            doctors = []
-        
-        context = {
-            "doctors": doctors,
-            **user_context
-        }
-        return render(request, "doctor_list.html", context)
-        
-    except Exception as e:
-        print(f"API Error loading doctors: {str(e)}")
-        messages.error(request, f"Failed to load doctors: {str(e)}")
-        context = {
-            "doctors": [],
-            "error_message": str(e),
-            **user_context
-        }
-        return render(request, "doctor_list.html", context)
 
 # POST: Accept schedule change
 @csrf_exempt
@@ -403,3 +350,4 @@ class DoctorScheduleListView(View):
             }
             
             return render(request, self.template_name, context)
+        
