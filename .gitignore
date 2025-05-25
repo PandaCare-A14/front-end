@@ -14,3 +14,4 @@ db.sqlite3/
 # python cache
 __pycache__/
 *.py[cod]__pycache__/
+.env
