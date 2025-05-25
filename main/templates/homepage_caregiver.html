@@ -44,476 +44,490 @@
                 {% for reservation in today_schedule %}
                 <div class="border-l-4 border-primary bg-blue-50 p-4 mb-3 rounded-r-lg">
                     <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-medium text-gray-900">Patient ID: {{ reservation.idPacilian }}</p>
-                            <p class="text-sm text-gray-600">
-                                <i class="fas fa-clock mr-1"></i>
-                                {{ reservation.idSchedule.startTime|slice:":5" }} -
-                                {{ reservation.idSchedule.endTime|slice:":5" }}
-                            </p>
-                            {% if reservation.pacilianNote %}
-                            <p class="text-xs text-gray-500 mt-1">
-                                <i class="fas fa-sticky-note mr-1"></i>
-                                {{ reservation.pacilianNote|truncatechars:30 }}
-                            </p>
-                            {% endif %}
-                        </div>
-
-                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {{ reservation.statusReservasi }}
-                        </span>
-                    </div>
-                </div>
-                {% endfor %}
-                {% else %}
-                <p class="text-gray-500 text-center py-8">
-                    <i class="fas fa-calendar-check text-3xl mb-2 block"></i>
-                    No appointments today
-                </p>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Middle and Right Columns -->
-        <div class="lg:col-span-2">
-            <!-- New Requests -->
-            <div class="card bg-white p-6 mb-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h6 class="text-gray-800 text-xl font-header font-semibold">New Requests</h6>
-                    <a href="/caregiver/waiting-reservations/?caregiver_id={{ caregiver_id }}"
-                        class="text-primary text-sm hover:underline flex items-center">
-                        View All
-                        <i class="fas fa-chevron-right ml-1 text-xs"></i>
-                    </a>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {% if pending_requests %}
-                    {% for request in pending_requests|slice:":4" %}
-                    <div
-                        class="request-item p-4 bg-secondary-20 rounded-lg hover:shadow-md transition-all duration-200">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-medium text-gray-800">{{ request.idSchedule.day }}</p>
-                                <p class="text-sm text-gray-600">{{ request.idSchedule.date }},
-                                    {{ request.idSchedule.startTime|slice:":5" }}-
-                                    {{request.idSchedule.endTime|slice:":5" }}</p>
-                                <div class="mt-2">
-                                    <button onclick="updateReservationStatus('{{ request.id }}', 'APPROVED')"
-                                        class="bg-primary hover:bg-primary-80 text-white text-xs py-1 px-3 rounded-full mr-2 transition-all">Accept</button>
-                                    <button onclick="rejectReservation('{{ request.id }}')"
-                                        class="bg-red-400 hover:bg-red-500 text-white text-xs py-1 px-3 rounded-full transition-all">Reject</button>
-                                    <button onclick="showRescheduleModal('{{ request.id }}')"
-                                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs py-1 px-3 rounded-full transition-all">Reschedule</button>
+                        <!-- Today's appointments only -->
+                        {% if today_schedule %}
+                        {% for reservation in today_schedule %}
+                        <div class="border-l-4 border-primary bg-blue-50 p-4 mb-3 rounded-r-lg">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-medium text-gray-900">Patient ID: {{ reservation.idPacilian }}</p>
+                                    <p class="text-sm text-gray-600">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        {{ reservation.idSchedule.startTime|slice:":5" }} -
+                                        {{ reservation.idSchedule.endTime|slice:":5" }}
+                                    </p>
+                                    {% if reservation.pacilianNote %}
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <i class="fas fa-sticky-note mr-1"></i>
+                                        {{ reservation.pacilianNote|truncatechars:30 }}
+                                    </p>
+                                    {% endif %}
                                 </div>
+
+                                <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    {{ reservation.statusReservasi }}
+                                </span>
                             </div>
                         </div>
+                        {% endfor %}
+                        {% else %}
+                        <p class="text-gray-500 text-center py-8">
+                            <i class="fas fa-calendar-check text-3xl mb-2 block"></i>
+                            No appointments today
+                        </p>
+                        {% endif %}
+                        {% endfor %}
+                        {% else %}
+                        <p class="text-gray-500 text-center py-8">
+                            <i class="fas fa-calendar-check text-3xl mb-2 block"></i>
+                            No appointments today
+                        </p>
+                        {% endif %}
                     </div>
-                    {% endfor %}
-                    {% else %}
-                    <div class="col-span-2 text-center py-4 text-gray-500">
-                        <p>No pending requests</p>
+                </div>
+
+                <!-- Middle and Right Columns -->
+                <div class="lg:col-span-2">
+                    <!-- New Requests -->
+                    <div class="card bg-white p-6 mb-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h6 class="text-gray-800 text-xl font-header font-semibold">New Requests</h6>
+                            <a href="/caregiver/waiting-reservations/?caregiver_id={{ caregiver_id }}"
+                                class="text-primary text-sm hover:underline flex items-center">
+                                View All
+                                <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                            </a>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {% if pending_requests %}
+                            {% for request in pending_requests|slice:":4" %}
+                            <div
+                                class="request-item p-4 bg-secondary-20 rounded-lg hover:shadow-md transition-all duration-200">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-medium text-gray-800">{{ request.idSchedule.day }}</p>
+                                        <p class="text-sm text-gray-600">{{ request.idSchedule.date }},
+                                            {{ request.idSchedule.startTime|slice:":5" }}-
+                                            {{request.idSchedule.endTime|slice:":5" }}</p>
+                                        <div class="mt-2">
+                                            <button onclick="updateReservationStatus('{{ request.id }}', 'APPROVED')"
+                                                class="bg-primary hover:bg-primary-80 text-white text-xs py-1 px-3 rounded-full mr-2 transition-all">Accept</button>
+                                            <button onclick="rejectReservation('{{ request.id }}')"
+                                                class="bg-red-400 hover:bg-red-500 text-white text-xs py-1 px-3 rounded-full transition-all">Reject</button>
+                                            <button onclick="showRescheduleModal('{{ request.id }}')"
+                                                class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs py-1 px-3 rounded-full transition-all">Reschedule</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="col-span-2 text-center py-4 text-gray-500">
+                                <p>No pending requests</p>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Reject Modal -->
-<div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-        <h3 class="text-xl font-bold mb-4">Reject Reservation</h3>
-        <input type="hidden" id="reject_reservation_id">
-        <div class="mb-4">
-            <label class="block text-gray-700 mb-2">Reason for rejection:</label>
-            <textarea id="rejection_reason" class="w-full border border-gray-300 rounded p-2"></textarea>
-        </div>
-        <div class="flex justify-end">
-            <button onclick="closeRejectModal()"
-                class="bg-gray-200 text-gray-700 px-4 py-2 rounded mr-2">Cancel</button>
-            <button onclick="rejectReservation()" class="bg-red-500 text-white px-4 py-2 rounded">Reject</button>
-        </div>
-    </div>
-</div>
-
-<!-- Enhanced Reschedule Modal -->
-<div id="rescheduleModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md max-h-96 overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-bold">Reschedule Reservation</h3>
-            <button onclick="closeRescheduleModal()" class="text-gray-500 hover:text-gray-700">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
-        <input type="hidden" id="reschedule_reservation_id">
-
-        <div class="mb-4">
-            <label class="block text-gray-700 mb-2">Select new schedule:</label>
-            <div id="schedule_loading" class="text-center py-4 hidden">
-                <i class="fas fa-spinner fa-spin"></i> Loading available schedules...
+        <!-- Reject Modal -->
+        <div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                <h3 class="text-xl font-bold mb-4">Reject Reservation</h3>
+                <input type="hidden" id="reject_reservation_id">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Reason for rejection:</label>
+                    <textarea id="rejection_reason" class="w-full border border-gray-300 rounded p-2"></textarea>
+                </div>
+                <div class="flex justify-end">
+                    <button onclick="closeRejectModal()"
+                        class="bg-gray-200 text-gray-700 px-4 py-2 rounded mr-2">Cancel</button>
+                    <button onclick="rejectReservation()"
+                        class="bg-red-500 text-white px-4 py-2 rounded">Reject</button>
+                </div>
             </div>
-            <div id="schedule_error" class="text-red-500 text-sm hidden"></div>
-            <select id="new_schedule_id" class="w-full border border-gray-300 rounded p-2">
-                <option value="">Select a schedule...</option>
-            </select>
         </div>
 
-        <div class="flex justify-end space-x-2">
-            <button onclick="closeRescheduleModal()"
-                class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition-colors">
-                Cancel
-            </button>
-            <button onclick="rescheduleReservation()"
-                class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-80 transition-colors">
-                Reschedule
-            </button>
+        <!-- Enhanced Reschedule Modal -->
+        <div id="rescheduleModal"
+            class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md max-h-96 overflow-y-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">Reschedule Reservation</h3>
+                    <button onclick="closeRescheduleModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <input type="hidden" id="reschedule_reservation_id">
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Select new schedule:</label>
+                    <div id="schedule_loading" class="text-center py-4 hidden">
+                        <i class="fas fa-spinner fa-spin"></i> Loading available schedules...
+                    </div>
+                    <div id="schedule_error" class="text-red-500 text-sm hidden"></div>
+                    <select id="new_schedule_id" class="w-full border border-gray-300 rounded p-2">
+                        <option value="">Select a schedule...</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end space-x-2">
+                    <button onclick="closeRescheduleModal()"
+                        class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition-colors">
+                        Cancel
+                    </button>
+                    <button onclick="rescheduleReservation()"
+                        class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-80 transition-colors">
+                        Reschedule
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-{% endblock content %}
+        {% endblock content %}
 
-{% block extra_style %}
-<style>
-    .doctor-avatar {
-        border-radius: 50%;
-        border: 3px solid white;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .progress-bar {
-        height: 8px;
-        border-radius: 4px;
-        background-color: #e6e9f5;
-    }
-
-    .progress-value {
-        height: 8px;
-        border-radius: 4px;
-    }
-
-    .busyness-circle {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background: conic-gradient(#1A76D2 0% 72%, #f783ac 72% 95%, #e6e9f5 95% 100%);
-        position: relative;
-    }
-
-    .busyness-circle::after {
-        content: '';
-        position: absolute;
-        width: 90px;
-        height: 90px;
-        border-radius: 50%;
-        background: white;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-    .event-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        display: inline-block;
-        margin-right: 10px;
-    }
-
-    .schedule-item {
-        transition: all 0.2s ease;
-    }
-
-    .schedule-item:hover {
-        transform: translateX(4px);
-    }
-
-    .request-item {
-        transition: all 0.2s ease;
-        border-left: 3px solid transparent;
-    }
-
-    .request-item:hover {
-        border-left-color: #1A76D2;
-        transform: translateX(2px);
-    }
-
-    .urgency-tag {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-    }
-
-    .search-input:focus {
-        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
-    }
-
-    .time-slot {
-        width: 60px;
-        text-align: center;
-        background: #e8f1fc;
-        padding: 8px 0;
-        border-radius: 8px;
-    }
-
-    .add-schedule-button {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .add-schedule-button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: 0.5s;
-    }
-
-    .add-schedule-button:hover::before {
-        left: 100%;
-    }
-
-    .quick-action-btn {
-        transition: all 0.3s ease;
-    }
-
-    .quick-action-btn:hover {
-        transform: translateY(-2px);
-    }
-</style>
-{% endblock extra_style %}
-
-{% block extra_js %}
-<script>
-    // Complete JavaScript for Caregiver Dashboard with Enhanced Reschedule Modal
-
-    function updateReservationStatus(reservationId, status, newScheduleId = null) {
-        let url = '';
-        const data = {};
-
-        if (status === 'APPROVED') {
-            url = `/reservations/${reservationId}/approve/`;
-        } else if (status === 'REJECTED') {
-            url = `/reservations/${reservationId}/reject/`;
-        } else if (status === 'ON_RESCHEDULE') {
-            url = `/reservations/${reservationId}/reschedule/`;
-            data.newScheduleId = newScheduleId;
-        }
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify(data)
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    showSuccessMessage('Operation completed successfully!');
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    showErrorMessage('Error: ' + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showErrorMessage('Error: ' + error.message);
-            });
-    }
-
-    function approveReservation(reservationId) {
-        if (confirm('Are you sure you want to approve this reservation?')) {
-            updateReservationStatus(reservationId, 'APPROVED');
-        }
-    }
-
-    function rejectReservation(reservationId) {
-        if (confirm('Are you sure you want to reject this reservation?')) {
-            updateReservationStatus(reservationId, 'REJECTED');
-        }
-    }
-
-    // Enhanced Reschedule Modal Functions
-    function showRescheduleModal(reservationId) {
-        document.getElementById('reschedule_reservation_id').value = reservationId;
-        document.getElementById('new_schedule_id').innerHTML = '<option value="">Select a schedule...</option>';
-        document.getElementById('rescheduleModal').classList.remove('hidden');
-
-        // Load available schedules
-        loadAvailableSchedules();
-    }
-
-    function closeRescheduleModal() {
-        document.getElementById('rescheduleModal').classList.add('hidden');
-        document.getElementById('schedule_error').classList.add('hidden');
-        document.getElementById('schedule_loading').classList.add('hidden');
-    }
-
-    function loadAvailableSchedules() {
-        const loadingDiv = document.getElementById('schedule_loading');
-        const errorDiv = document.getElementById('schedule_error');
-        const selectElement = document.getElementById('new_schedule_id');
-
-        // Show loading
-        loadingDiv.classList.remove('hidden');
-        errorDiv.classList.add('hidden');
-
-        // Get caregiver ID from page context
-        const caregiverId = '{{ caregiver_id }}'; // This will be populated by Django template
-
-        fetch(`/api/caregivers/${caregiverId}/schedules?status=AVAILABLE`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
+        {% block extra_style %}
+        <style>
+            .doctor-avatar {
+                border-radius: 50%;
+                border: 3px solid white;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
             }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+
+            .progress-bar {
+                height: 8px;
+                border-radius: 4px;
+                background-color: #e6e9f5;
+            }
+
+            .progress-value {
+                height: 8px;
+                border-radius: 4px;
+            }
+
+            .busyness-circle {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                background: conic-gradient(#1A76D2 0% 72%, #f783ac 72% 95%, #e6e9f5 95% 100%);
+                position: relative;
+            }
+
+            .busyness-circle::after {
+                content: '';
+                position: absolute;
+                width: 90px;
+                height: 90px;
+                border-radius: 50%;
+                background: white;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .event-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                display: inline-block;
+                margin-right: 10px;
+            }
+
+            .schedule-item {
+                transition: all 0.2s ease;
+            }
+
+            .schedule-item:hover {
+                transform: translateX(4px);
+            }
+
+            .request-item {
+                transition: all 0.2s ease;
+                border-left: 3px solid transparent;
+            }
+
+            .request-item:hover {
+                border-left-color: #1A76D2;
+                transform: translateX(2px);
+            }
+
+            .urgency-tag {
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+            }
+
+            .search-input:focus {
+                box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+            }
+
+            .time-slot {
+                width: 60px;
+                text-align: center;
+                background: #e8f1fc;
+                padding: 8px 0;
+                border-radius: 8px;
+            }
+
+            .add-schedule-button {
+                position: relative;
+                overflow: hidden;
+            }
+
+            .add-schedule-button::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: 0.5s;
+            }
+
+            .add-schedule-button:hover::before {
+                left: 100%;
+            }
+
+            .quick-action-btn {
+                transition: all 0.3s ease;
+            }
+
+            .quick-action-btn:hover {
+                transform: translateY(-2px);
+            }
+        </style>
+        {% endblock extra_style %}
+
+        {% block extra_js %}
+        <script>
+            // Complete JavaScript for Caregiver Dashboard with Enhanced Reschedule Modal
+
+            function updateReservationStatus(reservationId, status, newScheduleId = null) {
+                let url = '';
+                const data = {};
+
+                if (status === 'APPROVED') {
+                    url = `/reservations/${reservationId}/approve/`;
+                } else if (status === 'REJECTED') {
+                    url = `/reservations/${reservationId}/reject/`;
+                } else if (status === 'ON_RESCHEDULE') {
+                    url = `/reservations/${reservationId}/reschedule/`;
+                    data.newScheduleId = newScheduleId;
                 }
-                return response.json();
-            })
-            .then(data => {
-                loadingDiv.classList.add('hidden');
 
-                // Clear existing options
-                selectElement.innerHTML = '<option value="">Select a schedule...</option>';
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            showSuccessMessage('Operation completed successfully!');
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            showErrorMessage('Error: ' + (data.error || 'Unknown error'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showErrorMessage('Error: ' + error.message);
+                    });
+            }
 
-                // Handle different response formats
-                let schedules = [];
-                if (data.data && Array.isArray(data.data)) {
-                    schedules = data.data;
-                } else if (Array.isArray(data)) {
-                    schedules = data;
-                } else if (data.schedules && Array.isArray(data.schedules)) {
-                    schedules = data.schedules;
+            function approveReservation(reservationId) {
+                if (confirm('Are you sure you want to approve this reservation?')) {
+                    updateReservationStatus(reservationId, 'APPROVED');
                 }
+            }
 
-                if (schedules.length === 0) {
-                    selectElement.innerHTML = '<option value="">No available schedules</option>';
+            function rejectReservation(reservationId) {
+                if (confirm('Are you sure you want to reject this reservation?')) {
+                    updateReservationStatus(reservationId, 'REJECTED');
+                }
+            }
+
+            // Enhanced Reschedule Modal Functions
+            function showRescheduleModal(reservationId) {
+                document.getElementById('reschedule_reservation_id').value = reservationId;
+                document.getElementById('new_schedule_id').innerHTML = '<option value="">Select a schedule...</option>';
+                document.getElementById('rescheduleModal').classList.remove('hidden');
+
+                // Load available schedules
+                loadAvailableSchedules();
+            }
+
+            function closeRescheduleModal() {
+                document.getElementById('rescheduleModal').classList.add('hidden');
+                document.getElementById('schedule_error').classList.add('hidden');
+                document.getElementById('schedule_loading').classList.add('hidden');
+            }
+
+            function loadAvailableSchedules() {
+                const loadingDiv = document.getElementById('schedule_loading');
+                const errorDiv = document.getElementById('schedule_error');
+                const selectElement = document.getElementById('new_schedule_id');
+
+                // Show loading
+                loadingDiv.classList.remove('hidden');
+                errorDiv.classList.add('hidden');
+
+                // Get caregiver ID from page context
+                const caregiverId = '{{ caregiver_id }}'; // This will be populated by Django template
+
+                fetch(`/api/caregivers/${caregiverId}/schedules?status=AVAILABLE`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        loadingDiv.classList.add('hidden');
+
+                        // Clear existing options
+                        selectElement.innerHTML = '<option value="">Select a schedule...</option>';
+
+                        // Handle different response formats
+                        let schedules = [];
+                        if (data.data && Array.isArray(data.data)) {
+                            schedules = data.data;
+                        } else if (Array.isArray(data)) {
+                            schedules = data;
+                        } else if (data.schedules && Array.isArray(data.schedules)) {
+                            schedules = data.schedules;
+                        }
+
+                        if (schedules.length === 0) {
+                            selectElement.innerHTML = '<option value="">No available schedules</option>';
+                            return;
+                        }
+
+                        // Sort schedules by date and time
+                        schedules.sort((a, b) => {
+                            const dateA = new Date(a.date + 'T' + a.startTime);
+                            const dateB = new Date(b.date + 'T' + b.startTime);
+                            return dateA - dateB;
+                        });
+
+                        // Populate select options
+                        schedules.forEach(schedule => {
+                            const option = document.createElement('option');
+                            option.value = schedule.id || schedule.idSchedule;
+
+                            // Format the display text
+                            const date = formatDate(schedule.date);
+                            const day = schedule.day || getDayFromDate(schedule.date);
+                            const startTime = formatTime(schedule.startTime);
+                            const endTime = formatTime(schedule.endTime);
+
+                            option.textContent = `${day}, ${date} | ${startTime} - ${endTime}`;
+                            selectElement.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading schedules:', error);
+                        loadingDiv.classList.add('hidden');
+                        errorDiv.textContent = 'Failed to load available schedules. Please try again.';
+                        errorDiv.classList.remove('hidden');
+                    });
+            }
+
+            function rescheduleReservation() {
+                const reservationId = document.getElementById('reschedule_reservation_id').value;
+                const newScheduleId = document.getElementById('new_schedule_id').value;
+
+                if (!newScheduleId) {
+                    showErrorMessage('Please select a new schedule');
                     return;
                 }
 
-                // Sort schedules by date and time
-                schedules.sort((a, b) => {
-                    const dateA = new Date(a.date + 'T' + a.startTime);
-                    const dateB = new Date(b.date + 'T' + b.startTime);
-                    return dateA - dateB;
-                });
-
-                // Populate select options
-                schedules.forEach(schedule => {
-                    const option = document.createElement('option');
-                    option.value = schedule.id || schedule.idSchedule;
-
-                    // Format the display text
-                    const date = formatDate(schedule.date);
-                    const day = schedule.day || getDayFromDate(schedule.date);
-                    const startTime = formatTime(schedule.startTime);
-                    const endTime = formatTime(schedule.endTime);
-
-                    option.textContent = `${day}, ${date} | ${startTime} - ${endTime}`;
-                    selectElement.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Error loading schedules:', error);
-                loadingDiv.classList.add('hidden');
-                errorDiv.textContent = 'Failed to load available schedules. Please try again.';
-                errorDiv.classList.remove('hidden');
-            });
-    }
-
-    function rescheduleReservation() {
-        const reservationId = document.getElementById('reschedule_reservation_id').value;
-        const newScheduleId = document.getElementById('new_schedule_id').value;
-
-        if (!newScheduleId) {
-            showErrorMessage('Please select a new schedule');
-            return;
-        }
-
-        updateReservationStatus(reservationId, 'ON_RESCHEDULE', newScheduleId);
-        closeRescheduleModal();
-    }
-
-    // Helper Functions
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    }
-
-    function formatTime(timeString) {
-        // Handle both HH:mm:ss and HH:mm formats
-        const timeParts = timeString.split(':');
-        const hours = timeParts[0];
-        const minutes = timeParts[1];
-        return `${hours}:${minutes}`;
-    }
-
-    function getDayFromDate(dateString) {
-        const date = new Date(dateString);
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        return days[date.getDay()];
-    }
-
-    // Notification Functions
-    function showSuccessMessage(message) {
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
-    }
-
-    function showErrorMessage(message) {
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.remove();
-        }, 5000);
-    }
-
-    // Cookie Helper Function
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+                updateReservationStatus(reservationId, 'ON_RESCHEDULE', newScheduleId);
+                closeRescheduleModal();
             }
-        }
-        return cookieValue;
-    }
-</script>
-{% endblock extra_js %}
+
+            // Helper Functions
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            }
+
+            function formatTime(timeString) {
+                // Handle both HH:mm:ss and HH:mm formats
+                const timeParts = timeString.split(':');
+                const hours = timeParts[0];
+                const minutes = timeParts[1];
+                return `${hours}:${minutes}`;
+            }
+
+            function getDayFromDate(dateString) {
+                const date = new Date(dateString);
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                return days[date.getDay()];
+            }
+
+            // Notification Functions
+            function showSuccessMessage(message) {
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                notification.textContent = message;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+
+            function showErrorMessage(message) {
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                notification.textContent = message;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.remove();
+                }, 5000);
+            }
+
+            // Cookie Helper Function
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        </script>
+        {% endblock extra_js %}

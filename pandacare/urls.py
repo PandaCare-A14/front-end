@@ -26,4 +26,5 @@ urlpatterns = [
     path('', include('chat.urls')),
     path('', include('reservasi_caregiver.urls')),
     path('', include('schedule.urls')),
+    path('doctors/', include('doctor_profile.urls', namespace='doctor_profile')),
 ]

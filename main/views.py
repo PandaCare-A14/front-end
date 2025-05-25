@@ -35,9 +35,6 @@ def api_request(method, endpoint, data=None, token=None, params=None):
             response = requests.request(method, url, headers=headers, timeout=30)
         
         if response.status_code in [200, 201, 204]:
-            if not response.text or response.text.strip() == "":
-                return None
-            
             try:
                 return response.json()
             except json.JSONDecodeError:
@@ -346,21 +343,30 @@ class RegisterView(View):
         role = request.POST.get('role', 'pacilian')
         profile_data = self._extract_profile_data(request.POST, role)
         
+        print(f"=== REGISTRATION DEBUG ===")
+        print(f"Role: {role}")
+        print(f"Profile data: {profile_data}")
+        
         try:
             register_response = api_request("POST", "/api/auth/register", {
                 "email": profile_data["email"],
                 "password": profile_data["password"],
                 "role": role
             })
+            print(f"Registration response: {register_response}")
             
+            print("Step 2: Logging in...")
             login_response = api_request("POST", "/api/auth/login", {
                 "email": profile_data["email"],
                 "password": profile_data["password"]
             })
+            print(f"Login response: {login_response}")
             
             access_token = login_response.get("access")
             if not access_token:
                 raise Exception("Failed to get access token after registration")
+            
+            print(f"Access token: {access_token[:50]}...")
             
             profile_payload = {
                 "name": profile_data["name"],
