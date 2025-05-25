@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block meta %}
+<title>Doctor Schedules - PandaCare</title>
+{% endblock meta %}
+
+{% block navbar %}
+{% include "components/navbar.html" with is_logged_in=True user_role="pacilian" %}
+{% endblock navbar %}
+
+{% block content %}
+<div class="flex-grow container mx-auto p-6 max-w-6xl">
+    <!-- Page Header -->
+    <div class="mb-6">
+        <div class="flex items-center mb-4">
+            <a href="{% url 'pacilian_doctor_list' %}" class="text-primary hover:text-primary-dark mr-4">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </a>
+            <div>
+                <h3 class="text-2xl font-bold text-gray-800">Doctor Schedules</h3>
+                <p class="text-sm text-gray-600">Select an available time slot for your consultation</p>
+            </div>
+        </div>
+        
+        <!-- Doctor Info Card -->
+        {% if doctor %}
+        <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+            <div class="flex items-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">
+                    {{ doctor.name|first|upper }}
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold text-gray-800">{{ doctor.name }}</h4>
+                    <p class="text-gray-600">{{ doctor.specialization|default:"General Practice" }}</p>
+                    <p class="text-sm text-gray-500">{{ doctor.experience_years|default:"0" }} years experience</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Schedule Content -->
+    {% if error %}
+        <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <i class="fas fa-exclamation-triangle text-red-500 text-2xl mb-3"></i>
+            <h4 class="text-lg font-semibold text-red-800 mb-2">Error Loading Schedules</h4>
+            <p class="text-red-600">{{ error }}</p>
+        </div>
+    {% elif not schedules %}
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-12 text-center">
+            <i class="fas fa-calendar-times text-gray-400 text-4xl mb-4"></i>
+            <h4 class="text-xl font-semibold text-gray-700 mb-2">No Available Schedules</h4>
+            <p class="text-gray-500">This doctor doesn't have any available time slots at the moment.</p>
+            <a href="{% url 'pacilian_doctor_list' %}" class="mt-4 inline-block bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark">
+                <i class="fas fa-search mr-2"></i>Find Another Doctor
+            </a>
+        </div>
+    {% else %}
+        <!-- Available Schedules -->
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {% for schedule in schedules %}
+            <div class="schedule-card bg-white rounded-lg shadow-sm border hover:border-primary hover:shadow-md transition-all duration-200" 
+                 data-schedule-id="{{ schedule.id }}"
+                 data-doctor-id="{{ doctor_id }}"
+                 data-start-time="{{ schedule.start_time }}"
+                 data-end-time="{{ schedule.end_time }}"
+                 data-date="{{ schedule.date }}">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar text-primary mr-2"></i>
+                            <span class="text-lg font-semibold text-gray-800">{{ schedule.date|date:"M d, Y" }}</span>
+                        </div>
+                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                            Available
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-clock text-gray-500 mr-2"></i>
+                        <span class="text-gray-700">{{ schedule.start_time }} - {{ schedule.end_time }}</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-500">
+                            <i class="fas fa-map-marker-alt mr-1"></i>
+                            {{ schedule.location|default:"Online Consultation" }}
+                        </div>
+                        <button class="book-schedule-btn bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark text-sm font-medium">
+                            <i class="fas fa-plus mr-1"></i>Book
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<!-- Reservation Modal -->
+<div id="reservationModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Confirm Reservation</h3>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="reservationForm">
+                {% csrf_token %}
+                <input type="hidden" id="selectedScheduleId" name="schedule_id">
+                <input type="hidden" id="selectedDoctorId" name="doctor_id">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-user mr-1"></i>Pacilian ID
+                    </label>
+                    <input type="text" id="pacilianId" name="pacilian_id" required
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                           placeholder="Enter your Pacilian ID">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-sticky-note mr-1"></i>Additional Notes (Optional)
+                    </label>
+                    <textarea id="notes" name="notes" rows="3"
+                              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                              placeholder="Any additional information..."></textarea>
+                </div>
+                
+                <div class="selected-schedule-info bg-gray-50 rounded-lg p-4 mb-4">
+                    <h4 class="font-medium text-gray-800 mb-2">Selected Schedule:</h4>
+                    <div class="text-sm text-gray-600">
+                        <div><i class="fas fa-calendar mr-2"></i><span id="selectedDate"></span></div>
+                        <div><i class="fas fa-clock mr-2"></i><span id="selectedTime"></span></div>
+                        <div><i class="fas fa-user-md mr-2"></i><span id="selectedDoctor"></span></div>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button type="button" id="cancelReservation" 
+                            class="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200">
+                        Cancel
+                    </button>
+                    <button type="submit" id="confirmReservation"
+                            class="flex-1 bg-primary text-white py-3 px-4 rounded-lg hover:bg-primary-dark">
+                        <i class="fas fa-check mr-2"></i>Confirm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
+        <div class="p-6 text-center">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-check text-green-600 text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Reservation Confirmed!</h3>
+            <p class="text-gray-600 mb-6">Your reservation has been successfully created.</p>
+            <div class="flex space-x-3">
+                <a href="{% url 'pacilian_reservasi_list' id_pacilian='placeholder' %}" 
+                   class="flex-1 bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-dark">
+                    View Reservations
+                </a>
+                <button id="closeSuccessModal" class="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_style %}
+<style>
+    .bg-primary {
+        background-color: #3B82F6;
+    }
+    
+    .bg-primary-dark {
+        background-color: #2563EB;
+    }
+    
+    .text-primary {
+        color: #3B82F6;
+    }
+    
+    .text-primary-dark {
+        color: #2563EB;
+    }
+    
+    .border-primary {
+        border-color: #3B82F6;
+    }
+    
+    .focus\:ring-primary:focus {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .focus\:border-primary:focus {
+        border-color: #3B82F6;
+    }
+    
+    .schedule-card {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .schedule-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .modal {
+        backdrop-filter: blur(4px);
+    }
+</style>
+{% endblock extra_style %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const scheduleCards = document.querySelectorAll('.schedule-card');
+    const reservationModal = document.getElementById('reservationModal');
+    const successModal = document.getElementById('successModal');
+    const closeModal = document.getElementById('closeModal');
+    const cancelReservation = document.getElementById('cancelReservation');
+    const closeSuccessModal = document.getElementById('closeSuccessModal');
+    const reservationForm = document.getElementById('reservationForm');
+    
+    // Handle schedule card clicks
+    scheduleCards.forEach(card => {
+        const bookBtn = card.querySelector('.book-schedule-btn');
+        bookBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            const scheduleId = card.dataset.scheduleId;
+            const doctorId = card.dataset.doctorId;
+            const startTime = card.dataset.startTime;
+            const endTime = card.dataset.endTime;
+            const date = card.dataset.date;
+            
+            // Populate modal with selected schedule info
+            document.getElementById('selectedScheduleId').value = scheduleId;
+            document.getElementById('selectedDoctorId').value = doctorId;
+            document.getElementById('selectedDate').textContent = new Date(date).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('selectedTime').textContent = `${startTime} - ${endTime}`;
+            document.getElementById('selectedDoctor').textContent = '{{ doctor.name|default:"Doctor" }}';
+            
+            // Show modal
+            reservationModal.classList.remove('hidden');
+            reservationModal.classList.add('flex');
+        });
+    });
+    
+    // Close modal handlers
+    closeModal.addEventListener('click', hideReservationModal);
+    cancelReservation.addEventListener('click', hideReservationModal);
+    closeSuccessModal.addEventListener('click', hideSuccessModal);
+    
+    // Close modal when clicking outside
+    reservationModal.addEventListener('click', function(e) {
+        if (e.target === reservationModal) {
+            hideReservationModal();
+        }
+    });
+    
+    successModal.addEventListener('click', function(e) {
+        if (e.target === successModal) {
+            hideSuccessModal();
+        }
+    });
+    
+    // Handle form submission
+    reservationForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(reservationForm);
+        const submitBtn = document.getElementById('confirmReservation');
+        
+        // Disable submit button and show loading
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating...';
+        
+        fetch('{% url "pacilian_create_reservation_from_schedule" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                hideReservationModal();
+                showSuccessModal();
+            } else {
+                alert('Error creating reservation: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error creating reservation. Please try again.');
+        })
+        .finally(() => {
+            // Re-enable submit button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Confirm';
+        });
+    });
+    
+    function hideReservationModal() {
+        reservationModal.classList.add('hidden');
+        reservationModal.classList.remove('flex');
+        // Reset form
+        reservationForm.reset();
+    }
+    
+    function hideSuccessModal() {
+        successModal.classList.add('hidden');
+        successModal.classList.remove('flex');
+    }
+    
+    function showSuccessModal() {
+        successModal.classList.remove('hidden');
+        successModal.classList.add('flex');
+    }
+});
+</script>
+{% endblock extra_js %}

@@ -10,105 +10,150 @@
 {% endblock navbar %}
 
 {% block content %}
-<div class="flex-grow container mx-auto p-6 max-w-7xl">
-    <!-- Page Header -->
+<div class="flex-grow container mx-auto p-6 max-w-7xl">    <!-- Page Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
             <h3 class="text-2xl font-bold text-gray-800">My Reservations</h3>
             <p class="text-sm text-gray-600">View and manage your consultation appointments</p>
         </div>
-        <a href="{% url 'pacilian_request_reservasi' %}"
-            class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark flex items-center">
-            <i class="fas fa-plus mr-2"></i> New Reservation
-        </a>
-    </div>
-
-    <!-- Reservations List -->
+        <div class="flex space-x-3">
+            <a href="{/doctor}" 
+                class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 flex items-center"> <!-- Integrate dengan Dapqil -->
+                <i class="fas fa-user-md mr-2"></i> Browse Doctors
+            </a>
+            <a href="{/doctor}"
+                class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark flex items-center"> <!-- Integrate dengan Dapqil -->
+                <i class="fas fa-plus mr-2"></i> New Reservation
+            </a>
+        </div>
+    </div>    <!-- Reservations List -->
     <div class="space-y-4">
         {% if reservasis %}
         {% for reservasi in reservasis %}
-        <div class="card bg-white p-6">
-            <div class="flex justify-between items-start">
-                <!-- Left Side - Reservation Info -->
-                <div class="flex-1">
-                    <div class="flex items-center mb-3">
-                        <div class="h-12 w-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
-                            <i class="fas fa-calendar text-gray-400 text-lg"></i>
+        <div class="reservation-card bg-white border border-gray-100 hover:border-gray-200 transition-all duration-300">
+            <div class="card-header">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <div class="reservation-icon">
+                            <i class="fas fa-calendar-check text-primary"></i>
                         </div>
-                        <div>
-                            <h3 class="font-semibold text-gray-900">Reservation #{{ reservasi.id_reservasi }}</h3>
-                            <p class="text-sm text-gray-500">
+                        <div class="ml-4">
+                            <h3 class="reservation-title">Reservation #{{ reservasi.id }}</h3>
+                            <p class="reservation-subtitle">
                                 <i class="fas fa-user-md mr-1"></i>
-                                Caregiver ID: {{ reservasi.caregiver_id }}
+                                Doctor ID: {{ reservasi.idSchedule.idCaregiver|default:"Not assigned" }}
                             </p>
                         </div>
                     </div>
-
-                    {% if reservasi.schedule %}
-                    <div class="bg-blue-50 p-3 rounded-lg mb-3">
-                        <p class="text-sm text-blue-800">
-                            <i class="fas fa-calendar-alt mr-2"></i>
-                            <strong>Schedule:</strong> 
-                            {{ reservasi.schedule.date|date:"d M Y" }} at 
-                            {{ reservasi.schedule.start_time|time:"H:i" }} - {{ reservasi.schedule.end_time|time:"H:i" }}
-                        </p>
-                    </div>
-                    {% endif %}
-
-                    {% if reservasi.pacilian_note %}
-                    <div class="bg-gray-50 p-3 rounded-lg mb-3">
-                        <p class="text-sm text-gray-600">
-                            <i class="fas fa-sticky-note mr-2"></i>
-                            <strong>Your Note:</strong> {{ reservasi.pacilian_note }}
-                        </p>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <!-- Right Side - Status & Actions -->
-                <div class="flex flex-col items-end space-y-3">
+                    
                     <!-- Status Badge -->
-                    <span class="status-badge px-3 py-2 text-sm font-medium rounded-full
-                        {% if reservasi.status_reservasi == 'WAITING' %}bg-blue-100 text-blue-800
-                        {% elif reservasi.status_reservasi == 'APPROVED' %}bg-green-100 text-green-800
-                        {% elif reservasi.status_reservasi == 'REJECTED' %}bg-red-100 text-red-800
-                        {% elif reservasi.status_reservasi == 'ON_RESCHEDULE' %}bg-yellow-100 text-yellow-800
-                        {% else %}bg-gray-100 text-gray-800{% endif %}">
-                        {% if reservasi.status_reservasi == 'WAITING' %}
+                    <span class="status-badge
+                        {% if reservasi.statusReservasi == 'WAITING' %}status-waiting
+                        {% elif reservasi.statusReservasi == 'APPROVED' %}status-approved
+                        {% elif reservasi.statusReservasi == 'REJECTED' %}status-rejected
+                        {% elif reservasi.statusReservasi == 'ON_RESCHEDULE' %}status-rescheduled
+                        {% else %}status-default{% endif %}">
+                        {% if reservasi.statusReservasi == 'WAITING' %}
                         <i class="fas fa-clock mr-1"></i> Waiting
-                        {% elif reservasi.status_reservasi == 'APPROVED' %}
+                        {% elif reservasi.statusReservasi == 'APPROVED' %}
                         <i class="fas fa-check-circle mr-1"></i> Approved
-                        {% elif reservasi.status_reservasi == 'REJECTED' %}
+                        {% elif reservasi.statusReservasi == 'REJECTED' %}
                         <i class="fas fa-times-circle mr-1"></i> Rejected
-                        {% elif reservasi.status_reservasi == 'ON_RESCHEDULE' %}
+                        {% elif reservasi.statusReservasi == 'ON_RESCHEDULE' %}
                         <i class="fas fa-calendar-alt mr-1"></i> Rescheduled
                         {% else %}
-                        {{ reservasi.status_reservasi }}
+                        <i class="fas fa-question-circle mr-1"></i> {{ reservasi.statusReservasi|default:"Unknown" }}
                         {% endif %}
                     </span>
+                </div>
+            </div>
 
-                    <!-- Action Buttons -->
+            <div class="card-content">
+                <!-- Schedule Information -->
+                {% if reservasi.idSchedule %}
+                <div class="info-section schedule-info">
+                    <div class="info-header">
+                        <i class="fas fa-calendar-alt mr-2"></i>
+                        <strong>Appointment Schedule</strong>
+                    </div>
+                    <div class="info-content">
+                        {% if reservasi.idSchedule.date %}
+                            <span class="schedule-date">{{ reservasi.idSchedule.date|date:"l, F j, Y" }}</span>
+                        {% endif %}
+                        {% if reservasi.idSchedule.startTime and reservasi.idSchedule.endTime %}
+                            <span class="schedule-time">{{ reservasi.idSchedule.startTime }} - {{ reservasi.idSchedule.endTime }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Patient Note -->
+                {% if reservasi.pacilianNote or reservasi.pacilian_note %}
+                <div class="info-section note-info">
+                    <div class="info-header">
+                        <i class="fas fa-sticky-note mr-2"></i>
+                        <strong>Your Note</strong>
+                    </div>
+                    <div class="info-content">
+                        <p class="note-text">{{ reservasi.pacilianNote|default:reservasi.pacilian_note }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Caregiver Note (if any) -->
+                {% if reservasi.caregiverNote or reservasi.caregiver_note %}
+                <div class="info-section caregiver-note">
+                    <div class="info-header">
+                        <i class="fas fa-user-md mr-2"></i>
+                        <strong>Doctor's Note</strong>
+                    </div>
+                    <div class="info-content">
+                        <p class="note-text">{{ reservasi.caregiverNote|default:reservasi.caregiver_note }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="card-actions">
+                <div class="flex items-center justify-between">
+                    <div class="text-xs text-gray-500">
+                        {% if reservasi.createdAt %}
+                            <i class="fas fa-clock mr-1"></i>
+                            Created: {{ reservasi.createdAt|date:"M j, Y g:i A" }}
+                        {% endif %}
+                    </div>
+                    
                     <div class="flex space-x-2">
-                        {% if reservasi.status_reservasi == "WAITING" or reservasi.status_reservasi == "APPROVED" %}
-                        <a href="{% url 'pacilian_edit_reservasi' id=reservasi.id_reservasi %}"
-                            class="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-gray-100"
-                            title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </a>
+                        <!-- Edit Button - for WAITING status -->
+                        {% if reservasi.statusReservasi == "WAITING" %}
+                        <button onclick="editReservation('{{ reservasi.id }}')"
+                            class="btn btn-primary"
+                            title="Edit Reservation">
+                            <i class="fas fa-edit mr-1"></i> Edit
+                        </button>
                         {% endif %}
 
-                        {% if reservasi.status_reservasi == "ON_RESCHEDULE" %}
-                        <button onclick="acceptChange('{{ reservasi.id_reservasi }}')"
-                            class="text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50"
-                            title="Accept Change">
-                            <i class="fas fa-check"></i>
+                        <!-- Reschedule Actions -->
+                        {% if reservasi.statusReservasi == "ON_RESCHEDULE" %}
+                        <button onclick="acceptChange('{{ reservasi.id }}')"
+                            class="btn btn-success"
+                            title="Accept Schedule Change">
+                            <i class="fas fa-check mr-1"></i> Accept
                         </button>
-                        <button onclick="rejectChange('{{ reservasi.id_reservasi }}')"
-                            class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50"
-                            title="Reject Change">
-                            <i class="fas fa-times"></i>
+                        <button onclick="rejectChange('{{ reservasi.id }}')"
+                            class="btn btn-danger"
+                            title="Reject Schedule Change">
+                            <i class="fas fa-times mr-1"></i> Reject
                         </button>
                         {% endif %}
+
+                        <!-- View Details Button -->
+                        <button onclick="viewDetails('{{ reservasi.id }}')"
+                            class="btn btn-secondary"
+                            title="View Details">
+                            <i class="fas fa-eye mr-1"></i> Details
+                        </button>
                     </div>
                 </div>
             </div>
@@ -116,7 +161,7 @@
         {% endfor %}
 
         {% else %}
-        <!-- Empty State -->
+        <!-- Reservation Empty State -->
         <div class="card bg-white p-12 text-center">
             <div class="text-gray-400 mb-4">
                 <i class="fas fa-calendar-times text-6xl"></i>
@@ -155,9 +200,7 @@
                 alert('Failed to accept change: ' + error.message);
             });
         }
-    }
-
-    function rejectChange(reservationId) {
+    }    function rejectChange(reservationId) {
         if (confirm('Are you sure you want to reject this schedule change?')) {
             fetch(`/pacilian/reservasi/${reservationId}/reject-change/`, {
                 method: 'POST',
@@ -177,6 +220,16 @@
                 alert('Failed to reject change: ' + error.message);
             });
         }
+    }    function editReservation(reservationId) {
+        // Redirect to edit page
+        window.location.href = `/pacilian/reservasi/${reservationId}/edit/`;
+    }
+
+    function viewDetails(reservationId) {
+        // Show detailed modal or redirect to details page
+        alert(`Viewing details for reservation #${reservationId}`);
+        // TODO: Implement detailed view modal or redirect to details page
+        // This could show a modal with full reservation details, medical history, etc.
     }
 
     function getCookie(name) {
@@ -198,6 +251,217 @@
 
 {% block extra_style %}
 <style>
+    /* Enhanced Card Styles */
+    .reservation-card {
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        padding: 24px;
+        margin-bottom: 16px;
+    }
+
+    .reservation-card:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    /* Card Header */
+    .card-header {
+        border-bottom: 1px solid #f3f4f6;
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+    }
+
+    .reservation-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: white;
+    }
+
+    .reservation-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 4px;
+    }
+
+    .reservation-subtitle {
+        font-size: 14px;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        font-weight: 600;
+        letter-spacing: 0.025em;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .status-waiting {
+        background-color: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+    }
+
+    .status-approved {
+        background-color: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    .status-rejected {
+        background-color: #fecaca;
+        color: #dc2626;
+        border: 1px solid #fca5a5;
+    }
+
+    .status-rescheduled {
+        background-color: #fef3c7;
+        color: #d97706;
+        border: 1px solid #fed7aa;
+    }
+
+    .status-default {
+        background-color: #f3f4f6;
+        color: #6b7280;
+        border: 1px solid #d1d5db;
+    }
+
+    /* Card Content */
+    .card-content {
+        margin-bottom: 20px;
+    }
+
+    .info-section {
+        margin-bottom: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        border-left: 4px solid #e5e7eb;
+    }
+
+    .schedule-info {
+        background-color: #eff6ff;
+        border-left-color: #3b82f6;
+    }
+
+    .note-info {
+        background-color: #f9fafb;
+        border-left-color: #6b7280;
+    }
+
+    .caregiver-note {
+        background-color: #f0fdf4;
+        border-left-color: #10b981;
+    }
+
+    .info-header {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+    }
+
+    .info-content {
+        color: #6b7280;
+    }
+
+    .schedule-date {
+        font-weight: 600;
+        color: #1f2937;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .schedule-time {
+        color: #3b82f6;
+        font-weight: 500;
+    }
+
+    .note-text {
+        font-style: italic;
+        line-height: 1.5;
+    }
+
+    /* Card Actions */
+    .card-actions {
+        border-top: 1px solid #f3f4f6;
+        padding-top: 16px;
+        margin-top: 16px;
+    }
+
+    /* Button Styles */
+    .btn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+    }
+
+    .btn-secondary {
+        background-color: #f8fafc;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-secondary:hover {
+        background-color: #f1f5f9;
+        color: #475569;
+        border-color: #cbd5e1;
+    }
+
+    /* Legacy styles for compatibility */
     .card {
         border-radius: 16px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
@@ -206,11 +470,6 @@
 
     .card:hover {
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .status-badge {
-        font-weight: 600;
-        letter-spacing: 0.025em;
     }
 
     .bg-primary {

@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Reservation{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<style>
+    .edit-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+    
+    .reservation-info {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .schedule-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .schedule-card {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+    }
+    
+    .schedule-card:hover {
+        border-color: #007bff;
+        box-shadow: 0 4px 12px rgba(0,123,255,0.15);
+        transform: translateY(-2px);
+    }
+    
+    .schedule-card.selected {
+        border-color: #28a745;
+        background: #f8fff9;
+        box-shadow: 0 4px 12px rgba(40,167,69,0.2);
+    }
+    
+    .schedule-date {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .schedule-time {
+        font-size: 1rem;
+        color: #007bff;
+        font-weight: 500;
+        margin-bottom: 0.75rem;
+    }
+    
+    .schedule-status {
+        font-size: 0.85rem;
+        color: #28a745;
+        background: #d4edda;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        display: inline-block;
+    }
+    
+    .current-schedule {
+        background: #fff3cd;
+        border-color: #ffc107;
+    }
+    
+    .current-label {
+        position: absolute;
+        top: -10px;
+        right: 15px;
+        background: #ffc107;
+        color: #856404;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .action-buttons {
+        margin-top: 2rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+    
+    .btn-update {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-update:hover {
+        background: linear-gradient(135deg, #1e7e34, #17a2b8);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+    }
+    
+    .btn-update:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cancel:hover {
+        background: #5a6268;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+    
+    .no-schedules {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+    
+    .no-schedules i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Edit Reservation</h1>
+            <p class="text-muted">Select a new schedule for your reservation</p>
+        </div>
+        <a href="{% url 'pacilian_reservasi_list' user_id %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Reservations
+        </a>
+    </div>
+
+    <!-- Current Reservation Info -->
+    <div class="reservation-info">
+        <h5 class="mb-3">
+            <i class="fas fa-info-circle text-info"></i> Current Reservation Details
+        </h5>
+        <div class="row">
+            <div class="col-md-6">
+                <p class="mb-2">
+                    <strong>Doctor:</strong> 
+                    {{ caregiver.nama|default:caregiver.name|default:"N/A" }}
+                </p>
+                <p class="mb-2">
+                    <strong>Specialization:</strong> 
+                    {{ caregiver.spesialisasi|default:caregiver.specialization|default:"General Practice" }}
+                </p>
+            </div>
+            <div class="col-md-6">
+                <p class="mb-2">
+                    <strong>Current Date:</strong> 
+                    {{ reservation.schedule.tanggal|default:reservation.schedule.date|default:reservation.jadwal.tanggal|default:reservation.jadwal.date|default:"N/A" }}
+                </p>
+                <p class="mb-2">
+                    <strong>Current Time:</strong> 
+                    {{ reservation.schedule.waktu_mulai|default:reservation.schedule.start_time|default:reservation.jadwal.waktu_mulai|default:reservation.jadwal.start_time|default:"N/A" }} - 
+                    {{ reservation.schedule.waktu_selesai|default:reservation.schedule.end_time|default:reservation.jadwal.waktu_selesai|default:reservation.jadwal.end_time|default:"N/A" }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Schedules -->
+    <div class="schedules-section">
+        <h5 class="mb-3">
+            <i class="fas fa-calendar-alt text-primary"></i> 
+            Available Schedules for {{ caregiver.nama|default:caregiver.name|default:"Doctor" }}
+        </h5>
+        
+        {% if schedules %}
+            <div class="schedule-grid">
+                {% for schedule in schedules %}
+                <div class="schedule-card" 
+                     data-schedule-id="{{ schedule.id|default:schedule.idSchedule }}"
+                     onclick="selectSchedule(this)">
+                    
+                    <div class="schedule-date">
+                        <i class="fas fa-calendar text-primary"></i>
+                        {{ schedule.tanggal|default:schedule.date|default:"N/A" }}
+                    </div>
+                    
+                    <div class="schedule-time">
+                        <i class="fas fa-clock text-info"></i>
+                        {{ schedule.waktu_mulai|default:schedule.start_time|default:"N/A" }} - 
+                        {{ schedule.waktu_selesai|default:schedule.end_time|default:"N/A" }}
+                    </div>
+                    
+                    <div class="schedule-status">
+                        <i class="fas fa-check-circle"></i>
+                        {{ schedule.status|default:"Available" }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-schedules">
+                <i class="fas fa-calendar-times"></i>
+                <h4>No Available Schedules</h4>
+                <p>There are currently no available schedules for this doctor.</p>
+                <p>Please try again later or contact support.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Action Buttons -->
+    {% if schedules %}
+    <div class="action-buttons">
+        <button type="button" 
+                class="btn btn-update" 
+                id="updateBtn" 
+                onclick="updateReservation()" 
+                disabled>
+            <i class="fas fa-save"></i> Update Reservation
+        </button>
+        <a href="{% url 'pacilian_reservasi_list' user_id %}" class="btn-cancel">
+            <i class="fas fa-times"></i> Cancel
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p>Updating your reservation...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedScheduleId = null;
+
+function selectSchedule(card) {
+    // Remove selection from all cards
+    document.querySelectorAll('.schedule-card').forEach(c => {
+        c.classList.remove('selected');
+    });
+    
+    // Select current card
+    card.classList.add('selected');
+    selectedScheduleId = card.dataset.scheduleId;
+    
+    // Enable update button
+    const updateBtn = document.getElementById('updateBtn');
+    updateBtn.disabled = false;
+}
+
+function updateReservation() {
+    if (!selectedScheduleId) {
+        alert('Please select a new schedule first.');
+        return;
+    }
+    
+    // Show loading modal
+    $('#loadingModal').modal('show');
+    
+    // Prepare data
+    const data = {
+        newScheduleId: selectedScheduleId
+    };
+    
+    // Make API call
+    fetch(`{% url 'pacilian_update_schedule' reservation_id %}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        $('#loadingModal').modal('hide');
+        
+        if (data.success) {
+            // Show success message
+            alert('Reservation updated successfully!');
+            
+            // Redirect back to reservations list
+            window.location.href = "{% url 'pacilian_reservasi_list' user_id %}";
+        } else {
+            alert('Error: ' + (data.error || 'Failed to update reservation'));
+        }
+    })
+    .catch(error => {
+        $('#loadingModal').modal('hide');
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+    });
+}
+
+// Add keyboard support
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && selectedScheduleId) {
+        updateReservation();
+    } else if (e.key === 'Escape') {
+        window.location.href = "{% url 'pacilian_reservasi_list' user_id %}";
+    }
+});
+</script>
+{% endblock %}

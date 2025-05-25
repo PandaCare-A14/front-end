@@ -9,6 +9,13 @@ user_role="caregiver"/"pacilian"
 {% load static %}
 {% with logged_in=is_logged_in|default:False role=user_role|default:"" %}
 
+{# components/navbar.html #}
+{% comment %} DEBUG — hapus setelah beres {% endcomment %}
+<p style="color:red;font-size:10px">
+    user_id = “{{ user_id }}”
+</p>
+
+
 <nav class="navbar-gradient sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20 items-center">
@@ -41,11 +48,14 @@ user_role="caregiver"/"pacilian"
                     </a>                    <a href="#"
                         class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-comments mr-2"></i> Chat
-                    </a>
-                    {% elif role == "pacilian" %}
+                    </a>                    {% elif role == "pacilian" %}
                     <a href="/jadwal-konsultasi"
                         class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-calendar-alt mr-2"></i> Jadwal
+                    </a>
+                    <a href="{/doctor-list}"
+                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                        <i class="fas fa-user-md mr-2"></i> Dokter
                     </a>
                     {% if user_id %}
                     <a href="{% url 'pacilian_reservasi_list' id_pacilian=user_id %}" class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
