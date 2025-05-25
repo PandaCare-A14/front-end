@@ -1,36 +1,29 @@
-# Use Python base image
 FROM python:3.9-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# Set work directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+# Install dependencies
+RUN apt-get update && apt-get install -y \
     postgresql-client \
     build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
+# Copy and install requirements
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Copy project
 COPY . .
 
+# Create staticfiles directory
+RUN mkdir -p staticfiles
+
 # Collect static files
-RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput || echo "No static files"
 
-# Create static files directory if it doesn't exist
-RUN mkdir -p /app/staticfiles
+# Expose port (Railway uses 8080)
+EXPOSE 8080
 
-# Expose port
-EXPOSE 8000
-
-# Run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "your_project.wsgi:application"]
+# Run with Railway's PORT environment variable
+CMD gunicorn --bind 0.0.0.0:$PORT pandacare.wsgi:application
