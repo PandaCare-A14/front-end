@@ -21,13 +21,13 @@
                     <p class="text-lg opacity-90 mb-8">Dapatkan layanan konsultasi kesehatan dari dokter spesialis
                         terbaik kapan saja dan di mana saja</p>
                     <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="{% url 'doctor_profile:search' %}"
-                            class="px-6 py-3 bg-white text-primary font-medium rounded-full hover:bg-opacity-90 text-center transition-all">
+                        <a href="#"
+                           class="px-6 py-3 bg-white text-primary font-medium rounded-full hover:bg-opacity-90 text-center transition-all">
                             <i class="fas fa-user-md mr-2"></i> Lihat Dokter
                         </a>
                         {% if not is_logged_in %}
                         <a href="#"
-                            class="px-6 py-3 bg-transparent border-2 border-white text-white font-medium rounded-full hover:bg-white hover:bg-opacity-10 text-center transition-all">
+                           class="px-6 py-3 bg-transparent border-2 border-white text-white font-medium rounded-full hover:bg-white hover:bg-opacity-10 text-center transition-all">
                             Daftar Sekarang
                         </a>
                         {% endif %}
@@ -35,7 +35,7 @@
                 </div>
                 <div class="md:w-1/2 flex justify-center relative z-10">
                     <img src="{% static 'img/foto-dokter-konsultasi.jpg' %}" alt="Konsultasi Dokter"
-                        class="rounded-lg shadow-lg max-w-full h-auto transform hover:rotate-0 duration-300" />
+                         class="rounded-lg shadow-lg max-w-full h-auto transform hover:rotate-0 duration-300" />
                 </div>
             </div>
         </div>
@@ -80,8 +80,8 @@
             <h4 class="text-2xl font-header font-bold text-gray-800 mb-4">Mulai Konsultasi Dokter Sekarang</h4>
             <p class="text-gray-600 mb-6 max-w-2xl mx-auto">Dapatkan layanan konsultasi melalui video-call maupun chat
             </p>
-            <a href="{% url 'doctor_profile:search' %}"
-                class="inline-block px-6 py-3 bg-primary text-white font-medium rounded-full hover:bg-accent-500 transition-all">
+            <a href="#"
+               class="inline-block px-6 py-3 bg-primary text-white font-medium rounded-full hover:bg-accent-500 transition-all">
                 <i class="fas fa-user-md mr-2"></i> Lihat Dokter Sekarang
             </a>
         </div>

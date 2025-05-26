@@ -1,9 +1,8 @@
-<!-- rating/templates/rating/rating_list.html -->
 {% extends "base.html" %}
 {% load static %}
 
 {% block meta %}
-<title>{% if user_role == 'pacilian' %}My Ratings{% else %}Doctor Ratings{% endif %} - PandaCare</title>
+<title>PandaCare - Rating Konsultasi</title>
 {% endblock meta %}
 
 {% block navbar %}
@@ -11,458 +10,248 @@
 {% endblock navbar %}
 
 {% block content %}
-<div class="flex-grow container mx-auto p-6 max-w-7xl">
-    <!-- Back button -->
-    <div class="mb-4">
-        <a href="{% url 'main:home' %}" class="inline-flex items-center text-primary hover:text-accent-500 transition-colors">
-            <i class="fas fa-arrow-left mr-2"></i> Back to Home
-        </a>
-    </div>
-
-    <!-- Header Section -->
-    <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-8 mb-8 text-white">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-3xl font-bold mb-2">
-                    {% if user_role == 'pacilian' %}
-                    My Ratings
-                    {% else %}
-                    Doctor Ratings
-                    {% endif %}
-                </h1>
-                <p class="text-blue-100">
-                    {% if user_role == 'pacilian' %}
-                    Manage your consultation ratings and reviews
-                    {% else %}
-                    View ratings and reviews from patients
-                    {% endif %}
-                </p>
-            </div>
-            <div class="hidden md:block">
-                <div class="bg-white bg-opacity-20 rounded-lg p-4 text-center">
-                    <div class="text-2xl font-bold">{{ total_ratings }}</div>
-                    <div class="text-sm">Total Reviews</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white rounded-lg p-6 shadow-sm border">
-            <div class="flex items-center">
-                <div class="bg-blue-100 rounded-full p-3 mr-4">
-                    <i class="fas fa-star text-blue-600 text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-gray-600 text-sm">Total Ratings</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ total_ratings }}</p>
-                </div>
-            </div>
+<div class="min-h-screen flex flex-col font-body bg-[#f9fafc]">
+    <div class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-header font-bold text-gray-800 mb-2">Rating Konsultasi</h1>
+            <p class="text-gray-600">Berikan rating untuk konsultasi yang telah selesai</p>
         </div>
 
-        <div class="bg-white rounded-lg p-6 shadow-sm border">
-            <div class="flex items-center">
-                <div class="bg-yellow-100 rounded-full p-3 mr-4">
-                    <i class="fas fa-chart-line text-yellow-600 text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-gray-600 text-sm">Average Rating</p>
-                    <p class="text-2xl font-bold text-gray-800">
-                        {% if average_rating > 0 %}
-                        {{ average_rating|floatformat:1 }}
-                        {% else %}
-                        N/A
-                        {% endif %}
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg p-6 shadow-sm border">
-            <div class="flex items-center">
-                <div class="bg-green-100 rounded-full p-3 mr-4">
-                    <i class="fas fa-thumbs-up text-green-600 text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-gray-600 text-sm">High Ratings (4-5★)</p>
-                    <p class="text-2xl font-bold text-gray-800">
-                        {% with high_count=0 %}
-                        {% for rating in ratings %}
-                        {% if rating.ratingScore >= 4 %}
-                        {% add high_<!-- rating/templates/rating/rating_list.html -->
-                        {% extends "base.html" %}
-                        {% load static %}
-
-                        {% block meta %}
-                        <title>My Ratings - PandaCare</title>
-                        {% endblock meta %}
-
-                        {% block navbar %}
-                        {% include "components/navbar.html" with is_logged_in=True user_role="pacilian" %}
-                        {% endblock navbar %}
-
-                        {% block content %}
-                    <div class="flex-grow container mx-auto p-6 max-w-7xl">
-                        <!-- Header Section -->
-                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-8 mb-8 text-white">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <h1 class="text-3xl font-bold mb-2">My Ratings</h1>
-                                    <p class="text-blue-100">Manage your consultation ratings and reviews</p>
-                                </div>
-                                <div class="hidden md:block">
-                                    <div class="bg-white bg-opacity-20 rounded-lg p-4 text-center">
-                                        <div class="text-2xl font-bold">{{ total_ratings }}</div>
-                                        <div class="text-sm">Total Reviews</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Statistics Cards -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                            <div class="bg-white rounded-lg p-6 shadow-sm border">
-                                <div class="flex items-center">
-                                    <div class="bg-blue-100 rounded-full p-3 mr-4">
-                                        <i class="fas fa-star text-blue-600 text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-gray-600 text-sm">Total Ratings</p>
-                                        <p class="text-2xl font-bold text-gray-800">{{ total_ratings }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-white rounded-lg p-6 shadow-sm border">
-                                <div class="flex items-center">
-                                    <div class="bg-yellow-100 rounded-full p-3 mr-4">
-                                        <i class="fas fa-chart-line text-yellow-600 text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-gray-600 text-sm">Average Rating</p>
-                                        <p class="text-2xl font-bold text-gray-800">
-                                            {% if average_rating > 0 %}
-                                            {{ average_rating|floatformat:1 }}
-                                            {% else %}
-                                            N/A
-                                            {% endif %}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-white rounded-lg p-6 shadow-sm border">
-                                <div class="flex items-center">
-                                    <div class="bg-green-100 rounded-full p-3 mr-4">
-                                        <i class="fas fa-thumbs-up text-green-600 text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-gray-600 text-sm">High Ratings</p>
-                                        <p class="text-2xl font-bold text-gray-800">
-                                            {% with high_ratings=ratings|length %}
-                                            {% for rating in ratings %}
-                                            {% if rating.rating_score >= 4 %}
-                                            {{ forloop.counter }}
-                                            {% endif %}
-                                            {% endfor %}
-                                            {% endwith %}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Ratings List -->
-                        <div class="bg-white rounded-lg shadow-sm border">
-                            <div class="p-6 border-b">
-                                <div class="flex items-center justify-between">
-                                    <h2 class="text-xl font-semibold text-gray-800">Your Ratings</h2>
-                                    <div class="flex items-center space-x-2">
-                                        <button onclick="refreshRatings()" class="bg-blue-100 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-200 transition-all">
-                                            <i class="fas fa-refresh mr-1"></i> Refresh
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="p-6">
-                                {% if ratings %}
-                                <div class="space-y-4">
-                                    {% for rating in ratings %}
-                                    <div class="rating-card border border-gray-200 rounded-lg p-6 hover:shadow-md transition-all">
-                                        <div class="flex items-start justify-between">
-                                            <div class="flex-1">
-                                                <div class="flex items-center mb-3">
-                                                    <div class="flex items-center mr-4">
-                                                        {% for i in "12345" %}
-                                                        {% if forloop.counter <= rating.rating_score %}
-                                                        <i class="fas fa-star text-yellow-400"></i>
-                                                        {% else %}
-                                                        <i class="fas fa-star text-gray-300"></i>
-                                                        {% endif %}
-                                                        {% endfor %}
-                                                    </div>
-                                                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                                        {{ rating.rating_score }}/5
-                                    </span>
-                                                </div>
-
-                                                <div class="mb-3">
-                                                    <p class="text-gray-800 font-medium mb-1">Review:</p>
-                                                    <p class="text-gray-600 leading-relaxed rating-review">{{ rating.review }}</p>
-                                                </div>
-
-                                                <div class="flex items-center text-sm text-gray-500 space-x-4">
-                                    <span>
-                                        <i class="fas fa-calendar mr-1"></i>
-                                        {{ rating.created_at|date:"d M Y, H:i" }}
-                                    </span>
-                                                    {% if rating.updated_at != rating.created_at %}
-                                                    <span>
-                                        <i class="fas fa-edit mr-1"></i>
-                                        Updated: {{ rating.updated_at|date:"d M Y, H:i" }}
-                                    </span>
-                                                    {% endif %}
-                                                    <span>
-                                        <i class="fas fa-stethoscope mr-1"></i>
-                                        Consultation ID: {{ rating.consultation_id|slice:":8" }}...
-                                    </span>
-                                                </div>
-                                            </div>
-
-                                            <div class="flex items-center space-x-2 ml-4">
-                                                <button onclick="editRating('{{ rating.consultation_id }}', {{ rating.rating_score }}, '{{ rating.review|escapejs }}')"
-                                                        class="bg-yellow-100 text-yellow-600 px-3 py-2 rounded-lg hover:bg-yellow-200 transition-all">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button onclick="deleteRating('{{ rating.consultation_id }}')"
-                                                        class="bg-red-100 text-red-600 px-3 py-2 rounded-lg hover:bg-red-200 transition-all">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                {% else %}
-                                <div class="text-center py-12">
-                                    <div class="mb-4">
-                                        <i class="fas fa-star text-gray-300 text-6xl"></i>
-                                    </div>
-                                    <h3 class="text-xl font-semibold text-gray-600 mb-2">No Ratings Yet</h3>
-                                    <p class="text-gray-500">You haven't given any ratings yet. Start by rating your consultations!</p>
-                                    <a href="{% url 'doctor_profile:search' %}" class="inline-block mt-4 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all">
-                                        <i class="fas fa-search mr-2"></i>Find Doctors
-                                    </a>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 bg-blue-100 rounded-lg">
+                        <i class="fas fa-calendar-check text-blue-600 text-xl"></i>
                     </div>
+                    <div class="ml-4">
+                        <p class="text-gray-600 text-sm">Total Konsultasi</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ total_consultations }}</p>
+                    </div>
+                </div>
+            </div>
 
-                    <!-- Edit Rating Modal -->
-                    <div id="editRatingModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-                        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md m-4">
-                            <div class="flex items-center justify-between mb-6">
-                                <h3 class="text-xl font-bold text-gray-800">Edit Rating</h3>
-                                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
-                                    <i class="fas fa-times text-xl"></i>
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 bg-green-100 rounded-lg">
+                        <i class="fas fa-star text-green-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-600 text-sm">Sudah Diberi Rating</p>
+                        <p class="text-2xl font-bold text-gray-800">
+                            {% if consultations %}
+                            {{ consultations|length|add:0 }}
+                            {% for consultation in consultations %}
+                            {% if consultation.has_rating and forloop.first %}
+                            {{ forloop.counter }}
+                            {% elif consultation.has_rating %}
+                            {% if forloop.counter == 1 %}1{% else %}{{ forloop.counter }}{% endif %}
+                            {% endif %}
+                            {% endfor %}
+                            {% else %}
+                            0
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-3 bg-yellow-100 rounded-lg">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-gray-600 text-sm">Menunggu Rating</p>
+                        <p class="text-2xl font-bold text-gray-800">
+                            {% if consultations %}
+                            {% for consultation in consultations %}
+                            {% if not consultation.has_rating and forloop.first %}
+                            {{ forloop.counter }}
+                            {% elif not consultation.has_rating %}
+                            {% if forloop.counter == 1 %}1{% else %}{{ forloop.counter }}{% endif %}
+                            {% endif %}
+                            {% endfor %}
+                            {% else %}
+                            0
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consultations List -->
+        <div class="bg-white rounded-xl shadow-sm">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-xl font-header font-bold text-gray-800">Riwayat Konsultasi</h2>
+            </div>
+
+            {% if consultations %}
+            <div class="divide-y divide-gray-200">
+                {% for consultation in consultations %}
+                <div class="p-6 hover:bg-gray-50 transition-colors">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <!-- Consultation Info -->
+                        <div class="flex-1">
+                            <div class="flex items-start gap-4">
+                                <!-- Doctor Avatar -->
+                                <div class="w-16 h-16 rounded-full bg-gray-100 flex-shrink-0 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 text-gray-500">
+                                        <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+
+                                <!-- Details -->
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-medium text-gray-800 mb-1">{{ consultation.doctor_name }}</h3>
+                                    {% if consultation.doctor_speciality %}
+                                    <p class="text-primary font-medium text-sm mb-2">{{ consultation.doctor_speciality }}</p>
+                                    {% endif %}
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600">
+                                        {% if consultation.consultation_date %}
+                                        <div class="flex items-center">
+                                            <i class="fas fa-calendar-alt mr-2 text-gray-400"></i>
+                                            {{ consultation.consultation_date|date:"F j, Y" }}
+                                        </div>
+                                        {% endif %}
+
+                                        {% if consultation.consultation_time %}
+                                        <div class="flex items-center">
+                                            <i class="fas fa-clock mr-2 text-gray-400"></i>
+                                            {{ consultation.consultation_time }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    {% if consultation.pacilian_note %}
+                                    <div class="mt-2">
+                                        <p class="text-sm text-gray-600">
+                                            <i class="fas fa-sticky-note mr-2 text-gray-400"></i>
+                                            {{ consultation.pacilian_note|truncatechars:50 }}
+                                        </p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rating Status & Actions -->
+                        <div class="flex flex-col sm:flex-row gap-3 lg:min-w-0 lg:flex-col lg:items-end">
+                            {% if consultation.has_rating %}
+                            <!-- Already Rated -->
+                            <div class="flex items-center bg-green-50 text-green-700 px-3 py-2 rounded-lg mb-2">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <span class="text-sm font-medium">Sudah Rating</span>
+                            </div>
+
+                            {% if consultation.existing_rating %}
+                            <div class="flex items-center justify-center lg:justify-end mb-2">
+                                {% for i in "12345" %}
+                                {% if forloop.counter <= consultation.existing_rating.ratingScore %}
+                                <i class="fas fa-star text-yellow-400 text-sm"></i>
+                                {% else %}
+                                <i class="far fa-star text-gray-300 text-sm"></i>
+                                {% endif %}
+                                {% endfor %}
+                                <span class="ml-2 text-sm text-gray-600">({{ consultation.existing_rating.ratingScore }})</span>
+                            </div>
+                            {% endif %}
+
+                            <div class="flex gap-2">
+                                <a href="{% url 'rating:view' consultation.id %}"
+                                   class="px-3 py-2 bg-blue-100 text-blue-700 text-sm rounded-lg hover:bg-blue-200 transition-all">
+                                    <i class="fas fa-eye mr-1"></i> Lihat
+                                </a>
+                                <a href="{% url 'rating:edit' consultation.id %}"
+                                   class="px-3 py-2 bg-yellow-100 text-yellow-700 text-sm rounded-lg hover:bg-yellow-200 transition-all">
+                                    <i class="fas fa-edit mr-1"></i> Edit
+                                </a>
+                                <button onclick="confirmDelete('{{ consultation.id }}')"
+                                        class="px-3 py-2 bg-red-100 text-red-700 text-sm rounded-lg hover:bg-red-200 transition-all">
+                                    <i class="fas fa-trash mr-1"></i> Hapus
                                 </button>
                             </div>
-
-                            <form id="editRatingForm">
-                                <input type="hidden" id="editConsultationId">
-
-                                <div class="mb-4">
-                                    <label class="block text-gray-700 font-medium mb-2">Rating</label>
-                                    <div class="flex items-center space-x-2" id="editStarRating">
-                                        {% for i in "12345" %}
-                                        <button type="button" class="star-button text-2xl text-gray-300 hover:text-yellow-400 transition-colors"
-                                                data-rating="{{ forloop.counter }}" onclick="setEditRating({{ forloop.counter }})">
-                                            <i class="fas fa-star"></i>
-                                        </button>
-                                        {% endfor %}
-                                    </div>
-                                    <input type="hidden" id="editRatingScore">
-                                </div>
-
-                                <div class="mb-6">
-                                    <label for="editReview" class="block text-gray-700 font-medium mb-2">Review</label>
-                                    <textarea id="editReview" rows="4"
-                                              class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                              placeholder="Share your experience..."></textarea>
-                                </div>
-
-                                <div class="flex space-x-3">
-                                    <button type="button" onclick="closeEditModal()"
-                                            class="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition-all">
-                                        Cancel
-                                    </button>
-                                    <button type="submit"
-                                            class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-all">
-                                        Update Rating
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Delete Confirmation Modal -->
-                    <div id="deleteRatingModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-                        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md m-4">
-                            <div class="text-center">
-                                <div class="mb-4">
-                                    <i class="fas fa-exclamation-triangle text-red-500 text-4xl"></i>
-                                </div>
-                                <h3 class="text-xl font-bold text-gray-800 mb-2">Delete Rating</h3>
-                                <p class="text-gray-600 mb-6">Are you sure you want to delete this rating? This action cannot be undone.</p>
-
-                                <input type="hidden" id="deleteConsultationId">
-
-                                <div class="flex space-x-3">
-                                    <button onclick="closeDeleteModal()"
-                                            class="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition-all">
-                                        Cancel
-                                    </button>
-                                    <button onclick="confirmDeleteRating()"
-                                            class="flex-1 bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-all">
-                                        Delete
-                                    </button>
-                                </div>
+                            {% else %}
+                            <!-- Not Rated Yet -->
+                            <div class="flex items-center bg-yellow-50 text-yellow-700 px-3 py-2 rounded-lg mb-2">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                <span class="text-sm font-medium">Belum Rating</span>
                             </div>
+
+                            <a href="{% url 'rating:add' consultation.id %}"
+                               class="inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-accent-500 transition-all">
+                                <i class="fas fa-star mr-2"></i> Berikan Rating
+                            </a>
+                            {% endif %}
                         </div>
                     </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-12">
+                <div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-star text-gray-400 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-800 mb-2">Belum Ada Konsultasi</h3>
+                <p class="text-gray-600 mb-6">Anda belum memiliki konsultasi yang telah selesai</p>
 
-                    <!-- Loading Overlay -->
-                    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-30 z-50 hidden flex items-center justify-center">
-                        <div class="bg-white rounded-lg p-6 shadow-xl">
-                            <div class="flex items-center space-x-3">
-                                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                                <span class="text-gray-700">Processing...</span>
-                            </div>
-                        </div>
-                    </div>
-                    {% endblock content %}
-
-                    {% block extra_style %}
-                    <style>
-                        .rating-card {
-                            transition: all 0.3s ease;
-                        }
-
-                        .rating-card:hover {
-                            transform: translateY(-2px);
-                            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-                        }
-
-                        .star-button {
-                            cursor: pointer;
-                            transition: all 0.2s ease;
-                        }
-
-                        .star-button:hover {
-                            transform: scale(1.1);
-                        }
-
-                        .star-button.active {
-                            color: #fbbf24 !important;
-                        }
-
-                        .rating-review {
-                            max-height: 100px;
-                            overflow-y: auto;
-                        }
-
-                        @keyframes fadeIn {
-                            from { opacity: 0; transform: translateY(20px); }
-                            to { opacity: 1; transform: translateY(0); }
-                        }
-
-                        .rating-card {
-                            animation: fadeIn 0.5s ease-out;
-                        }
-                    </style>
-                    {% endblock extra_style %}
-
-                    {% block extra_js %}
-                    <script>
-                        let editRatingScore = 0;
-
-                        function getCookie(name) {
-                            let cookieValue = null;
-                            if (document.cookie && document.cookie !== '') {
-                                const cookies = document.cookie.split(';');
-                                for (let i = 0; i < cookies.length; i++) {
-                                    const cookie = cookies[i].trim();
-                                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                                        break;
-                                    }
-                                }
-                            }
-                            return cookieValue;
-                        }
-
-                        function showLoading() {
-                            document.getElementById('loadingOverlay').classList.remove('hidden');
-                        }
-
-                        function hideLoading() {
-                            document.getElementById('loadingOverlay').classList.add('hidden');
-                        }
-
-                        function showToast(message, type = 'info') {
-                            // Create toast notification
-                            const toast = document.createElement('div');
-                            toast.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
-                                type === 'success' ? 'bg-green-500 text-white' :
-                                    type === 'error' ? 'bg-red-500 text-white' :
-                                        'bg-blue-500 text-white'
-                            }`;
-                            toast.innerHTML = `
-        <div class="flex items-center">
-            <i class="fas ${
-                                type === 'success' ? 'fa-check-circle' :
-                                    type === 'error' ? 'fa-exclamation-circle' :
-                                        'fa-info-circle'
-                            } mr-2"></i>
-            <span>${message}</span>
+            </div>
+            {% endif %}
         </div>
-    `;
+    </div>
+</div>
 
-                            document.body.appendChild(toast);
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl w-full max-w-md p-6">
+        <div class="text-center">
+            <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-trash text-red-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Hapus Rating</h3>
+            <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus rating ini? Tindakan ini tidak dapat dibatalkan.</p>
 
-                            // Auto remove after 3 seconds
-                            setTimeout(() => {
-                                toast.remove();
-                            }, 3000);
-                        }
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeDeleteModal()"
+                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all">
+                    Batal
+                </button>
+                <form id="delete-form" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all">
+                        Hapus Rating
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
 
-                        function refreshRatings() {
-                            location.reload();
-                        }
+{% block extra_js %}
+<script>
+    function confirmDelete(consultationId) {
+        const modal = document.getElementById('delete-modal');
+        const form = document.getElementById('delete-form');
+        form.action = `/rating/delete/${consultationId}/`;
+        modal.classList.remove('hidden');
+    }
 
-                        function editRating(consultationId, ratingScore, review) {
-                            document.getElementById('editConsultationId').value = consultationId;
-                            document.getElementById('editReview').value = review;
-                            setEditRating(ratingScore);
-                            document.getElementById('editRatingModal').classList.remove('hidden');
-                        }
+    function closeDeleteModal() {
+        document.getElementById('delete-modal').classList.add('hidden');
+    }
 
-                        function setEditRating(score) {
-                            editRatingScore = score;
-                            document.getElementById('editRatingScore').value = score;
-
-                            // Update star display
-                            const stars = document.querySelectorAll('#editStarRating .star-button');
-                            stars.forEach((star, index) => {
-                                if (index < score) {
-                                    star.classList.add('active');
-                                    star.classList.remove('text-gray-300');
-                                    star.classList.add('text-yellow-400');
-                                } else {
-                                    star.classList.remove('active');
-                                    star.classList.remove('text-yellow-400');
-                                    star.classList.add('text-gray-300');
-                                }
+    // Close modal when clicking outside
+    document.getElementById('delete-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDeleteModal();
+        }
+    });
+</script>
+{% endblock extra_js %}

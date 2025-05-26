@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block meta %}
+<title>PandaCare - Detail Rating</title>
+{% endblock meta %}
+
+{% block navbar %}
+{% include "components/navbar.html" with is_logged_in=is_logged_in user_role=user_role %}
+{% endblock navbar %}
+
+{% block content %}
+<div class="min-h-screen flex flex-col font-body bg-[#f9fafc]">
+    <div class="flex-grow container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Back button -->
+        <a href="{% url 'rating:list' %}" class="mb-6 inline-flex items-center text-primary hover:text-accent-500 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i> Kembali ke Daftar Rating
+        </a>
+
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-header font-bold text-gray-800 mb-2">Detail Rating</h1>
+            <p class="text-gray-600">Rating yang telah Anda berikan untuk konsultasi ini</p>
+        </div>
+
+        <!-- Consultation Info Card -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <h2 class="text-xl font-header font-bold text-gray-800 mb-4">Informasi Konsultasi</h2>
+
+            <div class="flex items-start gap-4">
+                <!-- Doctor Avatar -->
+                <div class="w-16 h-16 rounded-full bg-gray-100 flex-shrink-0 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 text-gray-500">
+                        <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+
+                <!-- Details -->
+                <div class="flex-1">
+                    <h3 class="text-lg font-medium text-gray-800 mb-1">{{ doctor_name }}</h3>
+                    {% if doctor_speciality %}
+                    <p class="text-primary font-medium text-sm mb-3">{{ doctor_speciality }}</p>
+                    {% endif %}
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
+                        {% if consultation_date %}
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar-alt mr-2 text-gray-400"></i>
+                            <span>{{ consultation_date|date:"F j, Y" }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if consultation_time %}
+                        <div class="flex items-center">
+                            <i class="fas fa-clock mr-2 text-gray-400"></i>
+                            <span>{{ consultation_time }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rating Details Card -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-header font-bold text-gray-800">Rating Anda</h2>
+                <div class="flex gap-2">
+                    <a href="{% url 'rating:edit' consultation_id %}"
+                       class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-all">
+                        <i class="fas fa-edit mr-1"></i> Edit Rating
+                    </a>
+                    <button onclick="confirmDelete()"
+                            class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all">
+                        <i class="fas fa-trash mr-1"></i> Hapus Rating
+                    </button>
+                </div>
+            </div>
+
+            {% if rating %}
+            <!-- Rating Score Display -->
+            <div class="mb-6">
+                <div class="flex items-center gap-4 mb-2">
+                    <div class="flex items-center">
+                        {% for i in "12345" %}
+                        {% if forloop.counter <= rating.ratingScore %}
+                        <i class="fas fa-star text-yellow-400 text-2xl"></i>
+                        {% else %}
+                        <i class="far fa-star text-gray-300 text-2xl"></i>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-2xl font-bold text-gray-800">{{ rating.ratingScore }}/5</span>
+                        <span class="text-sm text-gray-600">
+              {% if rating.ratingScore == 1 %}Sangat Tidak Puas
+              {% elif rating.ratingScore == 2 %}Tidak Puas
+              {% elif rating.ratingScore == 3 %}Cukup
+              {% elif rating.ratingScore == 4 %}Puas
+              {% elif rating.ratingScore == 5 %}Sangat Puas
+              {% endif %}
+            </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review Text -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-800 mb-3">Ulasan Anda</h3>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ rating.ulasan }}</p>
+                </div>
+            </div>
+
+            <!-- Rating Metadata -->
+            <div class="border-t pt-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div class="flex items-center">
+                        <i class="fas fa-calendar-plus mr-2 text-gray-400"></i>
+                        <span>Dibuat: {{ rating.createdAt|date:"F j, Y g:i A" }}</span>
+                    </div>
+                    {% if rating.updatedAt != rating.createdAt %}
+                    <div class="flex items-center">
+                        <i class="fas fa-edit mr-2 text-gray-400"></i>
+                        <span>Diperbarui: {{ rating.updatedAt|date:"F j, Y g:i A" }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <!-- No Rating Found -->
+            <div class="text-center py-8">
+                <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-star text-gray-400 text-xl"></i>
+                </div>
+                <p class="text-gray-600">Rating tidak ditemukan</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="{% url 'rating:list' %}"
+               class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-accent-500 transition-all text-center">
+                <i class="fas fa-list mr-2"></i> Lihat Semua Rating
+            </a>
+            {% if rating %}
+            <a href="{% url 'rating:edit' consultation_id %}"
+               class="px-6 py-3 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-all text-center">
+                <i class="fas fa-edit mr-2"></i> Edit Rating Ini
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl w-full max-w-md p-6">
+        <div class="text-center">
+            <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-trash text-red-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Hapus Rating</h3>
+            <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus rating ini? Tindakan ini tidak dapat dibatalkan.</p>
+
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeDeleteModal()"
+                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all">
+                    Batal
+                </button>
+                <form method="post" action="{% url 'rating:delete' consultation_id %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all">
+                        Hapus Rating
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+    function confirmDelete() {
+        document.getElementById('delete-modal').classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('delete-modal').classList.add('hidden');
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('delete-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDeleteModal();
+        }
+    });
+</script>
+{% endblock extra_js %}

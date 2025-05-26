@@ -1,15 +1,11 @@
 from django.urls import path
-from .views import AddRatingView, UpdateRatingView, DeleteRatingView, GetRatingsByDoctorView, CheckRatingStatusView
+from . import views
 
 urlpatterns = [
-    # Rating Views
-    path('doctors/<uuid:doctor_id>/ratings/add/', AddRatingView.as_view(), name='add_rating'),  # Add rating to a consultation
-    path('doctors/<uuid:doctor_id>/ratings/update/', UpdateRatingView.as_view(), name='update_rating'),  # Update rating
-    path('doctors/<uuid:doctor_id>/ratings/delete/', DeleteRatingView.as_view(), name='delete_rating'),  # Delete rating
-
-    # Fetch Ratings by Doctor
-    path('doctors/<uuid:id_dokter>/ratings/', GetRatingsByDoctorView.as_view(), name='get_ratings_by_doctor'),  # Get all ratings for a doctor
-
-    # Check if a rating has been given for a specific consultation
-    path('consultations/<uuid:id_jadwal_konsultasi>/rating/status/', CheckRatingStatusView.as_view(), name='check_rating_status'),
+    # The rating-list view expects id_pacilian in the URL
+    path('rating/list/<uuid:id_pacilian>/', views.RatingListView.as_view(), name='rating-list'),
+    path('add/<uuid:consultation_id>/', views.AddRatingView.as_view(), name='add'),
+    path('edit/<uuid:consultation_id>/', views.EditRatingView.as_view(), name='edit'),
+    path('delete/<uuid:consultation_id>/', views.DeleteRatingView.as_view(), name='delete'),
+    path('view/<uuid:consultation_id>/', views.ViewRatingView.as_view(), name='view'),
 ]
