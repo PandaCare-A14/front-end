@@ -120,33 +120,32 @@
             </div>
         </div>
 
-    <!-- Reviews Section -->
-    <div class="bg-white rounded-xl shadow-sm p-6">
-        <h3 class="text-2xl font-header font-bold text-gray-800 mb-6">Ulasan Pasien</h3>
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="text-2xl font-header font-bold text-gray-800 mb-6">Ulasan Pasien</h3>
 
-        {% if doctor.totalRatings > 0 %}
-        <div class="space-y-4">
-            {% for rating in doctor.ratings %}
-            <div class="border-b border-gray-100 pb-4">
-                <div class="flex justify-between mb-2">
-                    <h4 class="font-medium text-gray-800">{{ rating.patient_name|default:"Pasien Anonim" }}</h4>
-                    <div class="flex items-center">
-                        <i class="fas fa-star text-yellow-400 mr-1"></i>
-                        <span>{{ rating.rating_score }}</span>
+            {% if doctor.ratings.totalRatings > 0 %}
+            <div class="space-y-4">
+                {% for rating in doctor.ratings.ratings %}
+                <div class="border-b border-gray-100 pb-4">
+                    <div class="flex justify-between mb-2">
+                        <h4 class="font-medium text-gray-800">Pasien Anonim</h4>
+                        <div class="flex items-center">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>{{ rating.ratingScore }}</span>
+                        </div>
                     </div>
+                    <p class="text-gray-600 text-sm">{{ rating.ulasan }}</p>
+                    <p class="text-gray-400 text-xs mt-2">{{ rating.createdAt|date:"F j, Y, g:i a" }}</p>
                 </div>
-                <p class="text-gray-600 text-sm">{{ rating.review_text }}</p>
-                <p class="text-gray-400 text-xs mt-2">{{ rating.created_at|date:"F j, Y" }}</p>
+                {% endfor %}
             </div>
-            {% endfor %}
+            {% else %}
+            <div class="text-center py-8">
+                <img src="{% static 'img/no-reviews.svg' %}" alt="No Reviews" class="w-48 mx-auto mb-4">
+                <p class="text-gray-600">Belum ada ulasan untuk dokter ini</p>
+            </div>
+            {% endif %}
         </div>
-        {% else %}
-        <div class="text-center py-8">
-            <img src="{% static 'img/no-reviews.svg' %}" alt="No Reviews" class="w-48 mx-auto mb-4">
-            <p class="text-gray-600">Belum ada ulasan untuk dokter ini</p>
-        </div>
-        {% endif %}
-    </div>
 
 <!-- Appointment Modal -->
 <div id="appointment-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">

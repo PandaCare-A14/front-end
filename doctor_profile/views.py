@@ -114,7 +114,18 @@ class DoctorProfileView(View):
             if not doctor_response:
                 messages.error(request, "Doctor not found")
                 return redirect("doctor_profile:search")
-            
+
+            ratings_response = api_request(
+                "GET",
+                f"/api/caregivers/{doctor_id}/ratings",
+                token=request.session.get("access_token")
+            )
+
+            if ratings_response:
+                doctor_response['ratings'] = ratings_response.get('data', [])
+                doctor_response['averageRating'] = ratings_response.get('averageRating', 0)
+                doctor_response['totalRatings'] = ratings_response.get('totalRatings', 0)
+
             # Get profile with action buttons if patient_id is available
             if patient_id and request.session.get("user_role") == "pacilian":
                 actions_response = api_request(
