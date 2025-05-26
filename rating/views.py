@@ -88,7 +88,10 @@ class RatingListView(View):
                     approved_consultations.append(consultation_data)
 
             # Sort by consultation date (newest first)
-            approved_consultations.sort(key=lambda x: x.get('consultation_date', ''), reverse=True)
+            approved_consultations.sort(
+                key=lambda x: x.get('consultation_date') or '',
+                reverse=True
+            )
 
             context['consultations'] = approved_consultations
             context['total_consultations'] = len(approved_consultations)
@@ -98,6 +101,7 @@ class RatingListView(View):
         except Exception as e:
             messages.error(request, f"Error loading consultations: {str(e)}")
             context['consultations'] = []
+            print(f"Error loading consultations: {str(e)}")
             return render(request, self.template_name, context)
 
 class AddRatingView(View):
@@ -123,7 +127,7 @@ class AddRatingView(View):
 
             if rating_status_response and rating_status_response.get('data', {}).get('hasRated', False):
                 messages.warning(request, "Konsultasi ini sudah memiliki rating. Gunakan fitur edit untuk mengubah.")
-                return redirect("rating:list")
+                return redirect("rating:list", id_pacilian=patient_id)
 
             # Get consultation details for display
             reservations_response = api_request(
@@ -141,7 +145,7 @@ class AddRatingView(View):
 
             if not consultation:
                 messages.error(request, "Consultation not found")
-                return redirect("rating:list")
+                return redirect("rating:list", id_pacilian=patient_id)
 
             # Get doctor info
             schedule = consultation.get('idSchedule', {})
@@ -159,6 +163,7 @@ class AddRatingView(View):
 
             context.update({
                 'consultation_id': consultation_id,
+                'id_pacilian': patient_id,
                 'doctor_name': doctor_name,
                 'consultation_date': schedule.get('date') if schedule else None,
                 'consultation_time': f"{schedule.get('startTime', '')} - {schedule.get('endTime', '')}" if schedule else "",
@@ -169,7 +174,8 @@ class AddRatingView(View):
 
         except Exception as e:
             messages.error(request, f"Error loading consultation: {str(e)}")
-            return redirect("rating:list")
+            print(f"Error loading consultation: {str(e)}")
+            return redirect("rating:list", id_pacilian=patient_id)
 
     def post(self, request, consultation_id):
         if not is_logged_in(request) or request.session.get("user_role") != "pacilian":
@@ -207,7 +213,7 @@ class AddRatingView(View):
 
             if response and response.get('status') == 'success':
                 messages.success(request, "Rating berhasil ditambahkan!")
-                return redirect("rating:list")
+                return redirect("rating:list", id_pacilian=patient_id)
             else:
                 error_msg = response.get('message', 'Failed to add rating') if response else 'Failed to add rating'
                 messages.error(request, f"Gagal menambahkan rating: {error_msg}")
@@ -227,6 +233,8 @@ class EditRatingView(View):
             messages.error(request, "Unauthorized access")
             return redirect("main:login")
 
+        patient_id = request.session.get("user_id")
+
         try:
             # Get existing rating
             rating_response = api_request(
@@ -237,12 +245,11 @@ class EditRatingView(View):
 
             if not rating_response or not rating_response.get('data', {}).get('rating'):
                 messages.error(request, "Rating not found")
-                return redirect("rating:list")
+                return redirect("rating:list", id_pacilian=patient_id)
 
             existing_rating = rating_response['data']['rating']
 
             # Get consultation details
-            patient_id = request.session.get("user_id")
             reservations_response = api_request(
                 "GET",
                 f"/api/reservasi-konsultasi/{patient_id}",
@@ -258,7 +265,7 @@ class EditRatingView(View):
 
             if not consultation:
                 messages.error(request, "Consultation not found")
-                return redirect("rating:list")
+                return redirect("rating:list", id_pacilian=patient_id)
 
             # Get doctor info
             schedule = consultation.get('idSchedule', {})
@@ -276,6 +283,7 @@ class EditRatingView(View):
 
             context.update({
                 'consultation_id': consultation_id,
+                'id_pacilian': patient_id,
                 'doctor_name': doctor_name,
                 'consultation_date': schedule.get('date') if schedule else None,
                 'consultation_time': f"{schedule.get('startTime', '')} - {schedule.get('endTime', '')}" if schedule else "",
@@ -287,12 +295,14 @@ class EditRatingView(View):
 
         except Exception as e:
             messages.error(request, f"Error loading rating: {str(e)}")
-            return redirect("rating:list")
+            return redirect("rating:list", id_pacilian=patient_id)
 
     def post(self, request, consultation_id):
         if not is_logged_in(request) or request.session.get("user_role") != "pacilian":
             messages.error(request, "Unauthorized access")
             return redirect("main:login")
+
+        patient_id = request.session.get("user_id")
 
         try:
             rating_score = request.POST.get('rating_score')
@@ -325,7 +335,7 @@ class EditRatingView(View):
 
             if response and response.get('status') == 'success':
                 messages.success(request, "Rating berhasil diperbarui!")
-                return redirect("rating:list")
+                return redirect("rating:list", id_pacilian=patient_id)
             else:
                 error_msg = response.get('message', 'Failed to update rating') if response else 'Failed to update rating'
                 messages.error(request, f"Gagal memperbarui rating: {error_msg}")
@@ -341,6 +351,8 @@ class DeleteRatingView(View):
         if not is_logged_in(request) or request.session.get("user_role") != "pacilian":
             messages.error(request, "Unauthorized access")
             return redirect("main:login")
+        
+        patient_id = request.session.get("user_id")
 
         try:
             # Delete rating
@@ -359,7 +371,7 @@ class DeleteRatingView(View):
         except Exception as e:
             messages.error(request, f"Error deleting rating: {str(e)}")
 
-        return redirect("rating:list")
+        return redirect("rating:list", id_pacilian=patient_id)
 
 class ViewRatingView(View):
     template_name = 'rating_detail.html'
@@ -371,6 +383,8 @@ class ViewRatingView(View):
             messages.error(request, "Unauthorized access")
             return redirect("main:login")
 
+        patient_id = request.session.get("user_id")
+
         try:
             # Get rating details
             rating_response = api_request(
@@ -381,7 +395,7 @@ class ViewRatingView(View):
 
             if not rating_response or not rating_response.get('data', {}).get('rating'):
                 messages.error(request, "Rating not found")
-                return redirect("rating:list")
+                return redirect("rating:list", id_pacilian=patient_id)
 
             rating = rating_response['data']['rating']
 
@@ -402,7 +416,7 @@ class ViewRatingView(View):
 
             if not consultation:
                 messages.error(request, "Consultation not found")
-                return redirect("rating:list")
+                return redirect("rating:list", id_pacilian=patient_id)
 
             # Get doctor info
             schedule = consultation.get('idSchedule', {})
@@ -422,6 +436,7 @@ class ViewRatingView(View):
 
             context.update({
                 'consultation_id': consultation_id,
+                'id_pacilian': patient_id,
                 'doctor_name': doctor_name,
                 'doctor_speciality': doctor_speciality,
                 'consultation_date': schedule.get('date') if schedule else None,
@@ -433,4 +448,5 @@ class ViewRatingView(View):
 
         except Exception as e:
             messages.error(request, f"Error loading rating details: {str(e)}")
-            return redirect("rating:list")
+            print(f"Error loading rating details: {str(e)}")
+            return redirect("rating:list", id_pacilian=patient_id)

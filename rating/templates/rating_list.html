@@ -169,10 +169,6 @@
                                    class="px-3 py-2 bg-yellow-100 text-yellow-700 text-sm rounded-lg hover:bg-yellow-200 transition-all">
                                     <i class="fas fa-edit mr-1"></i> Edit
                                 </a>
-                                <button onclick="confirmDelete('{{ consultation.id }}')"
-                                        class="px-3 py-2 bg-red-100 text-red-700 text-sm rounded-lg hover:bg-red-200 transition-all">
-                                    <i class="fas fa-trash mr-1"></i> Hapus
-                                </button>
                             </div>
                             {% else %}
                             <!-- Not Rated Yet -->
@@ -202,33 +198,6 @@
 
             </div>
             {% endif %}
-        </div>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div id="delete-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl w-full max-w-md p-6">
-        <div class="text-center">
-            <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
-                <i class="fas fa-trash text-red-600 text-xl"></i>
-            </div>
-            <h3 class="text-lg font-bold text-gray-800 mb-2">Hapus Rating</h3>
-            <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus rating ini? Tindakan ini tidak dapat dibatalkan.</p>
-
-            <div class="flex gap-3 justify-center">
-                <button onclick="closeDeleteModal()"
-                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all">
-                    Batal
-                </button>
-                <form id="delete-form" method="post" class="inline">
-                    {% csrf_token %}
-                    <button type="submit"
-                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all">
-                        Hapus Rating
-                    </button>
-                </form>
-            </div>
         </div>
     </div>
 </div>

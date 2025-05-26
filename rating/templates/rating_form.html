@@ -13,7 +13,7 @@
 <div class="min-h-screen flex flex-col font-body bg-[#f9fafc]">
     <div class="flex-grow container mx-auto px-4 py-8 max-w-4xl">
         <!-- Back button -->
-        <a href="{% url 'rating:list' %}" class="mb-6 inline-flex items-center text-primary hover:text-accent-500 transition-colors">
+        <a href="{% url 'rating:list' id_pacilian %}" class="mb-6 inline-flex items-center text-primary hover:text-accent-500 transition-colors">
             <i class="fas fa-arrow-left mr-2"></i> Kembali ke Daftar Rating
         </a>
 
@@ -132,7 +132,7 @@
                         {% if mode == 'edit' %}Perbarui Rating{% else %}Simpan Rating{% endif %}
                     </button>
 
-                    <a href="{% url 'rating:list' %}"
+                    <a href="{% url 'rating:list' id_pacilian %}"
                        class="flex-1 sm:flex-none px-6 py-3 border border-gray-300 text-gray-700 text-center rounded-lg hover:bg-gray-50 transition-all">
                         Batal
                     </a>
