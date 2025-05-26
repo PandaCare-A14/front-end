@@ -112,15 +112,15 @@ class ReservationListView(View):
             return redirect("main:home")
 
         token = request.session.get("access_token")
-        status_filter = request.GET.get('status', '')
-        date_from = request.GET.get('date_from', '')
+        status_filter = request.GET.get('status', '').strip()
+        day_filter = request.GET.get('day', '').strip()
 
         try:
             params = {}
             if status_filter:
                 params['status'] = status_filter
-            if date_from:
-                params['date_from'] = date_from
+            if day_filter:
+                params['day'] = day_filter
             
             reservations_response = api_request(
                 "GET", 
@@ -145,20 +145,46 @@ class ReservationListView(View):
             
             if not isinstance(reservations, list):
                 reservations = []
+
+            transformed_reservations = []
+            for reservation in reservations:
+                try:
+                    schedule_data = reservation.get('idSchedule', {})
+                    if not isinstance(schedule_data, dict):
+                        schedule_data = {}
+                    
+                    transformed_reservation = {
+                        'id': reservation.get('id', ''),
+                        'idPacilian': reservation.get('idPacilian', reservation.get('patient_id', '')),
+                        'patientName': reservation.get('patientName', reservation.get('patient_name', reservation.get('idPacilian', ''))),
+                        'pacilianNote': reservation.get('pacilianNote', reservation.get('patient_note', '')),
+                        'statusReservasi': reservation.get('statusReservasi', reservation.get('status', 'UNKNOWN')).upper(),
+                        'idSchedule': {
+                            'id': schedule_data.get('id', ''),
+                            'date': schedule_data.get('date', ''),
+                            'day': schedule_data.get('day', ''),
+                            'startTime': schedule_data.get('startTime', ''),
+                            'endTime': schedule_data.get('endTime', ''),
+                        }
+                    }
+                    transformed_reservations.append(transformed_reservation)
+                except Exception as e:
+                    print(f"Warning: Failed to transform reservation {reservation.get('id', 'unknown')}: {e}")
+                    transformed_reservations.append(reservation)
                         
             context = {
-                "reservations": reservations,
+                "reservations": transformed_reservations,
                 "caregiver_id": str(caregiver_id),
                 "user_id": str(caregiver_id),
                 "status_filter": status_filter,
-                "date_from": date_from,
+                "day_filter": day_filter,
                 "is_waiting": status_filter == 'WAITING',
                 "is_approved": status_filter == 'APPROVED',
                 "is_rejected": status_filter == 'REJECTED',
                 "is_rescheduled": status_filter == 'ON_RESCHEDULE',
                 "is_logged_in": True,
                 "user_role": "caregiver",
-                "total_reservations": len(reservations),
+                "total_reservations": len(transformed_reservations),
             }
             
             return render(request, self.template_name, context)
@@ -173,7 +199,7 @@ class ReservationListView(View):
                 "caregiver_id": str(caregiver_id),
                 "user_id": str(caregiver_id),
                 "status_filter": status_filter,
-                "date_from": date_from,
+                "day_filter": day_filter,
                 "is_waiting": False,
                 "is_approved": False,
                 "is_rejected": False,
