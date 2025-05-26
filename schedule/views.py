@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib import messages
@@ -5,11 +6,21 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 import requests
 import os
+import json
 
 API_BASE_URL = os.getenv("API_BASE_URL")
 
 def is_logged_in(request):
     return bool(request.session.get("access_token"))
+
+def validate_session(request):
+    required_keys = ['access_token', 'user_id', 'user_role']
+    return all(request.session.get(key) for key in required_keys)
+
+def clear_session_and_redirect(request, message="Session expired. Please login again."):
+    request.session.flush()
+    messages.error(request, message)
+    return redirect("main:login")
 
 def api_request(method, endpoint, data=None, token=None, params=None):
     if not API_BASE_URL:
@@ -17,6 +28,7 @@ def api_request(method, endpoint, data=None, token=None, params=None):
     
     url = f"{API_BASE_URL}{endpoint}"
     headers = {"Content-Type": "application/json"}
+    
     if token:
         headers["Authorization"] = f"Bearer {token}"
     
@@ -31,10 +43,12 @@ def api_request(method, endpoint, data=None, token=None, params=None):
         if response.status_code in [200, 201, 204]:
             try:
                 return response.json()
-            except:
+            except json.JSONDecodeError:
                 return response.text if response.text else {"success": True}
-        elif response.status_code in [401, 403]:
-            raise PermissionError(f"Unauthorized: {response.text}")
+        elif response.status_code == 401:
+            raise PermissionError("Session expired. Please login again.")
+        elif response.status_code == 403:
+            raise PermissionError(f"Access denied: {response.text}")
         else:
             raise Exception(f"API error {response.status_code}: {response.text}")
             
@@ -51,94 +65,95 @@ class ScheduleListView(View):
     
     def get(self, request, caregiver_id):
         if not is_logged_in(request):
-            messages.error(request, "Please login first")
-            return redirect("main:login")
+            return clear_session_and_redirect(request, "Please login first")
         
-        # Check if user is caregiver and matches caregiver_id
+        if not validate_session(request):
+            return clear_session_and_redirect(request)
+        
         if request.session.get("user_role") != "caregiver":
             messages.error(request, "Access denied")
             return redirect("main:home")
         
-        if request.session.get("user_id") != caregiver_id:
+        if str(request.session.get("user_id")) != str(caregiver_id):
             messages.error(request, "Access denied")
             return redirect("main:home")
         
         token = request.session.get("access_token")
-        
-        # Get filter parameters
-        status_filter = request.GET.get("status", "")
-        day_filter = request.GET.get("day", "")
+        status_filter = request.GET.get("status", "").strip()
+        day_filter = request.GET.get("day", "").strip()
         
         try:
-            # Build API parameters
             params = {}
             if status_filter:
                 params["status"] = status_filter
             if day_filter:
                 params["day"] = day_filter
             
-            # Get schedules from API
-            schedules = api_request(
+            schedules_response = api_request(
                 "GET", 
                 f"/api/caregivers/{caregiver_id}/schedules", 
                 params=params,
-                token=None  # No token since endpoints are permitAll
-            ) or []
+                token=token
+            )
             
-            # Handle API response structure
-            if isinstance(schedules, dict):
-                if "data" in schedules:
-                    schedules = schedules["data"]
-                elif "schedules" in schedules:
-                    schedules = schedules["schedules"]
-                else:
-                    schedules = []
+            schedules = []
+            if schedules_response:
+                if isinstance(schedules_response, dict):
+                    if "data" in schedules_response:
+                        schedules = schedules_response["data"]
+                    elif "schedules" in schedules_response:
+                        schedules = schedules_response["schedules"]
+                    elif "results" in schedules_response:
+                        schedules = schedules_response["results"]
+                    else:
+                        schedules = [schedules_response]
+                elif isinstance(schedules_response, list):
+                    schedules = schedules_response
             
             if not isinstance(schedules, list):
                 schedules = []
             
-            # Transform schedule data for template
             transformed_schedules = []
             for schedule in schedules:
                 try:
                     transformed_schedule = {
-                        'id': schedule.get('id'),
-                        'date': schedule.get('date', 'N/A'),
-                        'day': schedule.get('day', 'N/A'),
-                        'startTime': schedule.get('startTime', schedule.get('start_time', 'N/A')),
-                        'endTime': schedule.get('endTime', schedule.get('end_time', 'N/A')),
+                        'id': schedule.get('id', ''),
+                        'date': schedule.get('date', schedule.get('schedule_date', '')),
+                        'day': schedule.get('day', schedule.get('schedule_day', '')),
+                        'startTime': schedule.get('startTime', schedule.get('start_time', '')),
+                        'endTime': schedule.get('endTime', schedule.get('end_time', '')),
                         'status': schedule.get('status', 'UNKNOWN').upper(),
                     }
                     transformed_schedules.append(transformed_schedule)
-                except Exception as e:
-                    print(f"Error transforming schedule: {e}")
+                except Exception:
                     continue
             
             context = {
                 'schedules': transformed_schedules,
-                'caregiver_id': caregiver_id,
-                'status_filter': status_filter,
+                'caregiver_id': str(caregiver_id),
+                'user_id': str(caregiver_id),
+                'status_filter': status_filter,  
                 'day_filter': day_filter,
                 'is_logged_in': True,
                 'user_role': 'caregiver',
-                'user_id': caregiver_id,
                 'total_schedules': len(transformed_schedules),
             }
             
             return render(request, self.template_name, context)
             
+        except PermissionError as e:
+            return clear_session_and_redirect(request, str(e))
         except Exception as e:
-            print(f"Error loading schedules: {e}")
             messages.error(request, f"Error loading schedules: {str(e)}")
             
             context = {
                 'schedules': [],
-                'caregiver_id': caregiver_id,
+                'caregiver_id': str(caregiver_id),
+                'user_id': str(caregiver_id),
                 'status_filter': status_filter,
                 'day_filter': day_filter,
                 'is_logged_in': True,
                 'user_role': 'caregiver',
-                'user_id': caregiver_id,
                 'total_schedules': 0,
                 'error': str(e)
             }
@@ -149,111 +164,130 @@ class ScheduleListView(View):
 class ScheduleDeleteView(View):
     def post(self, request, caregiver_id, schedule_id):
         if not is_logged_in(request):
-            messages.error(request, "Please login first")
-            return redirect("main:login")
+            return clear_session_and_redirect(request, "Please login first")
         
-        # Check if user is caregiver and matches caregiver_id
+        if not validate_session(request):
+            return clear_session_and_redirect(request)
+        
         if (request.session.get("user_role") != "caregiver" or 
-            request.session.get("user_id") != caregiver_id):
+            str(request.session.get("user_id")) != str(caregiver_id)):
             messages.error(request, "Access denied")
             return redirect("main:home")
         
         token = request.session.get("access_token")
         
         try:
-            # Delete schedule via API
-            response = api_request(
+            api_request(
                 "DELETE", 
                 f"/api/caregivers/{caregiver_id}/schedules/{schedule_id}",
-                token=None  # No token since endpoints are permitAll
+                token=token
             )
             
             messages.success(request, "Schedule deleted successfully")
             
+        except PermissionError as e:
+            return clear_session_and_redirect(request, str(e))
         except Exception as e:
-            print(f"Error deleting schedule: {e}")
             messages.error(request, f"Error deleting schedule: {str(e)}")
         
         return redirect("schedule_list", caregiver_id=caregiver_id)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ScheduleCreateView(View):
-    template_name = 'schedule_create.html'
+    template_name = 'create_schedule.html'
     
     def get(self, request, caregiver_id):
         if not is_logged_in(request):
-            messages.error(request, "Please login first")
-            return redirect("main:login")
+            return clear_session_and_redirect(request, "Please login first")
         
-        # Check if user is caregiver and matches caregiver_id
+        if not validate_session(request):
+            return clear_session_and_redirect(request)
+        
         if (request.session.get("user_role") != "caregiver" or 
-            request.session.get("user_id") != caregiver_id):
+            str(request.session.get("user_id")) != str(caregiver_id)):
             messages.error(request, "Access denied")
             return redirect("main:home")
         
         context = {
-            'caregiver_id': caregiver_id,
+            'caregiver_id': str(caregiver_id),
             'is_logged_in': True,
             'user_role': 'caregiver',
-            'user_id': caregiver_id,
             'days': ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
         }
         
         return render(request, self.template_name, context)
-    
+
     def post(self, request, caregiver_id):
         if not is_logged_in(request):
-            messages.error(request, "Please login first")
-            return redirect("main:login")
-        
-        # Check if user is caregiver and matches caregiver_id
+            return JsonResponse({"error": "Please login first", "redirect": "/login/"}, status=401)
+
+        if not validate_session(request):
+            return JsonResponse({"error": "Session expired", "redirect": "/login/"}, status=401)
+
         if (request.session.get("user_role") != "caregiver" or 
-            request.session.get("user_id") != caregiver_id):
-            messages.error(request, "Access denied")
-            return redirect("main:home")
-        
-        token = request.session.get("access_token")
-        
-        # Get form data
-        day = request.POST.get('day')
-        start_time = request.POST.get('start_time')
-        end_time = request.POST.get('end_time')
-        weeks = request.POST.get('weeks', '')
-        create_multiple = request.POST.get('create_multiple', '') == 'on'
-        
-        # Validation
-        if not all([day, start_time, end_time]):
-            messages.error(request, "Please fill in all required fields")
-            return redirect("schedule_create", caregiver_id=caregiver_id)
-        
+            str(request.session.get("user_id")) != str(caregiver_id)):
+            return JsonResponse({"error": "Access denied"}, status=403)
+
         try:
-            # Prepare API data
+            body = json.loads(request.body.decode("utf-8"))
+            day = body.get('day')
+            start_time = body.get('startTime')
+            end_time = body.get('endTime')
+            weeks = body.get('weeks', '')
+            create_multiple = body.get('isInterval', False)
+        except Exception as e:
+            return JsonResponse({"error": f"Invalid JSON input: {str(e)}"}, status=400)
+        
+        if not all([day, start_time, end_time]):
+            return JsonResponse({"error": "Please fill in all required fields"}, status=400)
+
+        try:
+            from datetime import datetime
+            datetime.strptime(start_time, '%H:%M')
+            datetime.strptime(end_time, '%H:%M')
+        except ValueError:
+            return JsonResponse({"error": "Please enter valid time format (HH:MM)"}, status=400)
+
+        if start_time >= end_time:
+            return JsonResponse({"error": "Start time must be before end time"}, status=400)
+
+        try:
             schedule_data = {
                 "day": day.upper(),
                 "startTime": start_time,
-                "endTime": end_time
+                "endTime": end_time,
+                "status": "AVAILABLE"
             }
-            
-            if weeks and weeks.isdigit():
+            if weeks and str(weeks).isdigit() and int(weeks) > 0:
                 schedule_data["weeks"] = int(weeks)
-            
-            # Choose endpoint based on create_multiple option
+
             endpoint = f"/api/caregivers/{caregiver_id}/schedules"
-            if create_multiple:
+            if create_multiple and weeks:
                 endpoint += "/interval"
-            
-            # Create schedule via API
+
             response = api_request(
                 "POST", 
-                endpoint,
-                data=schedule_data,
-                token=None  # No token since endpoints are permitAll
+                endpoint, 
+                data=schedule_data, 
+                token=request.session.get("access_token")
             )
-            
-            messages.success(request, "Schedule created successfully")
-            return redirect("schedule_list", caregiver_id=caregiver_id)
-            
+
+            success_message = "Schedule created successfully"
+            if create_multiple and weeks:
+                success_message = f"Schedule created for {weeks} weeks successfully"
+
+            return JsonResponse({
+                "success": True,
+                "message": success_message,
+                "data": response
+            }, status=201)
+
+        except PermissionError as e:
+            return JsonResponse({
+                "error": str(e),
+                "redirect": "/login/"
+            }, status=401)
         except Exception as e:
-            print(f"Error creating schedule: {e}")
-            messages.error(request, f"Error creating schedule: {str(e)}")
-            return redirect("schedule_create", caregiver_id=caregiver_id)
+            return JsonResponse({
+                "error": f"Error creating schedule: {str(e)}"
+            }, status=500)

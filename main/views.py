@@ -35,9 +35,6 @@ def api_request(method, endpoint, data=None, token=None, params=None):
             response = requests.request(method, url, headers=headers, timeout=30)
         
         if response.status_code in [200, 201, 204]:
-            if not response.text or response.text.strip() == "":
-                return None
-            
             try:
                 return response.json()
             except json.JSONDecodeError:
@@ -184,7 +181,6 @@ class CaregiverDashboardView(View):
         }
 
     def _fetch_caregiver_profile(self, user_id, token):
-        """Get caregiver profile from API"""
         endpoints_to_try = [
             f"/api/caregivers/{user_id}/profile",
             f"/api/doctors/{user_id}",
@@ -201,7 +197,6 @@ class CaregiverDashboardView(View):
         return None
 
     def _get_reservations(self, user_id, status, token):
-        """Get reservations by status"""
         try:
             endpoint = f"/api/caregivers/{user_id}/reservations"
             reservations = api_request("GET", endpoint, params={"status": status}, token=token)
@@ -223,7 +218,6 @@ class CaregiverDashboardView(View):
             return []
 
     def _filter_today_schedule(self, reservations):
-        """Filter reservations for today"""
         if not reservations:
             return []
             
@@ -232,20 +226,15 @@ class CaregiverDashboardView(View):
         
         for res in reservations:
             try:
-                schedule = res.get("idSchedule", {}) or res.get("schedule", {})
+                schedule = res.get("idSchedule", {})
+                if not schedule:
+                    continue
+                    
                 schedule_date = schedule.get("date", "")
                 
                 if schedule_date and schedule_date.startswith(today):
-                    schedule_item = {
-                        'pacilian_id': res.get('idPacilian') or res.get('pacilian_id'),
-                        'status_reservasi': res.get('statusReservasi') or res.get('status'),
-                        'schedule': {
-                            'start_time': schedule.get('startTime') or schedule.get('start_time'),
-                            'end_time': schedule.get('endTime') or schedule.get('end_time'),
-                        }
-                    }
-                    today_schedule.append(schedule_item)
-                    
+                    today_schedule.append(res)
+                        
             except Exception:
                 continue
         
@@ -359,7 +348,6 @@ class RegisterView(View):
         print(f"Profile data: {profile_data}")
         
         try:
-            print("Step 1: Registering user...")
             register_response = api_request("POST", "/api/auth/register", {
                 "email": profile_data["email"],
                 "password": profile_data["password"],
@@ -398,32 +386,21 @@ class RegisterView(View):
                     "speciality": profile_data.get("speciality", "")
                 })
             
-            print(f"Profile payload: {profile_payload}")
-            
-            # Try different profile endpoints
             profile_endpoints = ["/api/profile", "/api/caregivers/profile", "/api/doctors/profile"]
             profile_created = False
             
             for endpoint in profile_endpoints:
                 try:
-                    print(f"Step 3: Trying profile endpoint: {endpoint}")
                     profile_response = api_request("POST", endpoint, profile_payload, token=access_token)
-                    print(f"Profile creation success with {endpoint}: {profile_response}")
                     profile_created = True
                     break
-                except Exception as e:
-                    print(f"Profile creation failed with {endpoint}: {e}")
+                except Exception:
                     continue
             
-            if not profile_created:
-                print("WARNING: All profile endpoints failed!")
-            
-            print("Registration process completed successfully")
             messages.success(request, "Registration successful! You can now sign in with your account.")
             return redirect("main:login")
             
         except Exception as e:
-            print(f"Registration error: {e}")
             error_str = str(e).lower()
             if "unauthorized" in error_str:
                 messages.error(request, "Registration failed. Please try again.")

@@ -10,44 +10,20 @@
 {% endblock navbar %}
 
 {% block content %}
-<div class="flex-grow container mx-auto p-4 md:p-6 max-w-7xl">
-    <!-- Banner -->
-    <div class="welcome-banner p-6 md:p-8 mb-6 flex justify-between items-center">
-        <div class="text-white relative">
-            <div class="absolute -left-10 -top-6">
-                <i class="fas fa-calendar-alt text-white text-opacity-10 text-7xl"></i>
-            </div>
-            <h4 class="text-white md:text-xl font-header font-bold mb-1">My Schedules</h4>
-            <p class="text-sm opacity-90">Manage your availability ({{ total_schedules }} schedules)</p>
+<div class="flex-grow container mx-auto p-6 max-w-7xl">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h3 class="text-2xl font-bold text-gray-800">My Schedules</h3>
+            <p class="text-sm text-gray-600">Manage your availability</p>
         </div>
-        <div class="hidden md:flex">
+        <div class="flex space-x-3">
             <a href="{% url 'schedule_create' caregiver_id=caregiver_id %}"
-                class="bg-white text-primary px-4 py-2 rounded-full font-medium flex items-center hover:bg-opacity-90 transition">
-                <i class="fas fa-plus mr-2"></i>
-                Create Schedule
+                class="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-primary-dark transition-all">
+                <i class="fas fa-plus mr-1"></i> Create Schedule
             </a>
         </div>
     </div>
-
-    <!-- Error Messages -->
-    {% if messages %}
-    <div class="mb-6">
-        {% for message in messages %}
-        <div class="alert {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-800{% elif message.tags == 'success' %}bg-green-50 border border-green-200 text-green-800{% else %}bg-blue-50 border border-blue-200 text-blue-800{% endif %} px-4 py-3 rounded-lg mb-4">
-            <div class="flex items-center">
-                {% if message.tags == 'error' %}
-                <i class="fas fa-exclamation-circle mr-3"></i>
-                {% elif message.tags == 'success' %}
-                <i class="fas fa-check-circle mr-3"></i>
-                {% else %}
-                <i class="fas fa-info-circle mr-3"></i>
-                {% endif %}
-                <span>{{ message }}</span>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
 
     <!-- Filter Section -->
     <div class="card bg-white p-5 mb-6">
@@ -55,176 +31,209 @@
         <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2" for="status">Status</label>
-                <select id="status" name="status" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                <select id="status" name="status"
+                    class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
                     <option value="">All Statuses</option>
-                    <option value="AVAILABLE" {% if status_filter == "AVAILABLE" %}selected{% endif %}>Available</option>
-                    <option value="UNAVAILABLE" {% if status_filter == "UNAVAILABLE" %}selected{% endif %}>Unavailable</option>
-                    <option value="INACTIVE" {% if status_filter == "INACTIVE" %}selected{% endif %}>Inactive</option>
+                    <option value="AVAILABLE" {% if "AVAILABLE" in status_filter %}selected{% endif %}>Available
+                    </option>
+                    <option value="UNAVAILABLE" {% if "UNAVAILABLE" in status_filter %}selected{% endif %}>Unavailable
+                    </option>
+                    <option value="INACTIVE" {% if "INACTIVE" in status_filter %}selected{% endif %}>Inactive</option>
                 </select>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2" for="day">Day</label>
-                <select id="day" name="day" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                <select id="day" name="day"
+                    class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
                     <option value="">All Days</option>
-                    <option value="MONDAY" {% if day_filter == "MONDAY" %}selected{% endif %}>Monday</option>
-                    <option value="TUESDAY" {% if day_filter == "TUESDAY" %}selected{% endif %}>Tuesday</option>
-                    <option value="WEDNESDAY" {% if day_filter == "WEDNESDAY" %}selected{% endif %}>Wednesday</option>
-                    <option value="THURSDAY" {% if day_filter == "THURSDAY" %}selected{% endif %}>Thursday</option>
-                    <option value="FRIDAY" {% if day_filter == "FRIDAY" %}selected{% endif %}>Friday</option>
-                    <option value="SATURDAY" {% if day_filter == "SATURDAY" %}selected{% endif %}>Saturday</option>
-                    <option value="SUNDAY" {% if day_filter == "SUNDAY" %}selected{% endif %}>Sunday</option>
+                    <option value="MONDAY" {% if "MONDAY" in day_filter %}selected{% endif %}>Monday</option>
+                    <option value="TUESDAY" {% if "TUESDAY" in day_filter %}selected{% endif %}>Tuesday</option>
+                    <option value="WEDNESDAY" {% if "WEDNESDAY" in day_filter %}selected{% endif %}>Wednesday</option>
+                    <option value="THURSDAY" {% if "THURSDAY" in day_filter %}selected{% endif %}>Thursday</option>
+                    <option value="FRIDAY" {% if "FRIDAY" in day_filter %}selected{% endif %}>Friday</option>
+                    <option value="SATURDAY" {% if "SATURDAY" in day_filter %}selected{% endif %}>Saturday</option>
+                    <option value="SUNDAY" {% if "SUNDAY" in day_filter %}selected{% endif %}>Sunday</option>
                 </select>
             </div>
             <div class="flex items-end">
-                <button type="submit" class="bg-primary text-white px-4 py-2 rounded-lg w-full flex justify-center items-center hover:bg-primary-dark">
+                <button type="submit"
+                    class="bg-primary text-white px-4 py-2 rounded-lg w-full flex justify-center items-center hover:bg-primary-dark">
                     <i class="fas fa-filter mr-2"></i> Apply Filter
                 </button>
             </div>
         </form>
-    </div>
 
-    <!-- Schedules Table -->
-    <div class="card bg-white p-5">
-        {% if schedules %}
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead>
-                    <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Date</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Day</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Time</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status</th>
-                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for schedule in schedules %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {% if schedule.date != 'N/A' %}
-                                {{ schedule.date }}
-                            {% else %}
-                                <span class="text-gray-400">Not set</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <span class="font-medium">{{ schedule.day|title }}</span>
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <span class="bg-gray-100 px-2 py-1 rounded text-xs font-mono">
-                                {{ schedule.startTime }} - {{ schedule.endTime }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap">
-                            <span class="status-badge px-3 py-1 text-xs font-medium rounded-full
-                                {% if schedule.status == 'AVAILABLE' %}bg-green-100 text-green-800
-                                {% elif schedule.status == 'UNAVAILABLE' %}bg-red-100 text-red-800
-                                {% elif schedule.status == 'INACTIVE' %}bg-gray-100 text-gray-800
-                                {% else %}bg-blue-100 text-blue-800{% endif %}">
-                                {% if schedule.status == 'AVAILABLE' %}
-                                    <i class="fas fa-check-circle mr-1"></i> Available
-                                {% elif schedule.status == 'UNAVAILABLE' %}
-                                    <i class="fas fa-times-circle mr-1"></i> Unavailable
-                                {% elif schedule.status == 'INACTIVE' %}
-                                    <i class="fas fa-pause-circle mr-1"></i> Inactive
-                                {% else %}
-                                    {{ schedule.status }}
-                                {% endif %}
-                            </span>
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex justify-end space-x-2">
-                                <button onclick="viewScheduleDetails('{{ schedule.id }}')" 
-                                        class="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-primary-50" 
-                                        title="View Details">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                
-                                {% if schedule.status != 'INACTIVE' %}
-                                <form method="post"
-                                    action="{% url 'schedule_delete' caregiver_id=caregiver_id schedule_id=schedule.id %}"
-                                    class="inline"
-                                    onsubmit="return confirm('Are you sure you want to delete this schedule?');">
-                                    {% csrf_token %}
-                                    <button type="submit" 
-                                            class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50"
-                                            title="Delete Schedule">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="text-center py-12">
-            <div class="text-gray-400 mb-4">
-                <i class="fas fa-calendar-times text-6xl"></i>
-            </div>
-            <h4 class="text-lg font-medium text-gray-500 mb-2">No Schedules Found</h4>
-            <p class="text-gray-400 mb-6">
-                {% if status_filter or day_filter %}
-                    No schedules found matching your filters.
-                {% else %}
-                    You haven't created any schedules yet.
-                {% endif %}
-            </p>
-            <div class="space-y-3">
-                <a href="{% url 'schedule_create' caregiver_id=caregiver_id %}"
-                    class="inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark">
-                    <i class="fas fa-plus mr-2"></i>
-                    Create New Schedule
-                </a>
-                {% if status_filter or day_filter %}
-                <div>
-                    <a href="{% url 'schedule_list' caregiver_id=caregiver_id %}"
-                        class="text-primary hover:text-primary-dark text-sm">
-                        Clear filters and view all schedules
-                    </a>
-                </div>
-                {% endif %}
-            </div>
+        <!-- Clear Filters -->
+        {% if status_filter or day_filter %}
+        <div class="mt-3">
+            <a href="{% url 'schedule_list' caregiver_id=caregiver_id %}"
+                class="text-sm text-gray-600 hover:text-gray-800">
+                <i class="fas fa-times mr-1"></i> Clear All Filters
+            </a>
         </div>
         {% endif %}
     </div>
 
-    <!-- Mobile Create Button -->
-    <div class="md:hidden fixed bottom-6 right-6">
-        <a href="{% url 'schedule_create' caregiver_id=caregiver_id %}"
-            class="bg-primary text-white p-4 rounded-full shadow-lg hover:bg-primary-dark transition-all">
-            <i class="fas fa-plus text-xl"></i>
-        </a>
+    <!-- Results Summary -->
+    {% if status_filter or day_filter %}
+    <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-4">
+        <p class="text-sm">
+            <i class="fas fa-info-circle mr-2"></i>
+            Showing {{ total_schedules }} schedule{% if total_schedules != 1 %}s{% endif %}
+            {% if status_filter %}with status "{{ status_filter }}"{% endif %}
+            {% if day_filter %}{% if status_filter %} and{% endif %} for "{{ day_filter|title }}"{% endif %}
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Schedules List -->
+    <div class="space-y-4">
+        {% if schedules %}
+        {% for schedule in schedules %}
+        <div class="card bg-white p-6">
+            <div class="flex justify-between items-start">
+                <!-- Left Side - Schedule Info -->
+                <div class="flex-1">
+                    <div class="flex items-center mb-3">
+                        <div class="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-calendar-alt text-blue-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">
+                                {{ schedule.day|title }} Schedule
+                            </h3>
+                            <p class="text-sm text-gray-500">
+                                <i class="fas fa-clock mr-1"></i>
+                                {% if schedule.date %}
+                                {{ schedule.date|date:"d M Y" }}
+                                {% else %}
+                                <span class="text-gray-400">Date not set</span>
+                                {% endif %}
+                                {% if schedule.startTime and schedule.endTime %}
+                                at {{ schedule.startTime }} - {{ schedule.endTime }}
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Additional Schedule Info -->
+                    <div class="bg-blue-50 p-3 rounded-lg mb-3">
+                        <p class="text-sm text-blue-800">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <strong>ID:</strong> {{ schedule.id }}
+                            <i class="fas fa-calendar mr-1"></i>
+                            {% if schedule.date and schedule.date != 'N/A' %}
+                            {{ schedule.date }}
+                            {% else %}
+                            <span class="text-gray-400">Date not set</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Right Side - Status & Actions -->
+                <div class="flex flex-col items-end space-y-3">
+                    <!-- Status Badge -->
+                    <span class="status-badge px-3 py-2 text-sm font-medium rounded-full
+                        {% if schedule.status == 'AVAILABLE' %}bg-green-100 text-green-800
+                        {% elif schedule.status == 'UNAVAILABLE' %}bg-red-100 text-red-800
+                        {% elif schedule.status == 'INACTIVE' %}bg-gray-100 text-gray-800
+                        {% else %}bg-blue-100 text-blue-800{% endif %}">
+                        {% if schedule.status == 'AVAILABLE' %}
+                        <i class="fas fa-check-circle mr-1"></i> Available
+                        {% elif schedule.status == 'UNAVAILABLE' %}
+                        <i class="fas fa-times-circle mr-1"></i> Unavailable
+                        {% elif schedule.status == 'INACTIVE' %}
+                        <i class="fas fa-pause-circle mr-1"></i> Inactive
+                        {% else %}
+                        <i class="fas fa-calendar mr-1"></i> {{ schedule.status }}
+                        {% endif %}
+                    </span>
+
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-2">
+                        <button
+                            onclick="showScheduleDetails('{{ schedule.id }}', '{{ schedule.date }}', '{{ schedule.day }}', '{{ schedule.startTime }}', '{{ schedule.endTime }}', '{{ schedule.status }}')"
+                            class="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-gray-100"
+                            title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+
+                        {% if schedule.status == 'AVAILABLE' %}
+                        <button onclick="confirmDeleteSchedule('{{ schedule.id }}')"
+                            class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50"
+                            title="Delete Schedule">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Info for Inactive Schedules -->
+            {% if schedule.status == 'INACTIVE' %}
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <p class="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    This schedule is currently inactive and not available for bookings.
+                </p>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="card bg-white p-12 text-center">
+            <div class="text-gray-400 mb-4">
+                <i class="fas fa-calendar-plus text-6xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-500 mb-2">No Schedules Found</h3>
+            <p class="text-gray-400 mb-6">
+                {% if status_filter or day_filter %}
+                No schedules match your current filters.
+                <br>
+                {% if status_filter %}Status: <strong>{{ status_filter }}</strong>{% endif %}
+                {% if day_filter %}{% if status_filter %}, {% endif %}Day: <strong>{{ day_filter }}</strong>{% endif %}
+                {% else %}
+                You haven't created any schedules yet.
+                {% endif %}
+            </p>
+            {% if status_filter or day_filter %}
+            <a href="{% url 'schedule_list' caregiver_id=caregiver_id %}"
+                class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 mr-3">
+                <i class="fas fa-times mr-2"></i> Clear Filters
+            </a>
+            {% endif %}
+            <a href="{% url 'schedule_create' caregiver_id=caregiver_id %}"
+                class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark">
+                <i class="fas fa-plus mr-2"></i> Create New Schedule
+            </a>
+        </div>
+        {% endif %}
     </div>
 </div>
 
+<!-- Modals remain the same -->
 <!-- Schedule Details Modal -->
 <div id="scheduleDetailsModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="fixed inset-0 bg-black opacity-50" onclick="closeModal('scheduleDetailsModal')"></div>
         <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                 <h3 class="text-lg font-medium">Schedule Details</h3>
-                <button type="button" onclick="closeModal('scheduleDetailsModal')" 
-                        class="text-gray-400 hover:text-gray-500">
+                <button type="button" onclick="closeModal('scheduleDetailsModal')"
+                    class="text-gray-400 hover:text-gray-500">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="p-6">
                 <div id="scheduleDetailsContent">
-                    <!-- Content will be loaded dynamically -->
+                    <!-- Content loaded dynamically -->
                 </div>
                 <div class="flex justify-end space-x-3 mt-6 pt-4 border-t">
-                    <button onclick="closeModal('scheduleDetailsModal')" 
-                            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                    <button onclick="closeModal('scheduleDetailsModal')"
+                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
                         Close
                     </button>
                 </div>
@@ -233,118 +242,137 @@
     </div>
 </div>
 
-<script>
-// Modal functions
-function openModal(modalId) {
-    document.getElementById(modalId).classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
-}
-
-function closeModal(modalId) {
-    document.getElementById(modalId).classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
-}
-
-// View schedule details
-function viewScheduleDetails(scheduleId) {
-    openModal('scheduleDetailsModal');
-    
-    // Find schedule data from current page
-    const scheduleRow = document.querySelector(`button[onclick="viewScheduleDetails('${scheduleId}')"]`).closest('tr');
-    const cells = scheduleRow.querySelectorAll('td');
-    
-    const scheduleData = {
-        date: cells[0].textContent.trim(),
-        day: cells[1].textContent.trim(),
-        time: cells[2].textContent.trim(),
-        status: cells[3].textContent.trim()
-    };
-    
-    document.getElementById('scheduleDetailsContent').innerHTML = `
-        <div class="space-y-4">
-            <div class="flex justify-between">
-                <span class="text-sm font-medium text-gray-500">Schedule ID:</span>
-                <span class="text-sm text-gray-900">${scheduleId}</span>
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="fixed inset-0 bg-black opacity-50" onclick="closeModal('deleteConfirmModal')"></div>
+        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-medium">Delete Schedule</h3>
+                <button type="button" onclick="closeModal('deleteConfirmModal')"
+                    class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="flex justify-between">
-                <span class="text-sm font-medium text-gray-500">Date:</span>
-                <span class="text-sm text-gray-900">${scheduleData.date}</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-sm font-medium text-gray-500">Day:</span>
-                <span class="text-sm text-gray-900">${scheduleData.day}</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-sm font-medium text-gray-500">Time:</span>
-                <span class="text-sm text-gray-900">${scheduleData.time}</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-sm font-medium text-gray-500">Status:</span>
-                <span class="text-sm text-gray-900">${scheduleData.status}</span>
+            <div class="p-6">
+                <div class="text-center">
+                    <div class="text-red-500 mb-4">
+                        <i class="fas fa-exclamation-triangle text-4xl"></i>
+                    </div>
+                    <h4 class="text-lg font-medium text-gray-900 mb-2">Are you sure?</h4>
+                    <p class="text-gray-600 mb-6">This action cannot be undone. This will permanently delete the
+                        schedule.</p>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="closeModal('deleteConfirmModal')"
+                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <form id="deleteForm" method="post" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                            <i class="fas fa-trash mr-1"></i> Delete Schedule
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
-    `;
-}
+    </div>
+</div>
 
-// Auto-refresh every 5 minutes
-setInterval(() => {
-    window.location.reload();
-}, 300000);
-</script>
 {% endblock content %}
+
+{% block extra_js %}
+<script>
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    function showScheduleDetails(id, date, day, startTime, endTime, status) {
+        const formatDate = (date && date !== 'Not set' && date !== '') ?
+            new Date(date).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            }) : 'Recurring schedule';
+
+        document.getElementById('scheduleDetailsContent').innerHTML = `
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <span class="text-sm font-medium text-gray-500">Schedule ID:</span>
+                    <span class="text-sm text-gray-900">${id}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-sm font-medium text-gray-500">Day:</span>
+                    <span class="text-sm text-gray-900">${day}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-sm font-medium text-gray-500">Date:</span>
+                    <span class="text-sm text-gray-900">${formatDate}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-sm font-medium text-gray-500">Start Time:</span>
+                    <span class="text-sm text-gray-900">${startTime}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-sm font-medium text-gray-500">End Time:</span>
+                    <span class="text-sm text-gray-900">${endTime}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-sm font-medium text-gray-500">Status:</span>
+                    <span class="status-badge px-2 py-1 text-xs font-medium rounded-full ${getStatusClass(status)}">${status}</span>
+                </div>
+            </div>
+        `;
+
+        openModal('scheduleDetailsModal');
+    }
+
+    function getStatusClass(status) {
+        const classes = {
+            'AVAILABLE': 'bg-green-100 text-green-800',
+            'UNAVAILABLE': 'bg-red-100 text-red-800',
+            'INACTIVE': 'bg-gray-100 text-gray-800'
+        };
+        return classes[status] || 'bg-blue-100 text-blue-800';
+    }
+
+    function confirmDeleteSchedule(scheduleId) {
+        const deleteForm = document.getElementById('deleteForm');
+        const caregiverId = '{{ caregiver_id }}';
+        deleteForm.action = `/schedules/${caregiverId}/${scheduleId}/delete/`;
+        openModal('deleteConfirmModal');
+    }
+</script>
+{% endblock extra_js %}
 
 {% block extra_style %}
 <style>
-    .welcome-banner {
-        background: linear-gradient(135deg, #1A76D2, #4A9BE8);
-        border-radius: 16px;
-        position: relative;
-        overflow: hidden;
+    .hover\:bg-primary:hover {
+        background-color: #3B82F6;
     }
 
-    .welcome-banner::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: url('{% static "img/pattern-bg.svg" %}') repeat;
-        opacity: 0.1;
-    }
-
-    .card {
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-    }
-
-    .bg-primary {
-        background-color: #1A76D2;
-    }
-
-    .bg-primary-dark {
-        background-color: #1565C0;
-    }
-
-    .text-primary {
-        color: #1A76D2;
-    }
-
-    .text-primary-dark {
-        color: #1565C0;
-    }
-
-    .hover\:bg-primary-50:hover {
-        background-color: rgba(26, 118, 210, 0.05);
+    .hover\:bg-primary-dark:hover {
+        background-color: #2563EB;
     }
 
     .focus\:ring-primary:focus {
-        box-shadow: 0 0 0 3px rgba(26, 118, 210, 0.1);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
     .focus\:border-primary:focus {
-        border-color: #1A76D2;
+        border-color: #3B82F6;
+    }
+
+    .container {
+        max-width: 1200px;
     }
 </style>
 {% endblock extra_style %}

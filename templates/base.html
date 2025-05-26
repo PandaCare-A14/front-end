@@ -31,6 +31,55 @@
             rights reserved.
         </div>
     </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof $ !== 'undefined') {
+                $(document).ajaxError(function (event, xhr, settings) {
+                    if (xhr.status === 401) {
+                        handleSessionExpired(xhr.responseJSON);
+                    }
+                });
+            }
+
+            const originalFetch = window.fetch;
+            window.fetch = function (...args) {
+                return originalFetch.apply(this, args)
+                    .then(response => {
+                        if (response.status === 401) {
+                            response.json().then(data => handleSessionExpired(data));
+                        }
+                        return response;
+                    })
+                    .catch(error => {
+                        throw error;
+                    });
+            };
+
+            const originalSend = XMLHttpRequest.prototype.send;
+            XMLHttpRequest.prototype.send = function (...args) {
+                this.addEventListener('load', function () {
+                    if (this.status === 401) {
+                        try {
+                            const data = JSON.parse(this.responseText);
+                            handleSessionExpired(data);
+                        } catch (e) {
+                            handleSessionExpired({});
+                        }
+                    }
+                });
+                originalSend.apply(this, args);
+            };
+
+            function handleSessionExpired(data) {
+                if (confirm('Your session has expired. Click OK to login again.')) {
+                    window.location.href = data?.redirect || '/login/';
+                } else {
+                    window.location.href = data?.redirect || '/login/';
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>
