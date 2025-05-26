@@ -6,5 +6,4 @@ app_name = 'doctor_profile'
 urlpatterns = [
     path('', views.DoctorListView.as_view(), name='search'),
     path('<uuid:doctor_id>/', views.DoctorProfileView.as_view(), name='detail'),
-    path('<uuid:doctor_id>/action/', views.DoctorActionView.as_view(), name='action'),
 ]

@@ -15,100 +15,98 @@
         <!-- Back button to homepage -->
         <div class="flex justify-between items-center mb-4">
             <a href="{% url 'main:home' %}" class="inline-flex items-center text-primary hover:text-accent-500 transition-colors">
-                <i class="fas fa-arrow-left mr-2"></i> Kembali ke Beranda
+                <i class="fas fa-arrow-left mr-2"></i> Back to Home
             </a>
             {% if search_performed %}
             <a href="{% url 'doctor_profile:search' %}" class="inline-flex items-center px-4 py-2 bg-secondary text-gray-700 rounded-xl hover:bg-accent-100 transition-all">
-                <i class="fas fa-list mr-2"></i> Tampilkan Semua Dokter
+                <i class="fas fa-list mr-2"></i> Show All Doctors
             </a>
             {% endif %}
         </div>
 
         <!-- Search Section -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <form method="get" action="{% url 'doctor_profile:search' %}" class="flex flex-col md:flex-row gap-4" id="searchForm">
-                <div class="flex-1">
-                    <label for="search-type" class="block text-sm font-medium text-gray-700 mb-1">Cari Berdasarkan</label>
-                    <select name="search_type" id="search-type" class="w-full p-2 border rounded-xl border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
-                        <option value="name" {% if search_type == 'name' %}selected{% endif %}>Nama</option>
-                        <option value="speciality" {% if search_type == 'speciality' %}selected{% endif %}>Spesialisasi</option>
-                        <option value="schedule" {% if search_type == 'schedule' %}selected{% endif %}>Jadwal Praktik</option>
-                    </select>
-                </div>
-
-                <!-- Default Keyword Input -->
-                <div class="flex-1" id="keywordField">
-                    <label for="text-query" class="block text-sm font-medium text-gray-700 mb-1">Kata kunci</label>
-                    <input type="text" name="query" id="text-query" value="{{ query }}" 
-                        class="w-full p-2 rounded-xl border border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-                        placeholder="Masukkan kata kunci..." required>
-                    <p id="keywordError" class="text-red-500 text-xs mt-1 hidden">Harap masukkan kata kunci</p>
-                </div>
-
-                <!-- Schedule Fields (Hidden by default) -->
-                <div class="hidden flex-1" id="scheduleFields">
-                    <div class="flex flex-col md:flex-row gap-2">
-                        <div class="flex-1">
-                            <label for="day" class="block text-sm font-medium text-gray-700 mb-1">Hari</label>
-                            <select id="day" name="day" class="w-full p-2 rounded-xl border border-gray-300 shadow-sm focus:border-primary focus:ring-primary" required>
-                                <option value="">Pilih hari</option>
-                                <option value="MONDAY" {% if day == 'MONDAY' %}selected{% endif %}>Senin</option>
-                                <option value="TUESDAY" {% if day == 'TUESDAY' %}selected{% endif %}>Selasa</option>
-                                <option value="WEDNESDAY" {% if day == 'WEDNESDAY' %}selected{% endif %}>Rabu</option>
-                                <option value="THURSDAY" {% if day == 'THURSDAY' %}selected{% endif %}>Kamis</option>
-                                <option value="FRIDAY" {% if day == 'FRIDAY' %}selected{% endif %}>Jumat</option>
-                                <option value="SATURDAY" {% if day == 'SATURDAY' %}selected{% endif %}>Sabtu</option>
-                                <option value="SUNDAY" {% if day == 'SUNDAY' %}selected{% endif %}>Minggu</option>
-                            </select>
-                            <p id="dayError" class="text-red-500 text-xs mt-1 hidden">Harap pilih hari</p>
-                        </div>
-                        <div class="flex-1">
-                            <label for="startTime" class="block text-sm font-medium text-gray-700 mb-1">Waktu Awal</label>
-                            <select id="startTime" name="start_time" class="w-full p-2 rounded-xl border border-gray-300 shadow-sm focus:border-primary focus:ring-primary" required>
-                                <option value="">Pilih waktu</option>
-                                <option value="08:00" {% if start_time == '08:00' %}selected{% endif %}>08:00</option>
-                                <option value="09:00" {% if start_time == '09:00' %}selected{% endif %}>09:00</option>
-                                <option value="10:00" {% if start_time == '10:00' %}selected{% endif %}>10:00</option>
-                                <option value="11:00" {% if start_time == '11:00' %}selected{% endif %}>11:00</option>
-                                <option value="12:00" {% if start_time == '12:00' %}selected{% endif %}>12:00</option>
-                                <option value="13:00" {% if start_time == '13:00' %}selected{% endif %}>13:00</option>
-                                <option value="14:00" {% if start_time == '14:00' %}selected{% endif %}>14:00</option>
-                                <option value="15:00" {% if start_time == '15:00' %}selected{% endif %}>15:00</option>
-                                <option value="16:00" {% if start_time == '16:00' %}selected{% endif %}>16:00</option>
-                                <option value="17:00" {% if start_time == '17:00' %}selected{% endif %}>17:00</option>
-                                <option value="18:00" {% if start_time == '18:00' %}selected{% endif %}>18:00</option>
-                                <option value="19:00" {% if start_time == '19:00' %}selected{% endif %}>19:00</option>
-                                <option value="20:00" {% if start_time == '20:00' %}selected{% endif %}>20:00</option>
-                            </select>
-                            <p id="startTimeError" class="text-red-500 text-xs mt-1 hidden">Harap pilih waktu awal</p>
-                        </div>
-
-                        <div class="flex-1">
-                            <label for="endTime" class="block text-sm font-medium text-gray-700 mb-1">Waktu Akhir</label>
-                            <select id="endTime" name="end_time" class="w-full p-2 rounded-xl border border-gray-300 shadow-sm focus:border-primary focus:ring-primary" required>
-                                <option value="">Pilih waktu</option>
-                                <option value="08:00" {% if end_time == '08:00' %}selected{% endif %}>08:00</option>
-                                <option value="09:00" {% if end_time == '09:00' %}selected{% endif %}>09:00</option>
-                                <option value="10:00" {% if end_time == '10:00' %}selected{% endif %}>10:00</option>
-                                <option value="11:00" {% if end_time == '11:00' %}selected{% endif %}>11:00</option>
-                                <option value="12:00" {% if end_time == '12:00' %}selected{% endif %}>12:00</option>
-                                <option value="13:00" {% if end_time == '13:00' %}selected{% endif %}>13:00</option>
-                                <option value="14:00" {% if end_time == '14:00' %}selected{% endif %}>14:00</option>
-                                <option value="15:00" {% if end_time == '15:00' %}selected{% endif %}>15:00</option>
-                                <option value="16:00" {% if end_time == '16:00' %}selected{% endif %}>16:00</option>
-                                <option value="17:00" {% if end_time == '17:00' %}selected{% endif %}>17:00</option>
-                                <option value="18:00" {% if end_time == '18:00' %}selected{% endif %}>18:00</option>
-                                <option value="19:00" {% if end_time == '19:00' %}selected{% endif %}>19:00</option>
-                                <option value="20:00" {% if end_time == '20:00' %}selected{% endif %}>20:00</option>
-                            </select>
-                            <p id="endTimeError" class="text-red-500 text-xs mt-1 hidden">Harap pilih waktu akhir</p>
-                        </div>
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <form method="get" action="{% url 'doctor_profile:search' %}" class="flex flex-col gap-4" id="searchForm">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Name Search -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Doctor Name</label>
+                        <input type="text" name="name" id="name" value="{{ name }}" 
+                            class="w-full p-2 rounded-xl border border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                            placeholder="Search Doctor by name...">
+                    </div>
+                    
+                    <!-- Speciality Search -->
+                    <div>
+                        <label for="speciality" class="block text-sm font-medium text-gray-700 mb-1">Speciality</label>
+                        <input type="text" name="speciality" id="speciality" value="{{ speciality }}" 
+                            class="w-full p-2 rounded-xl border border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                            placeholder="Search Doctor by speciality...">
+                    </div>
+                    
+                    <!-- Day Selector -->
+                    <div>
+                        <label for="day" class="block text-sm font-medium text-gray-700 mb-1">Day</label>
+                        <select id="day" name="day" class="w-full p-2 rounded-xl border border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                            <option value="">Select day</option>
+                            <option value="MONDAY" {% if day == 'MONDAY' %}selected{% endif %}>Monday</option>
+                            <option value="TUESDAY" {% if day == 'TUESDAY' %}selected{% endif %}>Tuesday</option>
+                            <option value="WEDNESDAY" {% if day == 'WEDNESDAY' %}selected{% endif %}>Wednesday</option>
+                            <option value="THURSDAY" {% if day == 'THURSDAY' %}selected{% endif %}>Thursday</option>
+                            <option value="FRIDAY" {% if day == 'FRIDAY' %}selected{% endif %}>Friday</option>
+                            <option value="SATURDAY" {% if day == 'SATURDAY' %}selected{% endif %}>Saturday</option>
+                            <option value="SUNDAY" {% if day == 'SUNDAY' %}selected{% endif %}>Sunday</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="flex items-end">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Start Time -->
+                    <div>
+                        <label for="start_time" class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                        <select id="start_time" name="start_time" class="w-full p-2 rounded-xl border border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                            <option value="">Select time</option>
+                            <option value="08:00" {% if start_time == '08:00' %}selected{% endif %}>08:00</option>
+                            <option value="09:00" {% if start_time == '09:00' %}selected{% endif %}>09:00</option>
+                            <option value="10:00" {% if start_time == '10:00' %}selected{% endif %}>10:00</option>
+                            <option value="11:00" {% if start_time == '11:00' %}selected{% endif %}>11:00</option>
+                            <option value="12:00" {% if start_time == '12:00' %}selected{% endif %}>12:00</option>
+                            <option value="13:00" {% if start_time == '13:00' %}selected{% endif %}>13:00</option>
+                            <option value="14:00" {% if start_time == '14:00' %}selected{% endif %}>14:00</option>
+                            <option value="15:00" {% if start_time == '15:00' %}selected{% endif %}>15:00</option>
+                            <option value="16:00" {% if start_time == '16:00' %}selected{% endif %}>16:00</option>
+                            <option value="17:00" {% if start_time == '17:00' %}selected{% endif %}>17:00</option>
+                            <option value="18:00" {% if start_time == '18:00' %}selected{% endif %}>18:00</option>
+                            <option value="19:00" {% if start_time == '19:00' %}selected{% endif %}>19:00</option>
+                            <option value="20:00" {% if start_time == '20:00' %}selected{% endif %}>20:00</option>
+                        </select>
+                    </div>
+                    
+                    <!-- End Time -->
+                    <div>
+                        <label for="end_time" class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                        <select id="end_time" name="end_time" class="w-full p-2 rounded-xl border border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                            <option value="">Select time</option>
+                            <option value="08:00" {% if end_time == '08:00' %}selected{% endif %}>08:00</option>
+                            <option value="09:00" {% if end_time == '09:00' %}selected{% endif %}>09:00</option>
+                            <option value="10:00" {% if end_time == '10:00' %}selected{% endif %}>10:00</option>
+                            <option value="11:00" {% if end_time == '11:00' %}selected{% endif %}>11:00</option>
+                            <option value="12:00" {% if end_time == '12:00' %}selected{% endif %}>12:00</option>
+                            <option value="13:00" {% if end_time == '13:00' %}selected{% endif %}>13:00</option>
+                            <option value="14:00" {% if end_time == '14:00' %}selected{% endif %}>14:00</option>
+                            <option value="15:00" {% if end_time == '15:00' %}selected{% endif %}>15:00</option>
+                            <option value="16:00" {% if end_time == '16:00' %}selected{% endif %}>16:00</option>
+                            <option value="17:00" {% if end_time == '17:00' %}selected{% endif %}>17:00</option>
+                            <option value="18:00" {% if end_time == '18:00' %}selected{% endif %}>18:00</option>
+                            <option value="19:00" {% if end_time == '19:00' %}selected{% endif %}>19:00</option>
+                            <option value="20:00" {% if end_time == '20:00' %}selected{% endif %}>20:00</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
                     <button type="submit" class="bg-primary hover:bg-accent-500 text-white px-6 py-2 rounded-xl transition duration-200">
-                        Cari
+                        Search
                     </button>
                 </div>
             </form>
@@ -147,7 +145,7 @@
                         
                         <a href="{% url 'doctor_profile:detail' doctor_id=doctor.caregiverId %}" 
                             class="block w-full text-center px-4 py-2 bg-primary text-white rounded-xl hover:bg-accent-500 transition-all">
-                            Lihat Profil
+                            View Profile
                         </a>
                     </div>
                 </div>
@@ -158,8 +156,8 @@
         {% if not search_performed and not doctors %}
         <div class="bg-white rounded-xl shadow-sm p-8 text-center">
             <img src="{% static 'img/empty-doctors.svg' %}" alt="No Doctors" class="w-64 mx-auto mb-6">
-            <h4 class="text-xl font-header font-bold text-gray-800 mb-2">Belum ada dokter tersedia</h4>
-            <p class="text-gray-600 mb-6">Dokter akan segera hadir untuk melayani Anda</p>
+            <h4 class="text-xl font-header font-bold text-gray-800 mb-2">No doctors available at the moment</h4>
+            <p class="text-gray-600 mb-6">Doctors will be available soon</p>
         </div>
         {% endif %}
     </div>
@@ -185,97 +183,29 @@
         }
     });
 
-    // Toggle between keyword and schedule fields
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchTypeSelect = document.getElementById('search-type');
-        const keywordField = document.getElementById('keywordField');
-        const scheduleFields = document.getElementById('scheduleFields');
-        const textQuery = document.getElementById('text-query');
-        const daySelect = document.getElementById('day');
-        const startTimeSelect = document.getElementById('startTime');
-        const endTimeSelect = document.getElementById('endTime');
-        const searchForm = document.getElementById('searchForm');
-
-        function resetFields() {
-            if (searchTypeSelect.value === 'schedule') {
-                // Reset keyword field
-                textQuery.value = '';
-                textQuery.required = false;
-            } else {
-                // Reset schedule fields
-                daySelect.value = '';
-                startTimeSelect.value = '';
-                endTimeSelect.value = '';
-                daySelect.required = false;
-                startTimeSelect.required = false;
-                endTimeSelect.required = false;
-            }
+    // Form validation
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+        const name = document.getElementById('name').value.trim();
+        const speciality = document.getElementById('speciality').value.trim();
+        const day = document.getElementById('day').value;
+        const startTime = document.getElementById('start_time').value;
+        const endTime = document.getElementById('end_time').value;
+        
+        // At least one filter must be provided
+        if (!name && !speciality && (!day || !startTime || !endTime)) {
+            e.preventDefault();
+            alert('Please provide at least one search filter: name, speciality, or schedule.');
+            return false;
         }
-
-        function toggleFields() {
-            if (searchTypeSelect.value === 'schedule') {
-                keywordField.classList.add('hidden');
-                scheduleFields.classList.remove('hidden');
-                textQuery.required = false;
-                daySelect.required = true;
-                startTimeSelect.required = true;
-                endTimeSelect.required = true;
-                resetFields();
-            } else {
-                keywordField.classList.remove('hidden');
-                scheduleFields.classList.add('hidden');
-                textQuery.required = true;
-                daySelect.required = false;
-                startTimeSelect.required = false;
-                endTimeSelect.required = false;
-                resetFields();
-            }
+        
+        // If schedule fields are partially filled
+        if ((day || startTime || endTime) && (!day || !startTime || !endTime)) {
+            e.preventDefault();
+            alert('Please fill all schedule fields (day, start time, end time) if you want to search by schedule.');
+            return false;
         }
-
-        // Form validation
-        searchForm.addEventListener('submit', function(e) {
-            let isValid = true;
-            
-            if (searchTypeSelect.value === 'name' || searchTypeSelect.value === 'speciality') {
-                if (!textQuery.value.trim()) {
-                    document.getElementById('keywordError').classList.remove('hidden');
-                    isValid = false;
-                } else {
-                    document.getElementById('keywordError').classList.add('hidden');
-                }
-            } else if (searchTypeSelect.value === 'schedule') {
-                if (!daySelect.value) {
-                    document.getElementById('dayError').classList.remove('hidden');
-                    isValid = false;
-                } else {
-                    document.getElementById('dayError').classList.add('hidden');
-                }
-                
-                if (!startTimeSelect.value) {
-                    document.getElementById('startTimeError').classList.remove('hidden');
-                    isValid = false;
-                } else {
-                    document.getElementById('startTimeError').classList.add('hidden');
-                }
-                
-                if (!endTimeSelect.value) {
-                    document.getElementById('endTimeError').classList.remove('hidden');
-                    isValid = false;
-                } else {
-                    document.getElementById('endTimeError').classList.add('hidden');
-                }
-            }
-            
-            if (!isValid) {
-                e.preventDefault();
-            }
-        });
-
-        // Initial check
-        toggleFields();
-
-        // Change event listener
-        searchTypeSelect.addEventListener('change', toggleFields);
+        
+        return true;
     });
 </script>
 {% endblock extra_js %}
