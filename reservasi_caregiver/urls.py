@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import ReservationListView, ApproveReservationView, RejectReservationView, RescheduleReservationView, CaregiverSchedulesView
 
+app_name = 'reservasi_caregiver'
+
 urlpatterns = [
     path("caregivers/<uuid:caregiver_id>/reservations/", ReservationListView.as_view(), name="reservation_list"),
     path("reservations/<uuid:reservation_id>/approve/", ApproveReservationView.as_view(), name="approve_reservation"),

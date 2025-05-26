@@ -102,45 +102,35 @@ class DoctorProfileView(View):
         
         try:
             # Validate UUID format
+            print(patient_id)
             uuid.UUID(str(doctor_id))
-            
+            uuid.UUID(str(patient_id))
+            print(f"2")
             # Get basic doctor profile
             doctor_response = api_request(
                 "GET", 
                 f"/api/doctors/{doctor_id}", 
                 token=request.session.get("access_token")
             )
-            
+            print(f"3")
             if not doctor_response:
                 messages.error(request, "Doctor not found")
                 return redirect("doctor_profile:search")
-            
-            # Get profile with action buttons if patient_id is available
-            if patient_id and request.session.get("user_role") == "pacilian":
-                actions_response = api_request(
-                    "GET", 
-                    f"/api/doctors/{doctor_id}/actions?patientId={patient_id}", 
-                    token=request.session.get("access_token")
-                )
-                
-                if actions_response:
-                    doctor_response.update({
-                        'can_chat': True,
-                        'can_appointment': True
-                    })
-            
+            print(f"8")
             context.update({
                 'doctor': doctor_response,
                 'patient_id': patient_id
             })
-            
+            print(f"9")
             return render(request, self.template_name, context)
             
         except ValueError as e:
             messages.error(request, f"Invalid ID format: {str(e)}")
+            print(f"Value error loading doctor profile: {str(e)}")
             return redirect("doctor_profile:search")
         except Exception as e:
             messages.error(request, f"Error loading doctor profile: {str(e)}")
+            print(f"Exception error loading doctor profile: {str(e)}")
             return redirect("doctor_profile:search")
 
 @method_decorator(csrf_exempt, name='dispatch')

@@ -210,6 +210,7 @@ class ScheduleCreateView(View):
         
         context = {
             'caregiver_id': str(caregiver_id),
+            'user_id': str(caregiver_id),
             'is_logged_in': True,
             'user_role': 'caregiver',
             'days': ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']

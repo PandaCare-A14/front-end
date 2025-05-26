@@ -26,7 +26,7 @@
                             <i class="fas fa-user-md mr-2"></i> Lihat Dokter
                         </a>
                         {% if not is_logged_in %}
-                        <a href="#"
+                        <a href="{% url 'main:register' %}"
                             class="px-6 py-3 bg-transparent border-2 border-white text-white font-medium rounded-full hover:bg-white hover:bg-opacity-10 text-center transition-all">
                             Daftar Sekarang
                         </a>

@@ -24,8 +24,8 @@ urlpatterns = [
     path('', HomePageView.as_view(), name='home'), 
     path('', include('main.urls')),
     path('', include('chat.urls')),
-    path('', include('reservasi_caregiver.urls')),
-    path('', include('schedule.urls')),
+    path('caregiver-reservation/', include('reservasi_caregiver.urls')),
+    path('schedule/', include('schedule.urls')),
     path('doctors/', include('doctor_profile.urls', namespace='doctor_profile')),
-    path('', include('reservasi_pacilian.urls')),
+    path('pacillian-reservation-/', include('reservasi_pacilian.urls')),
 ]

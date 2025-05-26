@@ -489,7 +489,7 @@
                                 showSuccess(message);
 
                                 setTimeout(() => {
-                                    window.location.href = "{% url 'schedule_list' caregiver_id=caregiver_id %}";
+                                    window.location.href = "{% url 'schedule:schedule_list' caregiver_id=caregiver_id %}";
                                 }, 1500);
                             } else if (successResults.length > 0 && errorResults.length > 0) {
                                 showError(`${successResults.length} schedules saved, but ${errorResults.length} failed. Check your input and try again.`);
