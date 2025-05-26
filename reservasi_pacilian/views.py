@@ -13,7 +13,7 @@ from django.views import View
 from django.utils.decorators import method_decorator
 
 # API Configuration
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8080")
+API_BASE_URL = os.getenv("API_BASE_URL")
 SPRINGBOOT_API_URL = f"{API_BASE_URL}/api/reservasi-konsultasi"
 
 def is_logged_in(request):
@@ -75,7 +75,6 @@ def api_request(method, endpoint, data=None, token=None, params=None):
         raise
     except Exception as e:
         raise Exception(f"API Error: {str(e)}")
-
 
 # GET: Lihat semua reservasi pasien (dari Spring Boot)
 def list_reservasi(request, id_pacilian):
@@ -163,137 +162,6 @@ def list_reservasi(request, id_pacilian):
             **user_context
         }
         return render(request, "list.html", context)
-
-# GET/POST: Create new reservation
-@csrf_exempt  # Add csrf_exempt decorator
-def request_reservasi(request):
-    if not is_logged_in(request):
-        messages.error(request, "Please login first")
-        return redirect("main:login")
-    
-    user_context = get_user_context(request)
-    if user_context.get('user_role') != 'pacilian':
-        messages.error(request, "Access denied")
-        return redirect("main:home")
-    
-    if request.method == "POST":
-        print(f"=== CREATE RESERVATION REQUEST ===")
-        print(f"Request method: {request.method}")
-        print(f"POST data: {request.POST}")
-        print(f"Content type: {request.content_type}")
-        
-        # Get schedule ID from the request
-        if request.content_type == 'application/json':
-            import json
-            body = json.loads(request.body.decode('utf-8'))
-            id_schedule = body.get('idSchedule')
-        else:
-            id_schedule = request.POST.get("idSchedule") or request.POST.get("schedule_id")
-        
-        id_pacilian = user_context.get('user_id')  # Use session user_id for security
-        
-        print(f"Schedule ID: {id_schedule}")
-        print(f"Pacilian ID: {id_pacilian}")
-        
-        if not id_schedule:
-            error_msg = "Schedule is required"
-            print(f"ERROR: {error_msg}")
-            
-            if request.content_type == 'application/json':
-                return JsonResponse({"error": error_msg}, status=400)
-            else:
-                messages.error(request, error_msg)
-                return render(request, "request.html", user_context)
-        
-        # Prepare data for Spring Boot API
-        data = {
-            "idSchedule": str(id_schedule),
-            "idPacilian": str(id_pacilian),
-        }
-        
-        try:
-            token = request.session.get("access_token")
-            endpoint = "/api/reservasi-konsultasi/request"
-            
-            print(f"=== CALLING SPRING BOOT API ===")
-            print(f"Endpoint: {endpoint}")
-            print(f"Data: {data}")
-            print(f"Token exists: {bool(token)}")
-            
-            response = api_request("POST", endpoint, data=data, token=token)
-            
-            print(f"=== SPRING BOOT RESPONSE ===")
-            print(f"Response: {response}")
-            print(f"Response type: {type(response)}")
-            
-            # Check if the response indicates success
-            if response and isinstance(response, dict):
-                if response.get('message') and ('berhasil diajukan' in response.get('message', '').lower() or 'success' in response.get('message', '').lower()):
-                    success_msg = "Reservation created successfully"
-                    print(f"SUCCESS: {success_msg}")
-                    
-                    if request.content_type == 'application/json':
-                        return JsonResponse({
-                            "success": True,
-                            "message": success_msg,
-                            "data": response.get('reservasi')
-                        })
-                    else:
-                        messages.success(request, success_msg)
-                        return redirect("pacilian_reservasi_list", id_pacilian=id_pacilian)
-                else:
-                    # Handle Spring Boot error response
-                    error_msg = response.get('error', 'Unknown error occurred')
-                    print(f"ERROR from Spring Boot: {error_msg}")
-                    
-                    if request.content_type == 'application/json':
-                        return JsonResponse({"error": error_msg}, status=400)
-                    else:
-                        messages.error(request, f"Failed to create reservation: {error_msg}")
-                        return render(request, "request.html", user_context)
-            
-            # Default success case
-            success_msg = "Reservation created successfully"
-            print(f"SUCCESS (default): {success_msg}")
-            
-            if request.content_type == 'application/json':
-                return JsonResponse({
-                    "success": True,
-                    "message": success_msg,
-                    "data": response
-                })
-            else:
-                messages.success(request, success_msg)
-                return redirect("pacilian_reservasi_list", id_pacilian=id_pacilian)
-            
-        except Exception as e:
-            print(f"=== EXCEPTION in request_reservasi ===")
-            print(f"Error type: {type(e).__name__}")
-            print(f"Error message: {str(e)}")
-            import traceback
-            print(f"Traceback: {traceback.format_exc()}")
-            
-            # Handle specific error types from Spring Boot
-            if "not available" in str(e).lower() or "tidak tersedia" in str(e).lower():
-                error_msg = "Selected schedule is not available"
-            elif "not found" in str(e).lower() or "tidak ditemukan" in str(e).lower():
-                error_msg = "Schedule not found"
-            elif "Unauthorized" in str(e) or "401" in str(e):
-                error_msg = "Authentication failed"
-            else:
-                error_msg = f"Failed to create reservation: {str(e)}"
-            
-            print(f"Processed error message: {error_msg}")
-            
-            if request.content_type == 'application/json':
-                status_code = 401 if "Authentication failed" in error_msg else 400
-                return JsonResponse({"error": error_msg}, status=status_code)
-            else:
-                messages.error(request, error_msg)
-                return render(request, "request.html", user_context)
-    
-    # GET request - show form
-    return render(request, "request.html", user_context)
 
 # POST: Accept schedule change
 @csrf_exempt
@@ -712,85 +580,38 @@ class AvailableScheduleListView(View):
             
             return redirect('available_schedules_html', caregiver_id=caregiver_id)
         
+class ReservationRequestView(View):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def post(self, request):
+        if not is_logged_in(request):
+            messages.error(request, "You need to login first")
+            return redirect("main:login")
+        
+        try:
+            data = {
+                "idSchedule": request.POST.get("schedule_id"),
+                "idPacilian": request.session.get("user_id")
+            }
+            print(f"{data.get('idSchedule')=}, {data.get('idPacilian')=}")
             
-# POST: Edit reservation (change schedule)
-@csrf_exempt
-def edit_reservation(request, id):
-    """
-    Edit a reservation by changing its schedule
-    Calls Spring Boot: POST /api/reservasi-konsultasi/{id}/edit
-    """
-    if request.method != "POST":
-        return JsonResponse({"error": "Method not allowed"}, status=405)
-    
-    if not is_logged_in(request):
-        return JsonResponse({"error": "Authentication required"}, status=401)
-    
-    user_context = get_user_context(request)
-    if user_context.get('user_role') != 'pacilian':
-        return JsonResponse({"error": "Access denied"}, status=403)
-    
-    try:
-        # Get the new schedule ID from the request
-        if request.content_type == 'application/json':
-            import json
-            body = json.loads(request.body.decode('utf-8'))
-            new_schedule_id = body.get('idSchedule')
-        else:
-            new_schedule_id = request.POST.get('idSchedule') or request.POST.get('schedule_id')
-        
-        if not new_schedule_id:
-            return JsonResponse({"error": "Schedule ID is required"}, status=400)
-        
-        # Prepare data for Spring Boot API
-        data = {
-            "idSchedule": str(new_schedule_id)
-        }
-        
-        token = request.session.get("access_token")
-        endpoint = f"/api/reservasi-konsultasi/{id}/edit"
-        
-        print(f"=== EDIT RESERVATION DEBUG ===")
-        print(f"Reservation ID: {id}")
-        print(f"New Schedule ID: {new_schedule_id}")
-        print(f"Endpoint: {endpoint}")
-        print(f"Data: {data}")
-        
-        # Call Spring Boot API
-        response = api_request("POST", endpoint, data=data, token=token)
-        
-        print(f"Spring Boot Response: {response}")
-        
-        # Check if the response indicates success
-        if response and isinstance(response, dict):
-            if response.get('message') and 'updated successfully' in response.get('message', '').lower():
-                return JsonResponse({
-                    "success": True, 
-                    "message": "Reservation updated successfully",
-                    "data": response.get('reservasi')
-                })
+            response = api_request(
+                "POST",
+                "/api/reservasi-konsultasi/request",
+                data=data,
+                token=request.session.get("access_token")
+            )
+            
+            if response and "reservasi" in response:
+                messages.success(request, response.get("message", "Reservation requested successfully"))
+                return redirect("doctor_profile:reservation_detail", reservation_id=response["reservasi"]["idReservasi"])
             else:
-                # Handle Spring Boot error response
-                error_msg = response.get('error', 'Unknown error occurred')
-                return JsonResponse({"error": error_msg}, status=400)
-        
-        return JsonResponse({
-            "success": True, 
-            "message": "Reservation updated successfully",
-            "data": response
-        })
-        
-    except Exception as e:
-        print(f"Error in edit_reservation: {str(e)}")
-        
-        # Handle specific error types
-        if "tidak ditemukan" in str(e).lower() or "not found" in str(e).lower():
-            return JsonResponse({"error": "Reservation not found"}, status=404)
-        elif "sudah disetujui" in str(e).lower() or "already approved" in str(e).lower():
-            return JsonResponse({"error": "Cannot edit reservation that has already been approved"}, status=400)
-        elif "tidak tersedia" in str(e).lower() or "not available" in str(e).lower():
-            return JsonResponse({"error": "The selected schedule is not available"}, status=400)
-        elif "Unauthorized" in str(e) or "401" in str(e):
-            return JsonResponse({"error": "Authentication failed"}, status=401)
-        else:
-            return JsonResponse({"error": f"Failed to update reservation: {str(e)}"}, status=500)
+                messages.error(request, response.get("error", "Failed to request reservation"))
+                return redirect(request.META.get('HTTP_REFERER', 'doctor_profile:search'))
+                
+        except Exception as e:
+            messages.error(request, f"Error requesting reservation: {str(e)}")
+            print(f"Error in ReservationRequestView: {str(e)}")
+            return redirect(request.META.get('HTTP_REFERER', 'doctor_profile:search'))

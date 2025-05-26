@@ -27,5 +27,5 @@ urlpatterns = [
     path('caregiver-reservation/', include('reservasi_caregiver.urls')),
     path('schedule/', include('schedule.urls')),
     path('doctors/', include('doctor_profile.urls', namespace='doctor_profile')),
-    path('pacillian-reservation-/', include('reservasi_pacilian.urls')),
+    path('pacillian-reservation/', include('reservasi_pacilian.urls')),
 ]
