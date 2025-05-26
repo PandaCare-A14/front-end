@@ -17,10 +17,10 @@ user_role="caregiver"/"pacilian"
             <!-- Logo -->
             <div class="flex items-center space-x-6">
                 <a href="{% if logged_in and role == 'caregiver' and user_id %}{% url 'main:caregiver_dashboard' caregiver_id=user_id %}{% elif logged_in and role == 'pacilian' %}{% url 'main:pacilian_dashboard' %}{% else %}/{% endif %}"
-                    class="flex items-center group hover:scale-105 transition-transform duration-300">
+                   class="flex items-center group hover:scale-105 transition-transform duration-300">
                     <div class="w-10 h-10 mr-3 rounded-lg flex items-center justify-center overflow-hidden">
                         <img src="{% static 'img/logo-panda.png' %}" alt="PandaCare Logo"
-                            class="w-full h-full object-cover" />
+                             class="w-full h-full object-cover" />
                     </div>
                     <span class="font-header font-bold text-xl text-white">PandaCare</span>
                 </a>
@@ -53,9 +53,12 @@ user_role="caregiver"/"pacilian"
                         class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-calendar-check mr-2"></i> Reservation
                     </a>
+                    <a href="{% url 'rating:list' id_pacilian=user_id %}" class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                        <i class="fas fa-history mr-2"></i> Riwayat
+                    </a>
                     {% endif %}
                     <a href="/chat"
-                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                       class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-comments mr-2"></i> Chat
                     </a>
                     {% endif %}
@@ -64,25 +67,25 @@ user_role="caregiver"/"pacilian"
                 <!-- Profile -->
                 <div class="relative profile-dropdown">
                     <button
-                        class="w-10 h-10 rounded-full bg-white bg-opacity-20 transition-all hover:scale-110 flex items-center justify-center relative">
+                            class="w-10 h-10 rounded-full bg-white bg-opacity-20 transition-all hover:scale-110 flex items-center justify-center relative">
                         <i class="fas fa-user text-white"></i>
                     </button>
                 </div>
 
                 <!-- Logout -->
                 <a href="/logout"
-                    class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                   class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                     <i class="fas fa-sign-out-alt mr-2"></i> Logout
                 </a>
                 {% else %}
                 <!-- Menu for Guests -->
                 <div class="flex space-x-1">
                     <a href="{% url 'main:login' %}"
-                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                       class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-sign-in-alt mr-2"></i> Login
                     </a>
                     <a href="{% url 'main:register' %}"
-                        class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
+                       class="text-white nav-link px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white hover:bg-opacity-10 transition-all mx-1 flex items-center">
                         <i class="fas fa-user-plus mr-2"></i> Register
                     </a>
                 </div>

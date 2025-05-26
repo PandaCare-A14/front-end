@@ -28,4 +28,5 @@ urlpatterns = [
     path('schedule/', include('schedule.urls')),
     path('doctors/', include('doctor_profile.urls', namespace='doctor_profile')),
     path('pacillian-reservation/', include('reservasi_pacilian.urls')),
+    path('rating/', include('rating.urls')),
 ]

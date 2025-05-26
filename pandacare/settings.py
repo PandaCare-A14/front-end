@@ -46,9 +46,11 @@ INSTALLED_APPS = [
     'main',
     'schedule',
     'reservasi_caregiver',
+    'reservasi_pacilian',
     'doctor_profile',
     'chat',
-    'reservasi_pacilian',
+    'rating',
+    
 ]
 
 MIDDLEWARE = [

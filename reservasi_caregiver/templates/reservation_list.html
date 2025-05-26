@@ -48,7 +48,7 @@
             </div>
             <div class="flex items-end">
                 <button type="submit"
-                    class="bg-primary text-white px-4 py-2 rounded-lg w-full flex justify-center items-center hover:bg-primary-dark">
+                        class="bg-primary text-white px-4 py-2 rounded-lg w-full flex justify-center items-center hover:bg-primary-dark">
                     <i class="fas fa-filter mr-2"></i> Apply Filter
                 </button>
             </div>
@@ -592,14 +592,14 @@
                 'X-CSRFToken': getCookie('csrftoken')
             }
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                loadingDiv.classList.add('hidden');
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    loadingDiv.classList.add('hidden');
 
                 selectElement.innerHTML = '<option value="">Select a schedule...</option>';
 
@@ -612,10 +612,10 @@
                     schedules = data.schedules;
                 }
 
-                if (schedules.length === 0) {
-                    selectElement.innerHTML = '<option value="">No available schedules</option>';
-                    return;
-                }
+                    if (schedules.length === 0) {
+                        selectElement.innerHTML = '<option value="">No available schedules</option>';
+                        return;
+                    }
 
                 schedules.sort((a, b) => {
                     const dateA = new Date(a.date + 'T' + a.startTime);
@@ -632,16 +632,16 @@
                     const startTime = formatTime(schedule.startTime);
                     const endTime = formatTime(schedule.endTime);
 
-                    option.textContent = `${day}, ${date} | ${startTime} - ${endTime}`;
-                    selectElement.appendChild(option);
+                        option.textContent = `${day}, ${date} | ${startTime} - ${endTime}`;
+                        selectElement.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading schedules:', error);
+                    loadingDiv.classList.add('hidden');
+                    errorDiv.textContent = 'Failed to load available schedules. Please try again.';
+                    errorDiv.classList.remove('hidden');
                 });
-            })
-            .catch(error => {
-                console.error('Error loading schedules:', error);
-                loadingDiv.classList.add('hidden');
-                errorDiv.textContent = 'Failed to load available schedules. Please try again.';
-                errorDiv.classList.remove('hidden');
-            });
     }
 
     function rescheduleReservation() {

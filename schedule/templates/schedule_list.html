@@ -32,7 +32,7 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2" for="status">Status</label>
                 <select id="status" name="status"
-                    class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                        class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
                     <option value="">All Statuses</option>
                     <option value="AVAILABLE" {% if "AVAILABLE" in status_filter %}selected{% endif %}>Available
                     </option>
@@ -44,7 +44,7 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2" for="day">Day</label>
                 <select id="day" name="day"
-                    class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                        class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
                     <option value="">All Days</option>
                     <option value="MONDAY" {% if "MONDAY" in day_filter %}selected{% endif %}>Monday</option>
                     <option value="TUESDAY" {% if "TUESDAY" in day_filter %}selected{% endif %}>Tuesday</option>
@@ -153,16 +153,16 @@
                     <!-- Action Buttons -->
                     <div class="flex space-x-2">
                         <button
-                            onclick="showScheduleDetails('{{ schedule.id }}', '{{ schedule.date }}', '{{ schedule.day }}', '{{ schedule.startTime }}', '{{ schedule.endTime }}', '{{ schedule.status }}')"
-                            class="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-gray-100"
-                            title="View Details">
+                                onclick="showScheduleDetails('{{ schedule.id }}', '{{ schedule.date }}', '{{ schedule.day }}', '{{ schedule.startTime }}', '{{ schedule.endTime }}', '{{ schedule.status }}')"
+                                class="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-gray-100"
+                                title="View Details">
                             <i class="fas fa-eye"></i>
                         </button>
 
                         {% if schedule.status == 'AVAILABLE' %}
                         <button onclick="confirmDeleteSchedule('{{ schedule.id }}')"
-                            class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50"
-                            title="Delete Schedule">
+                                class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50"
+                                title="Delete Schedule">
                             <i class="fas fa-trash"></i>
                         </button>
                         {% endif %}
@@ -250,7 +250,7 @@
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                 <h3 class="text-lg font-medium">Delete Schedule</h3>
                 <button type="button" onclick="closeModal('deleteConfirmModal')"
-                    class="text-gray-400 hover:text-gray-500">
+                        class="text-gray-400 hover:text-gray-500">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -265,7 +265,7 @@
                 </div>
                 <div class="flex justify-end space-x-3">
                     <button onclick="closeModal('deleteConfirmModal')"
-                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
                         Cancel
                     </button>
                     <form id="deleteForm" method="post" class="inline">
@@ -296,12 +296,12 @@
 
     function showScheduleDetails(id, date, day, startTime, endTime, status) {
         const formatDate = (date && date !== 'Not set' && date !== '') ?
-            new Date(date).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            }) : 'Recurring schedule';
+                new Date(date).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }) : 'Recurring schedule';
 
         document.getElementById('scheduleDetailsContent').innerHTML = `
             <div class="space-y-4">
