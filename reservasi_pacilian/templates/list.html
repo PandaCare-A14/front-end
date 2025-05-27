@@ -17,9 +17,13 @@
             <p class="text-sm text-gray-600">View and manage your consultation appointments</p>
         </div>
         <div class="flex space-x-3">
-            <a href="{% url 'doctor_profile:search' %}" 
+            <a href="{/doctor}" 
                 class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 flex items-center"> <!-- Integrate dengan Dapqil -->
                 <i class="fas fa-user-md mr-2"></i> Browse Doctors
+            </a>
+            <a href="{/doctor}"
+                class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark flex items-center"> <!-- Integrate dengan Dapqil -->
+                <i class="fas fa-plus mr-2"></i> New Reservation
             </a>
         </div>
     </div>    <!-- Reservations List -->
@@ -81,22 +85,20 @@
                         {% if reservasi.idSchedule.startTime and reservasi.idSchedule.endTime %}
                             <span class="schedule-time">{{ reservasi.idSchedule.startTime }} - {{ reservasi.idSchedule.endTime }}</span>
                         {% endif %}
+                        <span class="schedule-time">{{ reservasi.idSchedule.day }}</span>
                     </div>
                 </div>
                 {% endif %}
 
-                <!-- Patient Note -->
-                {% if reservasi.pacilianNote or reservasi.pacilian_note %}
                 <div class="info-section note-info">
                     <div class="info-header">
                         <i class="fas fa-sticky-note mr-2"></i>
                         <strong>Your Note</strong>
                     </div>
                     <div class="info-content">
-                        <p class="note-text">{{ reservasi.pacilianNote|default:reservasi.pacilian_note }}</p>
+                        <p class="note-text">{{ reservasi.pacilianNote }}</p>
                     </div>
                 </div>
-                {% endif %}
 
                 <!-- Caregiver Note (if any) -->
                 {% if reservasi.caregiverNote or reservasi.caregiver_note %}
@@ -166,9 +168,9 @@
             </div>
             <h3 class="text-lg font-medium text-gray-500 mb-2">No Reservations Found</h3>
             <p class="text-gray-400 mb-4">You don't have any reservations yet.</p>
-            <a href="{% url 'doctor_profile:search' %}"
+            <a href="{% url 'pacilian_request_reservasi' %}"
                 class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark inline-flex items-center">
-                <i class="fas fa-plus mr-2"></i> Browse doctors to make a reservation
+                <i class="fas fa-plus mr-2"></i> Make Your First Reservation
             </a>
         </div>
         {% endif %}
@@ -225,11 +227,11 @@
         const caregiverId = reservationCard?.dataset?.caregiverId;
 
         console.log('Reservation ID:', reservationId);
-        console.log('Caregiver ID:', caregiverId);
+        console.log('Caregiver ID:', caregiverId);  
 
         if (caregiverId) {
             // Redirect to doctor schedules with caregiver ID for edit mode
-            window.location.href = `/schedules/${caregiverId}/available/?reservation_id=${reservationId}`;
+            window.location.href = `/pacillian-reservation/schedules/${caregiverId}/available/?reservation_id=${reservationId}`;
         } else {
             alert('Unable to find doctor information for this reservation');
         }
