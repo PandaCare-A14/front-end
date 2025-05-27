@@ -88,7 +88,6 @@ class DoctorProfileView(View):
             if not doctor_response:
                 messages.error(request, "Doctor not found")
                 return redirect("doctor_profile:search")
-            print(f"{doctor_response}")
             context.update({
                 'doctor': doctor_response,
                 'patient_id': patient_id
@@ -98,9 +97,7 @@ class DoctorProfileView(View):
             
         except ValueError as e:
             messages.error(request, f"Invalid ID format: {str(e)}")
-            print(f"Value error loading doctor profile: {str(e)}")
             return redirect("doctor_profile:search")
         except Exception as e:
             messages.error(request, f"Error loading doctor profile: {str(e)}")
-            print(f"Exception error loading doctor profile: {str(e)}")
             return redirect("doctor_profile:search")

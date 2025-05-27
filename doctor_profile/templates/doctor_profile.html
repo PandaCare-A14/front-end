@@ -32,7 +32,7 @@
                         <h2 class="text-3xl font-header font-bold text-gray-800">Dr. {{ doctor.name }}</h2>
                         <div class="flex items-center bg-secondary px-3 py-1 rounded-full">
                             <i class="fas fa-star text-yellow-400 mr-1"></i>
-                            <span class="font-medium">{{ doctor.averageRating|default:"0.0" }}</span>
+                            <span class="font-medium">{{ doctor.averageRating|default:"0.0"|floatformat:1 }}</span>
                             <span class="text-gray-600 text-sm ml-1">({{ doctor.totalRatings|default:"0" }})</span>
                         </div>
                     </div>
@@ -102,6 +102,34 @@
             <div class="text-center py-8">
                 <img src="{% static 'img/no-schedule.svg' %}" alt="No Schedule" class="w-48 mx-auto mb-4">
                 <p class="text-gray-600">No schedules available at the moment</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="text-2xl font-header font-bold text-gray-800 mb-6">Patient Reviews</h3>
+            
+            {% if doctor.totalRatings > 0 %}
+            <div class="space-y-4">
+                {% for rating in doctor.ratings %}
+                <!-- Sample review - in real app this would come from API -->
+                <div class="border-b border-gray-100 pb-4">
+                    <div class="flex justify-between mb-2">
+                        <h5 class="font-medium text-gray-800">Anonymous</h5>
+                        <div class="flex items-center">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>{{ rating.ratingScore }}</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm">{{ rating.ulasan }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-8">
+                <img src="{% static 'img/no-reviews.svg' %}" alt="No Reviews" class="w-48 mx-auto mb-4">
+                <p class="text-gray-600">No review yet</p>
             </div>
             {% endif %}
         </div>

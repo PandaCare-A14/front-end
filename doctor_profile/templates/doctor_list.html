@@ -129,7 +129,7 @@
                             <p class="text-primary font-medium">{{ doctor.speciality }}</p>
                             <div class="flex items-center mt-1">
                                 <i class="fas fa-star text-yellow-400 mr-1"></i>
-                                <span class="text-gray-700">{{ doctor.averageRating|default:"0.0" }}</span>
+                                <span class="text-gray-700">{{ doctor.averageRating|default:"0.0"|floatformat:1 }}</span>
                                 <span class="text-gray-500 text-sm ml-2">({{ doctor.totalRatings|default:"0" }} ulasan)</span>
                             </div>
                         </div>
