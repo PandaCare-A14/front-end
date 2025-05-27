@@ -452,7 +452,7 @@ class AvailableScheduleListView(View):
                 messages.success(request, "Reservation created successfully!")
 
             print(f"Redirecting to reservation list for pacilian: {pacilian_id}")
-            return redirect("pacilian_reservasi_list", id_pacilian=pacilian_id)
+            return redirect("reservasi_pacilian:pacilian_reservasi_list", id_pacilian=pacilian_id)
 
         except Exception as e:
             print(f"=== EXCEPTION in post method ===")
@@ -558,7 +558,7 @@ class AvailableScheduleListView(View):
                     messages.success(request, "Reservation created successfully!")
 
             print(f"Redirecting to reservation list for pacilian: {pacilian_id}")
-            return redirect("pacilian_reservasi_list", id_pacilian=pacilian_id)
+            return redirect("reservasi_pacilian:pacilian_reservasi_list", id_pacilian=pacilian_id)
 
         except Exception as e:
             print(f"=== EXCEPTION in post method ===")
