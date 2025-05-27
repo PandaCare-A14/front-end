@@ -331,7 +331,6 @@ class LoginView(View):
         else:
             return redirect('main:home')
 
-@method_decorator(csrf_exempt, name='dispatch')
 class RegisterView(View):
     template_name = 'register.html'
 
@@ -376,10 +375,9 @@ class RegisterView(View):
                     "work_address": profile_data.get("work_address", ""),
                     "speciality": profile_data.get("speciality", "")
                 })
-            
+
             profile_endpoints = ["/api/profile", "/api/caregivers/profile", "/api/doctors/profile"]
             profile_created = False
-
             for endpoint in profile_endpoints:
                 try:
                     profile_response = api_request("POST", endpoint, profile_payload, token=access_token)
@@ -387,36 +385,39 @@ class RegisterView(View):
                     break
                 except Exception:
                     continue
-            
+
             messages.success(request, "Registration successful! You can now sign in with your account.")
             return redirect("main:login")
 
-        except Exception as e:
-            error_str = str(e).lower()
-            if "unauthorized" in error_str:
-                messages.error(request, "Registration failed. Please try again.")
-            else:
-                messages.error(request, "Access denied during registration.")
-            return render(request, self.template_name, {"roles": ["pacilian", "caregiver"]})
         except requests.exceptions.ConnectionError:
             messages.error(request, "Unable to connect to server. Please try again later.")
-            return render(request, self.template_name, {"roles": ["pacilian", "caregiver"]})
+        
         except Exception as e:
             error_str = str(e).lower()
+
             if "email" in error_str and ("exist" in error_str or "duplicate" in error_str):
                 messages.error(request, "Email already registered. Please use a different email or try logging in.")
             elif "nik" in error_str and ("exist" in error_str or "duplicate" in error_str):
                 messages.error(request, "NIK already registered. Please check your NIK or contact support.")
+            elif "unauthorized" in error_str:
+                messages.error(request, "Registration failed. Please try again.")
             elif "connection" in error_str:
                 messages.error(request, "Connection problem. Please check your internet connection.")
             elif "timeout" in error_str:
                 messages.error(request, "Server timeout. Please try again later.")
             else:
                 messages.error(request, "Registration failed. Please check your information and try again.")
-            return render(request, self.template_name, {"roles": ["pacilian", "caregiver"]})
+
+        return render(request, self.template_name, {"roles": ["pacilian", "caregiver"]})
 
     def _extract_profile_data(self, post_data, role):
-        data = {field: post_data.get(field, '') for field in ['email', 'password', 'name', 'nik', 'phone']}
+        data = {
+            'email': post_data.get('email', ''),
+            'password': post_data.get('password', ''),
+            'name': post_data.get('name', ''),
+            'nik': post_data.get('nik', ''),
+            'phone': post_data.get('phone', '')
+        }
         if role == 'pacilian':
             data.update({
                 'address': post_data.get('address', ''),

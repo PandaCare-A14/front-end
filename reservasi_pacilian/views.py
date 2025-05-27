@@ -8,8 +8,8 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.conf import settings
 from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
 # API Configuration
@@ -164,7 +164,6 @@ def list_reservasi(request, id_pacilian):
         return render(request, "list.html", context)
 
 # POST: Accept schedule change
-@csrf_exempt
 def accept_change(request, id):
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
@@ -187,7 +186,6 @@ def accept_change(request, id):
         return JsonResponse({"error": str(e)}, status=500)
 
 # POST: Reject schedule change
-@csrf_exempt
 def reject_change(request, id):
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)

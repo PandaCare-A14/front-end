@@ -48,8 +48,7 @@
 
                 <!-- Form Container -->
                 <div class="p-8">
-                    {% for role in roles %}
-                    {% if role == "pacilian" %}
+                    <!-- Pacilian Form -->
                     <form id="pacilian-form" method="post" action="" class="space-y-6">
                         {% csrf_token %}
                         <input type="hidden" name="role" value="pacilian">
@@ -131,7 +130,7 @@
                         </button>
                     </form>
 
-                    {% else %}
+                    <!-- Caregiver Form -->
                     <form id="caregiver-form" method="post" action="" class="space-y-6 hidden">
                         {% csrf_token %}
                         <input type="hidden" name="role" value="caregiver">
@@ -211,8 +210,6 @@
                             Register as Caregiver
                         </button>
                     </form>
-                    {% endif %}
-                    {% endfor %}
 
                     <!-- Divider -->
                     <div class="my-6 flex items-center">

@@ -48,7 +48,7 @@
             </div>
             <div class="flex items-end">
                 <button type="submit"
-                        class="bg-primary text-white px-4 py-2 rounded-lg w-full flex justify-center items-center hover:bg-primary-dark">
+                    class="bg-primary text-white px-4 py-2 rounded-lg w-full flex justify-center items-center hover:bg-primary-dark">
                     <i class="fas fa-filter mr-2"></i> Apply Filter
                 </button>
             </div>
@@ -196,7 +196,7 @@
                 {% endif %}
             </p>
             {% if status_filter or day_filter %}
-            <a href="{% url 'reservasi_pacilian:reservation_list' caregiver_id=caregiver_id %}"
+            <a href="{% url 'reservasi_caregiver:reservation_list' caregiver_id=caregiver_id %}"
                 class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 mr-3 mt-4 inline-block">
                 <i class="fas fa-times mr-2"></i> Clear Filters
             </a>
@@ -208,7 +208,10 @@
 
 <div id="reservationDetailsModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="fixed inset-0 bg-black opacity-50" onclick="closeModal('reservationDetailsModal')"></div>
+        <div class="fixed inset-0 bg-black opacity-50" role="button" tabindex="0"
+            onclick="closeModal('reservationDetailsModal')"
+            onkeydown="if(event.key==='Enter'||event.key===' ') closeModal('reservationDetailsModal')"
+            aria-label="Close modal background overlay"></div>
         <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white">
                 <h3 class="text-lg font-medium text-gray-900">
@@ -592,14 +595,14 @@
                 'X-CSRFToken': getCookie('csrftoken')
             }
         })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    loadingDiv.classList.add('hidden');
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                loadingDiv.classList.add('hidden');
 
                 selectElement.innerHTML = '<option value="">Select a schedule...</option>';
 
@@ -612,10 +615,10 @@
                     schedules = data.schedules;
                 }
 
-                    if (schedules.length === 0) {
-                        selectElement.innerHTML = '<option value="">No available schedules</option>';
-                        return;
-                    }
+                if (schedules.length === 0) {
+                    selectElement.innerHTML = '<option value="">No available schedules</option>';
+                    return;
+                }
 
                 schedules.sort((a, b) => {
                     const dateA = new Date(a.date + 'T' + a.startTime);
@@ -632,16 +635,16 @@
                     const startTime = formatTime(schedule.startTime);
                     const endTime = formatTime(schedule.endTime);
 
-                        option.textContent = `${day}, ${date} | ${startTime} - ${endTime}`;
-                        selectElement.appendChild(option);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading schedules:', error);
-                    loadingDiv.classList.add('hidden');
-                    errorDiv.textContent = 'Failed to load available schedules. Please try again.';
-                    errorDiv.classList.remove('hidden');
+                    option.textContent = `${day}, ${date} | ${startTime} - ${endTime}`;
+                    selectElement.appendChild(option);
                 });
+            })
+            .catch(error => {
+                console.error('Error loading schedules:', error);
+                loadingDiv.classList.add('hidden');
+                errorDiv.textContent = 'Failed to load available schedules. Please try again.';
+                errorDiv.classList.remove('hidden');
+            });
     }
 
     function rescheduleReservation() {

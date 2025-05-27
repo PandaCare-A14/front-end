@@ -72,11 +72,8 @@
             };
 
             function handleSessionExpired(data) {
-                if (confirm('Your session has expired. Click OK to login again.')) {
-                    window.location.href = data?.redirect || '/login/';
-                } else {
-                    window.location.href = data?.redirect || '/login/';
-                }
+                confirm('Your session has expired. Click OK to login again.');
+                window.location.href = data?.redirect || '/login/';
             }
         });
     </script>

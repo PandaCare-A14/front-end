@@ -14,29 +14,29 @@
     <!-- Page Header -->
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center">
-            <a href="{% url 'reservasi_pacilian:pacilian_reservasi_list' id_pacilian=user_id %}" 
-               class="text-primary hover:text-primary-dark mr-4">
+            <a href="{% url 'reservasi_pacilian:pacilian_reservasi_list' id_pacilian=user_id %}"
+                class="text-primary hover:text-primary-dark mr-4">
                 <i class="fas fa-arrow-left text-xl"></i>
             </a>
             <div>
                 <h3 class="text-2xl font-bold text-gray-800">
                     {% if is_edit_mode %}
-                        Change Reservation Schedule
+                    Change Reservation Schedule
                     {% else %}
-                        Available Schedules
+                    Available Schedules
                     {% endif %}
                 </h3>
                 <p class="text-sm text-gray-600">
                     {% if caregiver_info %}
-                        Dr. {{ caregiver_info.data.name|default:"Unknown Doctor" }}
+                    Dr. {{ caregiver_info.data.name|default:"Unknown Doctor" }}
                     {% else %}
-                        Doctor ID: {{ caregiver_id }}
+                    Doctor ID: {{ caregiver_id }}
                     {% endif %}
                     • {{ total_schedules }} available slot{{ total_schedules|pluralize }}
                 </p>
             </div>
         </div>
-        
+
         {% if is_edit_mode %}
         <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
             <p class="text-blue-800 text-sm font-medium">
@@ -50,10 +50,12 @@
     {% if schedules %}
     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {% for schedule in schedules %}
-        <div class="schedule-card bg-white border border-gray-200 rounded-xl p-6 hover:border-primary hover:shadow-lg transition-all duration-300">
+        <div
+            class="schedule-card bg-white border border-gray-200 rounded-xl p-6 hover:border-primary hover:shadow-lg transition-all duration-300">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
-                    <div class="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center mr-4">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center mr-4">
                         <i class="fas fa-calendar-alt text-white text-xl"></i>
                     </div>
                     <div>
@@ -61,33 +63,33 @@
                         <p class="text-sm text-gray-600">{{ schedule.date }}</p>
                     </div>
                 </div>
-                
+
                 <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
                     {{ schedule.status }}
                 </span>
             </div>
-            
+
             <div class="mb-6">
                 <div class="flex items-center text-gray-600 mb-2">
                     <i class="fas fa-clock mr-2 text-primary"></i>
                     <span class="font-medium">{{ schedule.startTime }} - {{ schedule.endTime }}</span>
                 </div>
             </div>
-            
+
             <form method="POST" class="schedule-selection-form">
                 {% csrf_token %}
                 <input type="hidden" name="schedule_id" value="{{ schedule.id }}">
                 {% if is_edit_mode %}
                 <input type="hidden" name="reservation_id" value="{{ reservation_id }}">
                 {% endif %}
-                
-                <button type="submit" 
-                        class="w-full bg-gradient-to-r from-primary to-primary-dark text-white py-3 px-4 rounded-lg hover:from-primary-dark hover:to-primary transition-all duration-300 flex items-center justify-center font-medium">
+
+                <button type="submit"
+                    class="w-full bg-gradient-to-r from-primary to-primary-dark text-white py-3 px-4 rounded-lg hover:from-primary-dark hover:to-primary transition-all duration-300 flex items-center justify-center font-medium">
                     <i class="fas fa-{% if is_edit_mode %}exchange-alt{% else %}plus{% endif %} mr-2"></i>
                     {% if is_edit_mode %}
-                        Change to This Schedule
+                    Change to This Schedule
                     {% else %}
-                        Book This Schedule
+                    Book This Schedule
                     {% endif %}
                 </button>
             </form>
@@ -102,13 +104,13 @@
             <h3 class="text-xl font-bold text-gray-800 mb-4">No Available Schedules</h3>
             <p class="text-gray-600 mb-6">
                 {% if error_message %}
-                    Error: {{ error_message }}
+                Error: {{ error_message }}
                 {% else %}
-                    This doctor currently has no available time slots.
+                This doctor currently has no available time slots.
                 {% endif %}
             </p>
-            <a href="{% url 'pacilian_reservasi_list' id_pacilian=user_id %}" 
-               class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors duration-300">
+            <a href="{% url 'pacilian_reservasi_list' id_pacilian=user_id %}"
+                class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors duration-300">
                 <i class="fas fa-arrow-left mr-2"></i>Go Back
             </a>
         </div>
@@ -117,26 +119,27 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const forms = document.querySelectorAll('.schedule-selection-form');
-    
-    forms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const button = form.querySelector('button[type="submit"]');
-            const isEdit = {{ is_edit_mode|yesno:"true,false" }};
-            
-            const confirmMessage = isEdit 
-                ? 'Are you sure you want to change your reservation to this schedule?' 
-                : 'Are you sure you want to book this schedule?';
-            
-            if (confirm(confirmMessage)) {
-                button.disabled = true;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
-                form.submit();
-            }
-        });
+    document.addEventListener('DOMContentLoaded', function () {
+        const forms = document.querySelectorAll('.schedule-selection-form');
+
+        forms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const button = form.querySelector('button[type="submit"]');
+                const isEdit = {{ is_edit_mode| yesno: "true,false"
+            }};
+
+        const confirmMessage = isEdit
+            ? 'Are you sure you want to change your reservation to this schedule?'
+            : 'Are you sure you want to book this schedule?';
+
+        if (confirm(confirmMessage)) {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+            form.submit();
+        }
+    });
     });
 });
 </script>

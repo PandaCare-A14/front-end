@@ -190,8 +190,8 @@ class ScheduleDeleteView(View):
         except Exception as e:
             messages.error(request, f"Error deleting schedule: {str(e)}")
         
-        return redirect("schedule_list", caregiver_id=caregiver_id)
-
+        return redirect("schedule:schedule_list", caregiver_id=caregiver_id)
+    
 @method_decorator(csrf_exempt, name='dispatch')
 class ScheduleCreateView(View):
     template_name = 'create_schedule.html'
