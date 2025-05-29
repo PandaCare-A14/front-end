@@ -29,11 +29,7 @@ CHAT_API_URL = os.environ["CHAT_API_URL"]
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-<<<<<<< HEAD
 SECRET_KEY = os.getenv("SECRET_KEY")
-=======
-SECRET_KEY = "django-insecure-57vxgfa^0y08w00c3s3k$sjrm@w5=ktbz&(n%yo&y%g0m!ju(w"
->>>>>>> f730c94 (Added auth middleware)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -52,14 +48,10 @@ INSTALLED_APPS = [
     "main",
     "schedule",
     "reservasi_caregiver",
-<<<<<<< HEAD
     "reservasi_pacilian",
     "doctor_profile",
     "chat",
     "rating",
-=======
-    "chat",
->>>>>>> f730c94 (Added auth middleware)
 ]
 
 MIDDLEWARE = [
@@ -70,10 +62,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-<<<<<<< HEAD
     "whitenoise.middleware.WhiteNoiseMiddleware",
-=======
->>>>>>> f730c94 (Added auth middleware)
 ]
 
 ROOT_URLCONF = "pandacare.urls"
@@ -142,12 +131,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-<<<<<<< HEAD
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-=======
-STATIC_URL = "static/"
->>>>>>> f730c94 (Added auth middleware)
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
