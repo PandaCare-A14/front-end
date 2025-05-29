@@ -4,7 +4,7 @@ let currentRecipientId = null; // Store the recipient ID for the current room
 
 let form = document.getElementById("chat-form");
 
-// Select chat room
+// Select chatroom
 function selectRoom(roomId, recipientId, messages) {
   currentRoomId = roomId;
   currentRecipientId = recipientId; // Set the recipient ID directly
@@ -20,7 +20,7 @@ function renderMessages(messages) {
     const messageDiv = document.createElement("div");
     messageDiv.classList.add("p-2", "rounded", "mb-2", "max-w-xs");
 
-    if (message.sender_id === user_id) {
+    if (message.sender_id === currentRecipientId) {
       messageDiv.classList.add("bg-blue-500", "text-white", "self-end");
     } else {
       messageDiv.classList.add("bg-gray-200", "text-black", "self-start");
@@ -34,7 +34,7 @@ function renderMessages(messages) {
 }
 
 // Handle form submission
-form.addEventListener("submit", function (e) {
+form.addEventListener("submit", function(e) {
   e.preventDefault();
 
   const input = document.getElementById("chat-message-input");
@@ -55,7 +55,7 @@ form.addEventListener("submit", function (e) {
 });
 
 // Handle incoming messages via WebSocket
-socket.onmessage = function (event) {
+socket.onmessage = function(event) {
   const data = JSON.parse(event.data);
 
   if (data.room_id === currentRoomId) {
