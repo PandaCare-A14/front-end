@@ -297,11 +297,11 @@
         const data = {};
 
         if (status === 'APPROVED') {
-            url = `/reservations/${reservationId}/approve/`;
+            url = `/caregiver-reservation/reservations/${reservationId}/approve/`;
         } else if (status === 'REJECTED') {
-            url = `/reservations/${reservationId}/reject/`;
+            url = `/caregiver-reservation/reservations/${reservationId}/reject/`;
         } else if (status === 'ON_RESCHEDULE') {
-            url = `/reservations/${reservationId}/reschedule/`;
+            url = `/caregiver-reservation/r/reservations/${reservationId}/reschedule/`;
             data.newScheduleId = newScheduleId;
         }
 
