@@ -121,24 +121,7 @@
     </div>
 </div>
 
-<!-- Reject Modal -->
-<div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-        <h3 class="text-xl font-bold mb-4">Reject Reservation</h3>
-        <input type="hidden" id="reject_reservation_id">
-        <div class="mb-4">
-            <label class="block text-gray-700 mb-2">Reason for rejection:</label>
-            <textarea id="rejection_reason" class="w-full border border-gray-300 rounded p-2"></textarea>
-        </div>
-        <div class="flex justify-end">
-            <button onclick="closeRejectModal()"
-                class="bg-gray-200 text-gray-700 px-4 py-2 rounded mr-2">Cancel</button>
-            <button onclick="rejectReservation()" class="bg-red-500 text-white px-4 py-2 rounded">Reject</button>
-        </div>
-    </div>
-</div>
-
-<!-- Enhanced Reschedule Modal -->
+<!-- Reschedule Modal -->
 <div id="rescheduleModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md max-h-96 overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
@@ -177,59 +160,6 @@
 
 {% block extra_style %}
 <style>
-    .doctor-avatar {
-        border-radius: 50%;
-        border: 3px solid white;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .progress-bar {
-        height: 8px;
-        border-radius: 4px;
-        background-color: #e6e9f5;
-    }
-
-    .progress-value {
-        height: 8px;
-        border-radius: 4px;
-    }
-
-    .busyness-circle {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background: conic-gradient(#1A76D2 0% 72%, #f783ac 72% 95%, #e6e9f5 95% 100%);
-        position: relative;
-    }
-
-    .busyness-circle::after {
-        content: '';
-        position: absolute;
-        width: 90px;
-        height: 90px;
-        border-radius: 50%;
-        background: white;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-    .event-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        display: inline-block;
-        margin-right: 10px;
-    }
-
-    .schedule-item {
-        transition: all 0.2s ease;
-    }
-
-    .schedule-item:hover {
-        transform: translateX(4px);
-    }
-
     .request-item {
         transition: all 0.2s ease;
         border-left: 3px solid transparent;
@@ -239,109 +169,115 @@
         border-left-color: #1A76D2;
         transform: translateX(2px);
     }
-
-    .urgency-tag {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-    }
-
-    .search-input:focus {
-        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
-    }
-
-    .time-slot {
-        width: 60px;
-        text-align: center;
-        background: #e8f1fc;
-        padding: 8px 0;
-        border-radius: 8px;
-    }
-
-    .add-schedule-button {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .add-schedule-button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: 0.5s;
-    }
-
-    .add-schedule-button:hover::before {
-        left: 100%;
-    }
-
-    .quick-action-btn {
-        transition: all 0.3s ease;
-    }
-
-    .quick-action-btn:hover {
-        transform: translateY(-2px);
-    }
 </style>
 {% endblock extra_style %}
 
 {% block extra_js %}
 <script>
-    function updateReservationStatus(reservationId, status, newScheduleId = null) {
-        let url = '';
-        const data = {};
+    // Centralized reservation management
+    const DashboardManager = {
+        caregiverId: '{{ caregiver_id }}',
 
-        if (status === 'APPROVED') {
-            url = `/caregiver-reservation/reservations/${reservationId}/approve/`;
-        } else if (status === 'REJECTED') {
-            url = `/caregiver-reservation/reservations/${reservationId}/reject/`;
-        } else if (status === 'ON_RESCHEDULE') {
-            url = `/caregiver-reservation/r/reservations/${reservationId}/reschedule/`;
-            data.newScheduleId = newScheduleId;
-        }
+        getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [key, value] = cookie.trim().split('=');
+                if (key === name) return decodeURIComponent(value);
+            }
+            return null;
+        },
 
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify(data)
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
+        showNotification(message, type = 'success') {
+            const colors = { success: 'bg-green-500', error: 'bg-red-500' };
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), type === 'error' ? 5000 : 3000);
+        },
+
+        async updateStatus(reservationId, status, newScheduleId = null) {
+            const endpoints = {
+                'APPROVED': `/caregiver-reservation/reservations/${reservationId}/approve/`,
+                'REJECTED': `/caregiver-reservation/reservations/${reservationId}/reject/`,
+                'ON_RESCHEDULE': `/caregiver-reservation/reservations/${reservationId}/reschedule/`
+            };
+
+            try {
+                const response = await fetch(endpoints[status], {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(newScheduleId ? { newScheduleId } : {})
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const data = await response.json();
                 if (data.success) {
-                    showSuccessMessage('Operation completed successfully!');
+                    this.showNotification('Operation completed successfully!');
                     setTimeout(() => location.reload(), 1000);
                 } else {
-                    showErrorMessage('Error: ' + (data.error || 'Unknown error'));
+                    this.showNotification('Error: ' + (data.error || 'Unknown error'), 'error');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showErrorMessage('Error: ' + error.message);
-            });
-    }
+            } catch (error) {
+                this.showNotification('Error: ' + error.message, 'error');
+            }
+        },
 
-    function approveReservation(reservationId) {
-        if (confirm('Are you sure you want to approve this reservation?')) {
-            updateReservationStatus(reservationId, 'APPROVED');
+        async loadSchedules() {
+            const loading = document.getElementById('schedule_loading');
+            const error = document.getElementById('schedule_error');
+            const select = document.getElementById('new_schedule_id');
+
+            loading.classList.remove('hidden');
+            error.classList.add('hidden');
+
+            try {
+                const response = await fetch(`/caregiver-reservation/api/caregivers/${this.caregiverId}/schedules?status=AVAILABLE`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const data = await response.json();
+                loading.classList.add('hidden');
+
+                const schedules = data.data || data.schedules || data || [];
+                select.innerHTML = schedules.length === 0 ?
+                    '<option value="">No available schedules</option>' :
+                    '<option value="">Select a schedule...</option>';
+
+                schedules.sort((a, b) => new Date(a.date + 'T' + a.startTime) - new Date(b.date + 'T' + b.startTime))
+                    .forEach(schedule => {
+                        const option = document.createElement('option');
+                        option.value = schedule.id || schedule.idSchedule;
+
+                        const date = new Date(schedule.date).toLocaleDateString('en-US', {
+                            weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+                        });
+                        const startTime = schedule.startTime.split(':').slice(0, 2).join(':');
+                        const endTime = schedule.endTime.split(':').slice(0, 2).join(':');
+                        const day = schedule.day || new Date(schedule.date).toLocaleDateString('en-US', { weekday: 'short' });
+
+                        option.textContent = `${day}, ${date} | ${startTime} - ${endTime}`;
+                        select.appendChild(option);
+                    });
+            } catch (error) {
+                loading.classList.add('hidden');
+                error.textContent = 'Failed to load available schedules. Please try again.';
+                error.classList.remove('hidden');
+            }
         }
+    };
+
+    // Global functions for onclick handlers
+    function updateReservationStatus(reservationId, status, newScheduleId = null) {
+        DashboardManager.updateStatus(reservationId, status, newScheduleId);
     }
 
     function rejectReservation(reservationId) {
         if (confirm('Are you sure you want to reject this reservation?')) {
-            updateReservationStatus(reservationId, 'REJECTED');
+            DashboardManager.updateStatus(reservationId, 'REJECTED');
         }
     }
 
@@ -349,83 +285,14 @@
         document.getElementById('reschedule_reservation_id').value = reservationId;
         document.getElementById('new_schedule_id').innerHTML = '<option value="">Select a schedule...</option>';
         document.getElementById('rescheduleModal').classList.remove('hidden');
-
-        loadAvailableSchedules();
+        DashboardManager.loadSchedules();
     }
 
     function closeRescheduleModal() {
         document.getElementById('rescheduleModal').classList.add('hidden');
-        document.getElementById('schedule_error').classList.add('hidden');
-        document.getElementById('schedule_loading').classList.add('hidden');
-    }
-
-    function loadAvailableSchedules() {
-        const loadingDiv = document.getElementById('schedule_loading');
-        const errorDiv = document.getElementById('schedule_error');
-        const selectElement = document.getElementById('new_schedule_id');
-
-        loadingDiv.classList.remove('hidden');
-        errorDiv.classList.add('hidden');
-
-        const caregiverId = '{{ caregiver_id }}';
-
-        fetch(`/api/caregivers/${caregiverId}/schedules?status=AVAILABLE`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                loadingDiv.classList.add('hidden');
-
-                selectElement.innerHTML = '<option value="">Select a schedule...</option>';
-
-                let schedules = [];
-                if (data.data && Array.isArray(data.data)) {
-                    schedules = data.data;
-                } else if (Array.isArray(data)) {
-                    schedules = data;
-                } else if (data.schedules && Array.isArray(data.schedules)) {
-                    schedules = data.schedules;
-                }
-
-                if (schedules.length === 0) {
-                    selectElement.innerHTML = '<option value="">No available schedules</option>';
-                    return;
-                }
-
-                schedules.sort((a, b) => {
-                    const dateA = new Date(a.date + 'T' + a.startTime);
-                    const dateB = new Date(b.date + 'T' + b.startTime);
-                    return dateA - dateB;
-                });
-
-                schedules.forEach(schedule => {
-                    const option = document.createElement('option');
-                    option.value = schedule.id || schedule.idSchedule;
-
-                    const date = formatDate(schedule.date);
-                    const day = schedule.day || getDayFromDate(schedule.date);
-                    const startTime = formatTime(schedule.startTime);
-                    const endTime = formatTime(schedule.endTime);
-
-                    option.textContent = `${day}, ${date} | ${startTime} - ${endTime}`;
-                    selectElement.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Error loading schedules:', error);
-                loadingDiv.classList.add('hidden');
-                errorDiv.textContent = 'Failed to load available schedules. Please try again.';
-                errorDiv.classList.remove('hidden');
-            });
+        ['schedule_error', 'schedule_loading'].forEach(id =>
+            document.getElementById(id).classList.add('hidden')
+        );
     }
 
     function rescheduleReservation() {
@@ -433,72 +300,29 @@
         const newScheduleId = document.getElementById('new_schedule_id').value;
 
         if (!newScheduleId) {
-            showErrorMessage('Please select a new schedule');
+            DashboardManager.showNotification('Please select a new schedule', 'error');
             return;
         }
 
-        updateReservationStatus(reservationId, 'ON_RESCHEDULE', newScheduleId);
+        DashboardManager.updateStatus(reservationId, 'ON_RESCHEDULE', newScheduleId);
         closeRescheduleModal();
     }
 
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    }
-
-    function formatTime(timeString) {
-        const timeParts = timeString.split(':');
-        const hours = timeParts[0];
-        const minutes = timeParts[1];
-        return `${hours}:${minutes}`;
-    }
-
-    function getDayFromDate(dateString) {
-        const date = new Date(dateString);
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        return days[date.getDay()];
-    }
-
-    function showSuccessMessage(message) {
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
-    }
-
-    function showErrorMessage(message) {
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.remove();
-        }, 5000);
-    }
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+    // Modal close handlers
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('rescheduleModal');
+            if (modal && !modal.classList.contains('hidden')) {
+                closeRescheduleModal();
             }
         }
-        return cookieValue;
-    }
+    });
+
+    window.addEventListener('click', (e) => {
+        const modal = document.getElementById('rescheduleModal');
+        if (e.target === modal) {
+            closeRescheduleModal();
+        }
+    });
 </script>
 {% endblock extra_js %}

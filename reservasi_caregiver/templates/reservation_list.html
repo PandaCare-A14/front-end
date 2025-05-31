@@ -23,8 +23,7 @@
         <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2" for="status">Status</label>
-                <select id="status" name="status"
-                    class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                <select id="status" name="status" class="form-select">
                     <option value="">All Statuses</option>
                     <option value="WAITING" {% if is_waiting %}selected{% endif %}>Waiting</option>
                     <option value="APPROVED" {% if is_approved %}selected{% endif %}>Approved</option>
@@ -34,8 +33,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2" for="day">Day</label>
-                <select id="day" name="day"
-                    class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                <select id="day" name="day" class="form-select">
                     <option value="">All Days</option>
                     <option value="MONDAY" {% if "MONDAY" in day_filter %}selected{% endif %}>Monday</option>
                     <option value="TUESDAY" {% if "TUESDAY" in day_filter %}selected{% endif %}>Tuesday</option>
@@ -47,14 +45,12 @@
                 </select>
             </div>
             <div class="flex items-end">
-                <button type="submit"
-                    class="bg-primary text-white px-4 py-2 rounded-lg w-full flex justify-center items-center hover:bg-primary-dark">
+                <button type="submit" class="btn btn-primary w-full">
                     <i class="fas fa-filter mr-2"></i> Apply Filter
                 </button>
             </div>
         </form>
 
-        <!-- Clear Filters -->
         {% if status_filter or day_filter %}
         <div class="mt-3">
             <a href="{% url 'reservasi_caregiver:reservation_list' caregiver_id=caregiver_id %}"
@@ -271,31 +267,11 @@
     </div>
 </div>
 
-<style>
-    .hover\:bg-primary:hover {
-        background-color: #3B82F6;
-    }
-
-    .hover\:bg-primary-dark:hover {
-        background-color: #2563EB;
-    }
-
-    .focus\:ring-primary:focus {
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .focus\:border-primary:focus {
-        border-color: #3B82F6;
-    }
-
-    .container {
-        max-width: 1200px;
-    }
-</style>
 {% endblock content %}
 
 {% block extra_js %}
 <script>
+    // Utility functions
     const Utils = {
         safeValue: (value, fallback = 'Not specified') =>
             value && value !== 'None' && value !== '' ? value : fallback,
@@ -317,26 +293,6 @@
                 const parts = timeString.split(':');
                 return parts.length >= 2 ? `${parts[0]}:${parts[1]}` : timeString;
             } catch { return 'Not set'; }
-        },
-
-        calculateDuration: (startTime, endTime) => {
-            if (!startTime || !endTime || startTime === 'Not set' || endTime === 'Not set') {
-                return 'Not available';
-            }
-            try {
-                const start = new Date(`2000/01/01 ${startTime}`);
-                const end = new Date(`2000/01/01 ${endTime}`);
-                if (isNaN(start.getTime()) || isNaN(end.getTime())) return 'Not available';
-
-                const diffMs = end - start;
-                if (diffMs <= 0) return 'Not available';
-
-                const hours = Math.floor(diffMs / (1000 * 60 * 60));
-                const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-                return hours > 0 && minutes > 0 ? `${hours}h ${minutes}m` :
-                    hours > 0 ? `${hours}h` : `${minutes}m`;
-            } catch { return 'Not available'; }
         },
 
         getCookie: (name) => {
@@ -374,24 +330,7 @@
         }
     };
 
-    const ModalManager = {
-        open: (modalId) => {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.body.classList.add('overflow-hidden');
-            }
-        },
-
-        close: (modalId) => {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-            }
-        }
-    };
-
+    // Notification manager
     const NotificationManager = {
         show: (message, type = 'success') => {
             const colors = { success: 'bg-green-500', error: 'bg-red-500' };
@@ -442,10 +381,6 @@
                             <span class="text-sm font-medium text-gray-500">End Time:</span>
                             <span class="text-sm text-gray-900">${Utils.formatTime(data.endTime)}</span>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm font-medium text-gray-500">Duration:</span>
-                            <span class="text-sm text-gray-900">${Utils.calculateDuration(data.startTime, data.endTime)}</span>
-                        </div>
                     </div>
                 </div>
                 
@@ -479,14 +414,14 @@
         `;
 
             document.getElementById('reservationDetailsContent').innerHTML = content;
-            ModalManager.open('reservationDetailsModal');
+            openModal('reservationDetailsModal');
         },
 
         updateStatus: async (reservationId, status, newScheduleId = null) => {
             const endpoints = {
-                'APPROVED': `/reservations/${reservationId}/approve/`,
-                'REJECTED': `/reservations/${reservationId}/reject/`,
-                'ON_RESCHEDULE': `/reservations/${reservationId}/reschedule/`
+                'APPROVED': `/caregiver-reservation/reservations/${reservationId}/approve/`,
+                'REJECTED': `/caregiver-reservation/reservations/${reservationId}/reject/`,
+                'ON_RESCHEDULE': `/caregiver-reservation/reservations/${reservationId}/reschedule/`
             };
 
             try {
@@ -513,25 +448,6 @@
             }
         },
 
-        approve: (id) => {
-            if (confirm('Are you sure you want to approve this reservation?')) {
-                ReservationManager.updateStatus(id, 'APPROVED');
-            }
-        },
-
-        reject: (id) => {
-            if (confirm('Are you sure you want to reject this reservation?')) {
-                ReservationManager.updateStatus(id, 'REJECTED');
-            }
-        },
-
-        showRescheduleModal: (id) => {
-            document.getElementById('reschedule_reservation_id').value = id;
-            document.getElementById('new_schedule_id').innerHTML = '<option value="">Select a schedule...</option>';
-            ModalManager.open('rescheduleModal');
-            ReservationManager.loadSchedules();
-        },
-
         loadSchedules: async () => {
             const loadingDiv = document.getElementById('schedule_loading');
             const errorDiv = document.getElementById('schedule_error');
@@ -541,7 +457,7 @@
             errorDiv.classList.add('hidden');
 
             try {
-                const response = await fetch(`/api/caregivers/{{ caregiver_id }}/schedules?status=AVAILABLE`);
+                const response = await fetch(`/caregiver-reservation/api/caregivers/{{ caregiver_id }}/schedules?status=AVAILABLE`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
                 const data = await response.json();
@@ -556,7 +472,8 @@
                     .forEach(schedule => {
                         const option = document.createElement('option');
                         option.value = schedule.id || schedule.idSchedule;
-                        option.textContent = `${schedule.day || 'Unknown'}, ${Utils.formatDate(schedule.date)} | ${Utils.formatTime(schedule.startTime)} - ${Utils.formatTime(schedule.endTime)}`;
+                        const dayName = schedule.day || new Date(schedule.date).toLocaleDateString('en-US', { weekday: 'short' });
+                        option.textContent = `${dayName}, ${Utils.formatDate(schedule.date)} | ${Utils.formatTime(schedule.startTime)} - ${Utils.formatTime(schedule.endTime)}`;
                         selectElement.appendChild(option);
                     });
             } catch (error) {
@@ -564,26 +481,44 @@
                 errorDiv.textContent = 'Failed to load available schedules. Please try again.';
                 errorDiv.classList.remove('hidden');
             }
-        },
-
-        reschedule: () => {
-            const reservationId = document.getElementById('reschedule_reservation_id').value;
-            const newScheduleId = document.getElementById('new_schedule_id').value;
-
-            if (!newScheduleId) {
-                NotificationManager.show('Please select a new schedule', 'error');
-                return;
-            }
-
-            ReservationManager.updateStatus(reservationId, 'ON_RESCHEDULE', newScheduleId);
-            ModalManager.close('rescheduleModal');
         }
     };
 
-    function openModal(modalId) { ModalManager.open(modalId); }
-    function closeModal(modalId) { ModalManager.close(modalId); }
-    function closeRescheduleModal() { ModalManager.close('rescheduleModal'); }
-    function rescheduleReservation() { ReservationManager.reschedule(); }
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+    }
+
+    function closeRescheduleModal() {
+        closeModal('rescheduleModal');
+        ['schedule_error', 'schedule_loading'].forEach(id =>
+            document.getElementById(id).classList.add('hidden')
+        );
+    }
+
+    function rescheduleReservation() {
+        const reservationId = document.getElementById('reschedule_reservation_id').value;
+        const newScheduleId = document.getElementById('new_schedule_id').value;
+
+        if (!newScheduleId) {
+            NotificationManager.show('Please select a new schedule', 'error');
+            return;
+        }
+
+        ReservationManager.updateStatus(reservationId, 'ON_RESCHEDULE', newScheduleId);
+        closeRescheduleModal();
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.reservation-details-btn').forEach(button => {
@@ -603,19 +538,26 @@
 
         document.querySelectorAll('.approve-btn').forEach(button => {
             button.addEventListener('click', function () {
-                ReservationManager.approve(this.dataset.reservationId);
+                if (confirm('Are you sure you want to approve this reservation?')) {
+                    ReservationManager.updateStatus(this.dataset.reservationId, 'APPROVED');
+                }
             });
         });
 
         document.querySelectorAll('.reschedule-btn').forEach(button => {
             button.addEventListener('click', function () {
-                ReservationManager.showRescheduleModal(this.dataset.reservationId);
+                document.getElementById('reschedule_reservation_id').value = this.dataset.reservationId;
+                document.getElementById('new_schedule_id').innerHTML = '<option value="">Select a schedule...</option>';
+                openModal('rescheduleModal');
+                ReservationManager.loadSchedules();
             });
         });
 
         document.querySelectorAll('.reject-btn').forEach(button => {
             button.addEventListener('click', function () {
-                ReservationManager.reject(this.dataset.reservationId);
+                if (confirm('Are you sure you want to reject this reservation?')) {
+                    ReservationManager.updateStatus(this.dataset.reservationId, 'REJECTED');
+                }
             });
         });
 
@@ -624,7 +566,7 @@
                 ['reservationDetailsModal', 'rescheduleModal'].forEach(id => {
                     const modal = document.getElementById(id);
                     if (modal && !modal.classList.contains('hidden')) {
-                        ModalManager.close(id);
+                        closeModal(id);
                     }
                 });
             }
@@ -634,10 +576,57 @@
             ['reservationDetailsModal', 'rescheduleModal'].forEach(modalId => {
                 const modal = document.getElementById(modalId);
                 if (e.target === modal) {
-                    ModalManager.close(modalId);
+                    closeModal(modalId);
                 }
             });
         });
     });
 </script>
 {% endblock extra_js %}
+
+{% block extra_style %}
+<style>
+    .form-select {
+        @apply w-full p-2 border border-gray-300 rounded-lg;
+        transition: all 0.2s ease;
+    }
+
+    .form-select:focus {
+        @apply ring-2 ring-primary border-primary;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .btn {
+        @apply px-4 py-2 rounded-lg flex justify-center items-center transition-colors;
+        font-weight: 500;
+    }
+
+    .btn-primary {
+        @apply bg-primary text-white;
+    }
+
+    .btn-primary:hover {
+        background-color: #2563EB;
+    }
+
+    .hover\:bg-primary:hover {
+        background-color: #3B82F6;
+    }
+
+    .hover\:bg-primary-dark:hover {
+        background-color: #2563EB;
+    }
+
+    .focus\:ring-primary:focus {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .focus\:border-primary:focus {
+        border-color: #3B82F6;
+    }
+
+    .container {
+        max-width: 1200px;
+    }
+</style>
+{% endblock extra_style %}
