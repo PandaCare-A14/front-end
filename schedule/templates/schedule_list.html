@@ -11,26 +11,24 @@
 
 {% block content %}
 <div class="flex-grow container mx-auto p-6 max-w-7xl">
+    <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
             <h3 class="text-2xl font-bold text-gray-800">My Schedules</h3>
             <p class="text-sm text-gray-600">Manage your availability</p>
         </div>
-        <div class="flex space-x-3">
-            <a href="{% url 'schedule:schedule_create' user_id %}"
-                class="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-primary-dark transition-all">
-                <i class="fas fa-plus mr-1"></i> Create Schedule
-            </a>
-        </div>
+        <a href="{% url 'schedule:schedule_create' user_id %}" class="btn-primary">
+            <i class="fas fa-plus mr-1"></i> Create Schedule
+        </a>
     </div>
 
+    <!-- Filter Form -->
     <div class="card bg-white p-5 mb-6">
         <h3 class="font-medium mb-4">Filter Schedules</h3>
         <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2" for="status">Status</label>
-                <select id="status" name="status"
-                    class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                <label class="form-label" for="status">Status</label>
+                <select id="status" name="status" class="form-select">
                     <option value="">All Statuses</option>
                     <option value="AVAILABLE" {% if "AVAILABLE" in status_filter %}selected{% endif %}>Available
                     </option>
@@ -40,9 +38,8 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2" for="day">Day</label>
-                <select id="day" name="day"
-                    class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                <label class="form-label" for="day">Day</label>
+                <select id="day" name="day" class="form-select">
                     <option value="">All Days</option>
                     <option value="MONDAY" {% if "MONDAY" in day_filter %}selected{% endif %}>Monday</option>
                     <option value="TUESDAY" {% if "TUESDAY" in day_filter %}selected{% endif %}>Tuesday</option>
@@ -54,8 +51,7 @@
                 </select>
             </div>
             <div class="flex items-end">
-                <button type="submit"
-                    class="bg-primary text-white px-4 py-2 rounded-lg w-full flex justify-center items-center hover:bg-primary-dark">
+                <button type="submit" class="btn-primary w-full">
                     <i class="fas fa-filter mr-2"></i> Apply Filter
                 </button>
             </div>
@@ -63,16 +59,16 @@
 
         {% if status_filter or day_filter %}
         <div class="mt-3">
-            <a href="{% url 'schedule:schedule_list' caregiver_id=caregiver_id %}"
-                class="text-sm text-gray-600 hover:text-gray-800">
+            <a href="{% url 'schedule:schedule_list' caregiver_id=caregiver_id %}" class="clear-link">
                 <i class="fas fa-times mr-1"></i> Clear All Filters
             </a>
         </div>
         {% endif %}
     </div>
 
+    <!-- Results Summary -->
     {% if status_filter or day_filter %}
-    <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-4">
+    <div class="info-banner">
         <p class="text-sm">
             <i class="fas fa-info-circle mr-2"></i>
             Showing {{ total_schedules }} schedule{% if total_schedules != 1 %}s{% endif %}
@@ -82,6 +78,7 @@
     </div>
     {% endif %}
 
+    <!-- Schedules List -->
     <div class="space-y-4">
         {% if schedules %}
         {% for schedule in schedules %}
@@ -89,13 +86,11 @@
             <div class="flex justify-between items-start">
                 <div class="flex-1">
                     <div class="flex items-center mb-3">
-                        <div class="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                        <div class="icon-wrapper">
                             <i class="fas fa-calendar-alt text-blue-600 text-lg"></i>
                         </div>
                         <div>
-                            <h3 class="font-semibold text-gray-900">
-                                {{ schedule.day|title }} Schedule
-                            </h3>
+                            <h3 class="font-semibold text-gray-900">{{ schedule.day|title }} Schedule</h3>
                             <p class="text-sm text-gray-500">
                                 <i class="fas fa-clock mr-1"></i>
                                 {% if schedule.date %}
@@ -110,7 +105,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-blue-50 p-3 rounded-lg mb-3">
+                    <div class="info-box">
                         <p class="text-sm text-blue-800">
                             <i class="fas fa-info-circle mr-2"></i>
                             <strong>ID:</strong> {{ schedule.id }}
@@ -125,34 +120,19 @@
                 </div>
 
                 <div class="flex flex-col items-end space-y-3">
-                    <span class="status-badge px-3 py-2 text-sm font-medium rounded-full
-                        {% if schedule.status == 'AVAILABLE' %}bg-green-100 text-green-800
-                        {% elif schedule.status == 'UNAVAILABLE' %}bg-red-100 text-red-800
-                        {% elif schedule.status == 'INACTIVE' %}bg-gray-100 text-gray-800
-                        {% else %}bg-blue-100 text-blue-800{% endif %}">
-                        {% if schedule.status == 'AVAILABLE' %}
-                        <i class="fas fa-check-circle mr-1"></i> Available
-                        {% elif schedule.status == 'UNAVAILABLE' %}
-                        <i class="fas fa-times-circle mr-1"></i> Unavailable
-                        {% elif schedule.status == 'INACTIVE' %}
-                        <i class="fas fa-pause-circle mr-1"></i> Inactive
-                        {% else %}
-                        <i class="fas fa-calendar mr-1"></i> {{ schedule.status }}
-                        {% endif %}
-                    </span>
+                    <!-- Status Badge -->
+                    <span class="status-badge" data-status="{{ schedule.status }}">{{ schedule.status }}</span>
 
+                    <!-- Action Buttons -->
                     <div class="flex space-x-2">
-                        <button
-                            onclick="showScheduleDetails('{{ schedule.id }}', '{{ schedule.date }}', '{{ schedule.day }}', '{{ schedule.startTime }}', '{{ schedule.endTime }}', '{{ schedule.status }}')"
-                            class="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-gray-100"
-                            title="View Details">
+                        <button class="action-btn view-btn" data-id="{{ schedule.id }}" data-date="{{ schedule.date }}"
+                            data-day="{{ schedule.day }}" data-start="{{ schedule.startTime }}"
+                            data-end="{{ schedule.endTime }}" data-status="{{ schedule.status }}" title="View Details">
                             <i class="fas fa-eye"></i>
                         </button>
 
                         {% if schedule.status == 'AVAILABLE' %}
-                        <button onclick="confirmDeleteSchedule('{{ schedule.id }}')"
-                            class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50"
-                            title="Delete Schedule">
+                        <button class="action-btn delete-btn" data-id="{{ schedule.id }}" title="Delete Schedule">
                             <i class="fas fa-trash"></i>
                         </button>
                         {% endif %}
@@ -187,196 +167,367 @@
                 You haven't created any schedules yet.
                 {% endif %}
             </p>
-            {% if status_filter or day_filter %}
-            <a href="{% url 'schedule:schedule_list' caregiver_id=caregiver_id %}"
-                class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 mr-3">
-                <i class="fas fa-times mr-2"></i> Clear Filters
-            </a>
-            {% endif %}
-            <a href="{% url 'schedule:schedule_create' caregiver_id=caregiver_id %}"
-                class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark">
-                <i class="fas fa-plus mr-2"></i> Create New Schedule
-            </a>
+            <div class="space-x-3">
+                {% if status_filter or day_filter %}
+                <a href="{% url 'schedule:schedule_list' caregiver_id=caregiver_id %}" class="btn-secondary">
+                    <i class="fas fa-times mr-2"></i> Clear Filters
+                </a>
+                {% endif %}
+                <a href="{% url 'schedule:schedule_create' caregiver_id=caregiver_id %}" class="btn-primary">
+                    <i class="fas fa-plus mr-2"></i> Create New Schedule
+                </a>
+            </div>
         </div>
         {% endif %}
     </div>
 </div>
 
-<div id="scheduleDetailsModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="fixed inset-0 bg-black opacity-50" onclick="closeModal('scheduleDetailsModal')"></div>
-        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h3 class="text-lg font-medium">Schedule Details</h3>
-                <button type="button" onclick="closeModal('scheduleDetailsModal')"
-                    class="text-gray-400 hover:text-gray-500">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="p-6">
-                <div id="scheduleDetailsContent"></div>
-                <div class="flex justify-end space-x-3 mt-6 pt-4 border-t">
-                    <button onclick="closeModal('scheduleDetailsModal')"
-                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                        Close
-                    </button>
-                </div>
-            </div>
+<!-- Modals -->
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Schedule Details</h3>
+            <button class="close-btn" onclick="closeModal('detailsModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="detailsContent"></div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('detailsModal')" class="btn-secondary">Close</button>
         </div>
     </div>
 </div>
 
-<div id="deleteConfirmModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="fixed inset-0 bg-black opacity-50" onclick="closeModal('deleteConfirmModal')"></div>
-        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h3 class="text-lg font-medium">Delete Schedule</h3>
-                <button type="button" onclick="closeModal('deleteConfirmModal')"
-                    class="text-gray-400 hover:text-gray-500">
-                    <i class="fas fa-times"></i>
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Delete Schedule</h3>
+            <button class="close-btn" onclick="closeModal('deleteModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body text-center">
+            <div class="text-red-500 mb-4">
+                <i class="fas fa-exclamation-triangle text-4xl"></i>
+            </div>
+            <h4 class="text-lg font-medium text-gray-900 mb-2">Are you sure?</h4>
+            <p class="text-gray-600 mb-6">This action cannot be undone. This will permanently delete the schedule.</p>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeModal('deleteModal')" class="btn-secondary">Cancel</button>
+            <form id="deleteForm" method="post" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger">
+                    <i class="fas fa-trash mr-1"></i> Delete Schedule
                 </button>
-            </div>
-            <div class="p-6">
-                <div class="text-center">
-                    <div class="text-red-500 mb-4">
-                        <i class="fas fa-exclamation-triangle text-4xl"></i>
-                    </div>
-                    <h4 class="text-lg font-medium text-gray-900 mb-2">Are you sure?</h4>
-                    <p class="text-gray-600 mb-6">This action cannot be undone. This will permanently delete the
-                        schedule.</p>
-                </div>
-                <div class="flex justify-end space-x-3">
-                    <button onclick="closeModal('deleteConfirmModal')"
-                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                        Cancel
-                    </button>
-                    <form id="deleteForm" method="post" class="inline">
-                        {% csrf_token %}
-                        <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                            <i class="fas fa-trash mr-1"></i> Delete Schedule
-                        </button>
-                    </form>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
-{% endblock content %}
 
-{% block extra_style %}
 <style>
-    .hover\:bg-primary:hover {
-        background-color: #3B82F6;
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.5rem;
     }
 
-    .hover\:bg-primary-dark:hover {
-        background-color: #2563EB;
+    .form-select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
     }
 
-    .focus\:ring-primary:focus {
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        text-decoration: none;
     }
 
-    .focus\:border-primary:focus {
-        border-color: #3B82F6;
+    .btn-primary {
+        background: #1A76D2;
+        color: white;
     }
 
-    .container {
-        max-width: 1200px;
+    .btn-primary:hover {
+        background: #0D5CAB;
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+    }
+
+    .btn-danger {
+        background: #dc2626;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #b91c1c;
+    }
+
+    .clear-link {
+        font-size: 0.875rem;
+        color: #6b7280;
+        text-decoration: none;
+    }
+
+    .clear-link:hover {
+        color: #374151;
+    }
+
+    .info-banner {
+        background: #dbeafe;
+        border: 1px solid #93c5fd;
+        color: #1d4ed8;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .icon-wrapper {
+        height: 3rem;
+        width: 3rem;
+        background: #dbeafe;
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+
+    .info-box {
+        background: #eff6ff;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .status-badge {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: 9999px;
+    }
+
+    .action-btn {
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .view-btn {
+        color: #1A76D2;
+    }
+
+    .view-btn:hover {
+        background: #f3f4f6;
+    }
+
+    .delete-btn {
+        color: #dc2626;
+    }
+
+    .delete-btn:hover {
+        background: #fef2f2;
+    }
+
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+    }
+
+    .modal.show {
+        display: flex;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 0.5rem;
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        padding: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 0.25rem;
+    }
+
+    .close-btn:hover {
+        color: #374151;
     }
 </style>
-{% endblock extra_style %}
+{% endblock content %}
 
 {% block extra_js %}
 <script>
-    function openModal(modalId) {
-        document.getElementById(modalId).classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
+    // Configuration
+    const STATUS_CONFIG = {
+        AVAILABLE: { label: 'Available', icon: 'fas fa-check-circle', class: 'bg-green-100 text-green-800' },
+        UNAVAILABLE: { label: 'Unavailable', icon: 'fas fa-times-circle', class: 'bg-red-100 text-red-800' },
+        INACTIVE: { label: 'Inactive', icon: 'fas fa-pause-circle', class: 'bg-gray-100 text-gray-800' }
+    };
+
+    const MODAL_IDS = ['detailsModal', 'deleteModal'];
+
+    const Utils = {
+        formatDate: (date) => {
+            if (!date || date === 'Not set' || date === '') return 'Recurring schedule';
+            try {
+                return new Date(date).toLocaleDateString('en-US', {
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                });
+            } catch {
+                return 'Recurring schedule';
+            }
+        },
+
+        getStatusConfig: (status) => STATUS_CONFIG[status] || {
+            label: status, icon: 'fas fa-calendar', class: 'bg-blue-100 text-blue-800'
+        }
+    };
+
+    // Modal functions
+    function openModal(id) {
+        document.getElementById(id).classList.add('show');
+        document.body.style.overflow = 'hidden';
     }
 
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('show');
+        document.body.style.overflow = '';
     }
 
-    function showScheduleDetails(id, date, day, startTime, endTime, status) {
-        const formatDate = (date && date !== 'Not set' && date !== '') ?
-            new Date(date).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            }) : 'Recurring schedule';
+    // Show schedule details
+    function showDetails(data) {
+        const statusConfig = Utils.getStatusConfig(data.status);
 
-        document.getElementById('scheduleDetailsContent').innerHTML = `
+        document.getElementById('detailsContent').innerHTML = `
             <div class="space-y-4">
-                <div class="flex justify-between">
-                    <span class="text-sm font-medium text-gray-500">Schedule ID:</span>
-                    <span class="text-sm text-gray-900">${id}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-sm font-medium text-gray-500">Day:</span>
-                    <span class="text-sm text-gray-900">${day}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-sm font-medium text-gray-500">Date:</span>
-                    <span class="text-sm text-gray-900">${formatDate}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-sm font-medium text-gray-500">Start Time:</span>
-                    <span class="text-sm text-gray-900">${startTime}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-sm font-medium text-gray-500">End Time:</span>
-                    <span class="text-sm text-gray-900">${endTime}</span>
-                </div>
+                ${[
+                ['Schedule ID', data.id],
+                ['Day', data.day],
+                ['Date', Utils.formatDate(data.date)],
+                ['Start Time', data.start],
+                ['End Time', data.end]
+            ].map(([label, value]) => `
+                    <div class="flex justify-between">
+                        <span class="text-sm font-medium text-gray-500">${label}:</span>
+                        <span class="text-sm text-gray-900">${value}</span>
+                    </div>
+                `).join('')}
                 <div class="flex justify-between">
                     <span class="text-sm font-medium text-gray-500">Status:</span>
-                    <span class="status-badge px-2 py-1 text-xs font-medium rounded-full ${getStatusClass(status)}">${status}</span>
+                    <span class="status-badge px-2 py-1 text-xs font-medium rounded-full ${statusConfig.class}">
+                        <i class="${statusConfig.icon} mr-1"></i>${statusConfig.label}
+                    </span>
                 </div>
             </div>
         `;
 
-        openModal('scheduleDetailsModal');
+        openModal('detailsModal');
     }
 
-    function getStatusClass(status) {
-        const classes = {
-            'AVAILABLE': 'bg-green-100 text-green-800',
-            'UNAVAILABLE': 'bg-red-100 text-red-800',
-            'INACTIVE': 'bg-gray-100 text-gray-800'
-        };
-        return classes[status] || 'bg-blue-100 text-blue-800';
-    }
-
-    function confirmDeleteSchedule(scheduleId) {
+    // Delete confirmation
+    function confirmDelete(scheduleId) {
         const deleteForm = document.getElementById('deleteForm');
-        const caregiverId = '{{ caregiver_id }}';
-        deleteForm.action = `/schedule/schedules/${caregiverId}/${scheduleId}/delete/`;
-        openModal('deleteConfirmModal');
+        deleteForm.action = `/schedule/schedules/{{ caregiver_id }}/${scheduleId}/delete/`;
+        openModal('deleteModal');
     }
 
-    window.addEventListener('click', function (event) {
-        const modals = ['scheduleDetailsModal', 'deleteConfirmModal'];
-        modals.forEach(modalId => {
-            const modal = document.getElementById(modalId);
-            if (event.target === modal) {
-                closeModal(modalId);
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function () {
+        // Apply status badge styles
+        document.querySelectorAll('.status-badge').forEach(badge => {
+            const status = badge.dataset.status;
+            const config = Utils.getStatusConfig(status);
+            badge.className = `status-badge ${config.class}`;
+            badge.innerHTML = `<i class="${config.icon} mr-1"></i>${config.label}`;
+        });
+
+        // Bind view buttons
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', () => showDetails({
+                id: btn.dataset.id,
+                date: btn.dataset.date,
+                day: btn.dataset.day,
+                start: btn.dataset.start,
+                end: btn.dataset.end,
+                status: btn.dataset.status
+            }));
+        });
+
+        // Bind delete buttons
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', () => confirmDelete(btn.dataset.id));
+        });
+
+        // Close modals on outside click
+        MODAL_IDS.forEach(modalId => {
+            document.getElementById(modalId).addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) closeModal(modalId);
+            });
+        });
+
+        // Close modals on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                MODAL_IDS.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (modal.classList.contains('show')) closeModal(modalId);
+                });
             }
         });
-    });
-
-    window.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') {
-            const modals = ['scheduleDetailsModal', 'deleteConfirmModal'];
-            modals.forEach(modalId => {
-                const modal = document.getElementById(modalId);
-                if (modal && !modal.classList.contains('hidden')) {
-                    closeModal(modalId);
-                }
-            });
-        }
     });
 </script>
 {% endblock extra_js %}

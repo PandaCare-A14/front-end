@@ -1,14 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block meta %}
 <title>Caregiver Schedule</title>
 {% endblock meta %}
-
 {% block navbar %}
 {% include "components/navbar.html" with is_logged_in=True user_role="caregiver" %}
 {% endblock navbar %}
-
 {% block content %}
 
 <body class="min-h-screen flex flex-col">
@@ -89,47 +86,8 @@
                     <!-- Days Selection -->
                     <div class="mb-5">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Select Days</label>
-                        <div class="flex flex-wrap gap-2">
-                            <div class="flex flex-wrap gap-2">
-                                <div class="day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm"
-                                    role="button" tabindex="0" data-day="MONDAY" onclick="toggleDay(this)"
-                                    onkeydown="if(event.key==='Enter'||event.key===' ') toggleDay(this)">
-                                    Mon
-                                </div>
-                                <div class="day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm"
-                                    role="button" tabindex="0" data-day="TUESDAY" onclick="toggleDay(this)"
-                                    onkeydown="if(event.key==='Enter'||event.key===' ') toggleDay(this)">
-                                    Tue
-                                </div>
-                                <div class="day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm"
-                                    role="button" tabindex="0" data-day="WEDNESDAY" onclick="toggleDay(this)"
-                                    onkeydown="if(event.key==='Enter'||event.key===' ') toggleDay(this)">
-                                    Wed
-                                </div>
-                                <div class="day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm"
-                                    role="button" tabindex="0" data-day="THURSDAY" onclick="toggleDay(this)"
-                                    onkeydown="if(event.key==='Enter'||event.key===' ') toggleDay(this)">
-                                    Thu
-                                </div>
-                                <div class="day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm"
-                                    role="button" tabindex="0" data-day="FRIDAY" onclick="toggleDay(this)"
-                                    onkeydown="if(event.key==='Enter'||event.key===' ') toggleDay(this)">
-                                    Fri
-                                </div>
-                                <div class="day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm"
-                                    role="button" tabindex="0" data-day="SATURDAY" onclick="toggleDay(this)"
-                                    onkeydown="if(event.key==='Enter'||event.key===' ') toggleDay(this)">
-                                    Sat
-                                </div>
-                                <div class="day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm"
-                                    role="button" tabindex="0" data-day="SUNDAY" onclick="toggleDay(this)"
-                                    onkeydown="if(event.key==='Enter'||event.key===' ') toggleDay(this)">
-                                    Sun
-                                </div>
-                            </div>
-                        </div>
+                        <div id="manualDaysContainer" class="flex flex-wrap gap-2"></div>
                     </div>
-
                     <!-- Time Selection -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                         <div>
@@ -144,7 +102,6 @@
                                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
                         </div>
                     </div>
-
                     <!-- Repeat -->
                     <div class="mb-5">
                         <label class="block text-sm font-medium text-gray-700 mb-2" for="repeatWeeks">Repeat
@@ -159,24 +116,8 @@
                     <!-- Days Selection -->
                     <div class="mb-5">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Select Days</label>
-                        <div class="flex flex-wrap gap-2">
-                            <div class="day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm"
-                                data-day="MONDAY" onclick="toggleDay(this)">Mon</div>
-                            <div class="day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm"
-                                data-day="TUESDAY" onclick="toggleDay(this)">Tue</div>
-                            <div class="day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm"
-                                data-day="WEDNESDAY" onclick="toggleDay(this)">Wed</div>
-                            <div class="day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm"
-                                data-day="THURSDAY" onclick="toggleDay(this)">Thu</div>
-                            <div class="day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm"
-                                data-day="FRIDAY" onclick="toggleDay(this)">Fri</div>
-                            <div class="day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm"
-                                data-day="SATURDAY" onclick="toggleDay(this)">Sat</div>
-                            <div class="day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm"
-                                data-day="SUNDAY" onclick="toggleDay(this)">Sun</div>
-                        </div>
+                        <div id="intervalDaysContainer" class="flex flex-wrap gap-2"></div>
                     </div>
-
                     <!-- Time Selection -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                         <div>
@@ -192,7 +133,6 @@
                                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
                         </div>
                     </div>
-
                     <!-- Repeat -->
                     <div class="mb-5">
                         <label class="block text-sm font-medium text-gray-700 mb-2" for="repeatWeeksInterval">Repeat
@@ -229,20 +169,52 @@
     </div>
 
     <script>
-        // Utility functions
+        const DAYS_CONFIG = [
+            { value: 'MONDAY', label: 'Mon' },
+            { value: 'TUESDAY', label: 'Tue' },
+            { value: 'WEDNESDAY', label: 'Wed' },
+            { value: 'THURSDAY', label: 'Thu' },
+            { value: 'FRIDAY', label: 'Fri' },
+            { value: 'SATURDAY', label: 'Sat' },
+            { value: 'SUNDAY', label: 'Sun' }
+        ];
+
+        function createDayChips() {
+            const manualContainer = document.getElementById('manualDaysContainer');
+            const intervalContainer = document.getElementById('intervalDaysContainer');
+
+            DAYS_CONFIG.forEach(day => {
+                const manualChip = createDayChip(day.value, day.label);
+                manualContainer.appendChild(manualChip);
+
+                const intervalChip = createDayChip(day.value, day.label);
+                intervalContainer.appendChild(intervalChip);
+            });
+        }
+
+        function createDayChip(value, label) {
+            const chip = document.createElement('div');
+            chip.className = 'day-chip cursor-pointer rounded-full px-4 py-2 border border-gray-300 text-sm';
+            chip.setAttribute('role', 'button');
+            chip.setAttribute('tabindex', '0');
+            chip.setAttribute('data-day', value);
+            chip.textContent = label;
+            chip.onclick = () => toggleDay(chip);
+            chip.onkeydown = (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    toggleDay(chip);
+                }
+            };
+            return chip;
+        }
+
         function showError(message) {
             const errorAlert = document.getElementById('errorAlert');
             const errorMessage = document.getElementById('errorMessage');
             errorMessage.textContent = message;
             errorAlert.classList.remove('hidden');
-
-            // Hide success alert if visible
             document.getElementById('successAlert').classList.add('hidden');
-
-            // Auto hide after 5 seconds
-            setTimeout(() => {
-                errorAlert.classList.add('hidden');
-            }, 5000);
+            setTimeout(() => errorAlert.classList.add('hidden'), 5000);
         }
 
         function showSuccess(message) {
@@ -250,14 +222,8 @@
             const successMessage = document.getElementById('successMessage');
             successMessage.textContent = message;
             successAlert.classList.remove('hidden');
-
-            // Hide error alert if visible
             document.getElementById('errorAlert').classList.add('hidden');
-
-            // Auto hide after 3 seconds
-            setTimeout(() => {
-                successAlert.classList.add('hidden');
-            }, 3000);
+            setTimeout(() => successAlert.classList.add('hidden'), 3000);
         }
 
         function hideAlerts() {
@@ -265,94 +231,79 @@
             document.getElementById('successAlert').classList.add('hidden');
         }
 
-        // Toggle between tabs
         function switchTab(tab) {
-            const tabManual = document.getElementById('tabManual');
-            const tabInterval = document.getElementById('tabInterval');
-            const manualForm = document.getElementById('manualForm');
-            const intervalForm = document.getElementById('intervalForm');
+            const elements = {
+                tabManual: document.getElementById('tabManual'),
+                tabInterval: document.getElementById('tabInterval'),
+                manualForm: document.getElementById('manualForm'),
+                intervalForm: document.getElementById('intervalForm')
+            };
 
             hideAlerts();
 
             if (tab === 'manual') {
-                tabManual.classList.add('tab-active');
-                tabManual.classList.remove('text-gray-500');
-                tabInterval.classList.remove('tab-active');
-                tabInterval.classList.add('text-gray-500');
-                manualForm.classList.remove('hidden');
-                intervalForm.classList.add('hidden');
+                elements.tabManual.classList.add('tab-active');
+                elements.tabManual.classList.remove('text-gray-500');
+                elements.tabInterval.classList.remove('tab-active');
+                elements.tabInterval.classList.add('text-gray-500');
+                elements.manualForm.classList.remove('hidden');
+                elements.intervalForm.classList.add('hidden');
             } else {
-                tabInterval.classList.add('tab-active');
-                tabInterval.classList.remove('text-gray-500');
-                tabManual.classList.remove('tab-active');
-                tabManual.classList.add('text-gray-500');
-                intervalForm.classList.remove('hidden');
-                manualForm.classList.add('hidden');
+                elements.tabInterval.classList.add('tab-active');
+                elements.tabInterval.classList.remove('text-gray-500');
+                elements.tabManual.classList.remove('tab-active');
+                elements.tabManual.classList.add('text-gray-500');
+                elements.intervalForm.classList.remove('hidden');
+                elements.manualForm.classList.add('hidden');
             }
-
             updatePreview();
         }
 
-        // Toggle day selection
         function toggleDay(element) {
             element.classList.toggle('selected');
             updatePreview();
         }
 
-        // Update preview
         function updatePreview() {
             const preview = document.getElementById('schedulePreview');
             const isManual = !document.getElementById('manualForm').classList.contains('hidden');
 
-            // Get selected days
             const activeForm = isManual ? 'manualForm' : 'intervalForm';
-            const selectedDays = [];
-            document.querySelectorAll(`#${activeForm} .day-chip.selected`).forEach(day => {
-                const displayName = day.textContent.trim();
-                selectedDays.push(displayName);
-            });
+            const selectedDays = Array.from(document.querySelectorAll(`#${activeForm} .day-chip.selected`))
+                .map(day => day.textContent.trim());
 
-            const startTimeId = isManual ? 'startTime' : 'intervalStartTime';
-            const endTimeId = isManual ? 'endTime' : 'intervalEndTime';
-            const startTime = document.getElementById(startTimeId).value;
-            const endTime = document.getElementById(endTimeId).value;
-            const repeatWeeks = document.getElementById(isManual ? 'repeatWeeks' : 'repeatWeeksInterval').value;
+            const timeIds = isManual
+                ? { start: 'startTime', end: 'endTime', weeks: 'repeatWeeks' }
+                : { start: 'intervalStartTime', end: 'intervalEndTime', weeks: 'repeatWeeksInterval' };
 
-            if (selectedDays.length === 0 || !startTime || !endTime) {
+            const startTime = document.getElementById(timeIds.start).value;
+            const endTime = document.getElementById(timeIds.end).value;
+            const repeatWeeks = document.getElementById(timeIds.weeks).value;
+
+            if (!selectedDays.length || !startTime || !endTime) {
                 preview.innerHTML = '<p class="text-gray-500 italic">Select days and times to see your schedule preview</p>';
                 return;
             }
 
-            let previewContent = '';
+            let previewContent = `
+                <p><span class="font-medium">Days:</span> ${selectedDays.join(', ')}</p>
+                <p><span class="font-medium">Time${isManual ? '' : ' range'}:</span> ${formatTime(startTime)} - ${formatTime(endTime)}</p>
+                <p><span class="font-medium">Repeats for:</span> ${repeatWeeks} week(s)</p>
+            `;
 
-            if (isManual) {
-                previewContent = `
-                    <p><span class="font-medium">Days:</span> ${selectedDays.join(', ')}</p>
-                    <p><span class="font-medium">Time:</span> ${formatTime(startTime)} - ${formatTime(endTime)}</p>
-                    <p><span class="font-medium">Repeats for:</span> ${repeatWeeks} week(s)</p>
-                `;
-            } else {
-                previewContent = `
-                    <p><span class="font-medium">Days:</span> ${selectedDays.join(', ')}</p>
-                    <p><span class="font-medium">Time range:</span> ${formatTime(startTime)} - ${formatTime(endTime)}</p>
-                    <p><span class="font-medium">Appointment duration:</span> 30 minutes (auto-managed)</p>
-                    <p><span class="font-medium">Repeats for:</span> ${repeatWeeks} week(s)</p>
-                `;
+            if (!isManual) {
+                previewContent += '<p><span class="font-medium">Appointment duration:</span> 30 minutes (auto-managed)</p>';
 
-                if (startTime && endTime) {
-                    const start = new Date(`2025-01-01T${startTime}`);
-                    const end = new Date(`2025-01-01T${endTime}`);
-                    const totalMinutes = (end - start) / (1000 * 60);
-                    const appointments = Math.floor(totalMinutes / 30); // 30 minutes per appointment
-
-                    previewContent += `<p><span class="font-medium">Approximate appointments per day:</span> ${appointments}</p>`;
-                }
+                const start = new Date(`2025-01-01T${startTime}`);
+                const end = new Date(`2025-01-01T${endTime}`);
+                const totalMinutes = (end - start) / (1000 * 60);
+                const appointments = Math.floor(totalMinutes / 30);
+                previewContent += `<p><span class="font-medium">Approximate appointments per day:</span> ${appointments}</p>`;
             }
 
             preview.innerHTML = previewContent;
         }
 
-        // Format time to 12-hour format
         function formatTime(time) {
             if (!time) return '';
             const [hours, minutes] = time.split(':');
@@ -362,35 +313,21 @@
             return `${formattedHours}:${minutes} ${period}`;
         }
 
-        // Function to get CSRF token from cookies
         function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [cookieName, cookieValue] = cookie.trim().split('=');
+                if (cookieName === name) {
+                    return decodeURIComponent(cookieValue);
                 }
             }
-            return cookieValue;
+            return null;
         }
 
-        // Submit a single schedule
         function submitSchedule(day, startTime, endTime, weeks, isInterval) {
-            const data = {
-                day: day,
-                startTime: startTime,
-                endTime: endTime,
-                weeks: weeks,
-                isInterval: isInterval
-            };
-
+            const data = { day, startTime, endTime, weeks, isInterval };
             console.log('Submitting schedule data:', data);
 
-            // Send the data to the API
             return fetch(window.location.pathname, {
                 method: 'POST',
                 headers: {
@@ -399,13 +336,7 @@
                 },
                 body: JSON.stringify(data)
             })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    return response.json().then(data => ({
-                        status: response.status,
-                        data: data
-                    }));
-                })
+                .then(response => response.json().then(data => ({ status: response.status, data })))
                 .catch(error => {
                     console.error('Fetch error:', error);
                     throw error;
@@ -413,6 +344,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            createDayChips();
+
             ['startTime', 'endTime', 'intervalStartTime', 'intervalEndTime'].forEach(id => {
                 const element = document.getElementById(id);
                 if (element) element.addEventListener('change', updatePreview);
@@ -425,152 +358,142 @@
 
             const saveButton = document.getElementById('saveScheduleBtn');
             if (saveButton) {
-                saveButton.addEventListener('click', function () {
-                    hideAlerts();
-
-                    const isManual = !document.getElementById('manualForm').classList.contains('hidden');
-                    const activeForm = isManual ? 'manualForm' : 'intervalForm';
-
-                    const selectedDays = [];
-                    document.querySelectorAll(`#${activeForm} .day-chip.selected`).forEach(day => {
-                        selectedDays.push(day.dataset.day);
-                    });
-
-                    if (selectedDays.length === 0) {
-                        showError('Please select at least one day');
-                        return;
-                    }
-
-                    const startTimeId = isManual ? 'startTime' : 'intervalStartTime';
-                    const endTimeId = isManual ? 'endTime' : 'intervalEndTime';
-                    const startTime = document.getElementById(startTimeId).value;
-                    const endTime = document.getElementById(endTimeId).value;
-                    const weeksId = isManual ? 'repeatWeeks' : 'repeatWeeksInterval';
-                    const weeks = document.getElementById(weeksId).value;
-
-                    if (!startTime || !endTime) {
-                        showError('Please select start and end times');
-                        return;
-                    }
-
-                    if (startTime >= endTime) {
-                        showError('Start time must be before end time');
-                        return;
-                    }
-
-                    document.getElementById('loadingIndicator').classList.remove('hidden');
-                    saveButton.disabled = true;
-                    saveButton.textContent = 'Saving...';
-
-                    const promises = [];
-
-                    selectedDays.forEach(day => {
-                        promises.push(submitSchedule(
-                            day,
-                            startTime,
-                            endTime,
-                            weeks,
-                            !isManual
-                        ));
-                    });
-
-                    Promise.all(promises)
-                        .then(results => {
-                            console.log('All results:', results);
-
-                            document.getElementById('loadingIndicator').classList.add('hidden');
-                            saveButton.disabled = false;
-                            saveButton.textContent = 'Save Schedule';
-
-                            const authError = results.find(result => result.status === 401);
-                            if (authError) {
-                                if (authError.data.redirect) {
-                                    showError('Session expired. Redirecting to login...');
-                                    setTimeout(() => {
-                                        window.location.href = authError.data.redirect;
-                                    }, 2000);
-                                } else {
-                                    showError('Authentication error. Please login again.');
-                                }
-                                return;
-                            }
-
-                            const permError = results.find(result => result.status === 403);
-                            if (permError) {
-                                showError('Access denied. You do not have permission to perform this action.');
-                                return;
-                            }
-
-                            const successResults = results.filter(result => result.status === 201);
-                            const errorResults = results.filter(result => result.status !== 201);
-
-                            if (successResults.length > 0 && errorResults.length === 0) {
-                                const message = successResults.length === 1 ?
-                                    'Schedule saved successfully!' :
-                                    `All ${successResults.length} schedules saved successfully!`;
-
-                                showSuccess(message);
-
-                                setTimeout(() => {
-                                    window.location.href = "{% url 'schedule:schedule_list' caregiver_id=caregiver_id %}";
-                                }, 1500);
-                            } else if (successResults.length > 0 && errorResults.length > 0) {
-                                showError(`${successResults.length} schedules saved, but ${errorResults.length} failed. Check your input and try again.`);
-                            } else {
-                                const firstError = errorResults[0];
-                                const errorMsg = firstError.data.error || 'An error occurred while saving schedules';
-                                showError(errorMsg);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-
-                            document.getElementById('loadingIndicator').classList.add('hidden');
-                            saveButton.disabled = false;
-                            saveButton.textContent = 'Save Schedule';
-
-                            showError('Network error occurred. Please check your connection and try again.');
-                        });
-                });
+                saveButton.addEventListener('click', handleSave);
             }
         });
+
+        function handleSave() {
+            hideAlerts();
+
+            const isManual = !document.getElementById('manualForm').classList.contains('hidden');
+            const activeForm = isManual ? 'manualForm' : 'intervalForm';
+
+            const selectedDays = Array.from(document.querySelectorAll(`#${activeForm} .day-chip.selected`))
+                .map(day => day.dataset.day);
+
+            if (!selectedDays.length) {
+                showError('Please select at least one day');
+                return;
+            }
+
+            const timeIds = isManual
+                ? { start: 'startTime', end: 'endTime', weeks: 'repeatWeeks' }
+                : { start: 'intervalStartTime', end: 'intervalEndTime', weeks: 'repeatWeeksInterval' };
+
+            const startTime = document.getElementById(timeIds.start).value;
+            const endTime = document.getElementById(timeIds.end).value;
+            const weeks = document.getElementById(timeIds.weeks).value;
+
+            if (!startTime || !endTime) {
+                showError('Please select start and end times');
+                return;
+            }
+
+            if (startTime >= endTime) {
+                showError('Start time must be before end time');
+                return;
+            }
+
+            // Show loading state
+            const saveButton = document.getElementById('saveScheduleBtn');
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+            saveButton.disabled = true;
+            saveButton.textContent = 'Saving...';
+
+            const promises = selectedDays.map(day =>
+                submitSchedule(day, startTime, endTime, weeks, !isManual)
+            );
+
+            Promise.all(promises)
+                .then(handleSaveResults)
+                .catch(handleSaveError)
+                .finally(() => {
+                    document.getElementById('loadingIndicator').classList.add('hidden');
+                    saveButton.disabled = false;
+                    saveButton.textContent = 'Save Schedule';
+                });
+        }
+
+        function handleSaveResults(results) {
+            console.log('All results:', results);
+
+            const authError = results.find(result => result.status === 401);
+            if (authError) {
+                if (authError.data.redirect) {
+                    showError('Session expired. Redirecting to login...');
+                    setTimeout(() => window.location.href = authError.data.redirect, 2000);
+                } else {
+                    showError('Authentication error. Please login again.');
+                }
+                return;
+            }
+
+            const permError = results.find(result => result.status === 403);
+            if (permError) {
+                showError('Access denied. You do not have permission to perform this action.');
+                return;
+            }
+
+            const successResults = results.filter(result => result.status === 201);
+            const errorResults = results.filter(result => result.status !== 201);
+
+            if (successResults.length > 0 && errorResults.length === 0) {
+                const message = successResults.length === 1
+                    ? 'Schedule saved successfully!'
+                    : `All ${successResults.length} schedules saved successfully!`;
+                showSuccess(message);
+                setTimeout(() => {
+                    window.location.href = "{% url 'schedule:schedule_list' caregiver_id=caregiver_id %}";
+                }, 1500);
+            } else if (successResults.length > 0 && errorResults.length > 0) {
+                showError(`${successResults.length} schedules saved, but ${errorResults.length} failed. Check your input and try again.`);
+            } else {
+                const firstError = errorResults[0];
+                const errorMsg = firstError.data.error || 'An error occurred while saving schedules';
+                showError(errorMsg);
+            }
+        }
+
+        function handleSaveError(error) {
+            console.error('Error:', error);
+            showError('Network error occurred. Please check your connection and try again.');
+        }
     </script>
 
+    <style>
+        .tab-active {
+            color: #1A76D2;
+            border-bottom: 2px solid #1A76D2;
+        }
+
+        .day-chip {
+            transition: all 0.3s ease;
+        }
+
+        .day-chip.selected {
+            background-color: #1A76D2;
+            color: white;
+        }
+
+        .add-schedule-button {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-schedule-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .add-schedule-button:hover::before {
+            left: 100%;
+        }
+    </style>
 </body>
-
-<style>
-    .tab-active {
-        color: #1A76D2;
-        border-bottom: 2px solid #1A76D2;
-    }
-
-    .day-chip {
-        transition: all 0.3s ease;
-    }
-
-    .day-chip.selected {
-        background-color: #1A76D2;
-        color: white;
-    }
-
-    .add-schedule-button {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .add-schedule-button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: 0.5s;
-    }
-
-    .add-schedule-button:hover::before {
-        left: 100%;
-    }
-</style>
 {% endblock content %}

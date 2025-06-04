@@ -14,7 +14,6 @@
 <div class="min-h-screen flex flex-col">
     <div class="flex-1 flex items-center justify-center px-4 py-12">
         <div class="max-w-2xl w-full">
-            <!-- Registration Card -->
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
                 <!-- Header -->
                 <div class="welcome-banner p-8 text-center text-white bg-gradient-to-r from-primary to-accent">
@@ -46,13 +45,13 @@
                     </button>
                 </div>
 
-                <!-- Form Container -->
+                <!-- Single Form -->
                 <div class="p-8">
-                    <!-- Pacilian Form -->
-                    <form id="pacilian-form" method="post" action="" class="space-y-6">
+                    <form id="registration-form" method="post" action="" class="space-y-6">
                         {% csrf_token %}
-                        <input type="hidden" name="role" value="pacilian">
+                        <input type="hidden" name="role" value="pacilian" id="role-input">
 
+                        <!-- Common Fields -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-envelope mr-2 text-primary"></i>Email
@@ -97,15 +96,6 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-map-marker-alt mr-2 text-primary"></i>Address
-                            </label>
-                            <textarea name="address" required rows="3"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                placeholder="Address"></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-phone mr-2 text-primary"></i>Phone Number
                             </label>
                             <input type="tel" name="phone" required
@@ -113,101 +103,54 @@
                                 placeholder="08xxxxxxxxxx">
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-notes-medical mr-2 text-primary"></i>Medical History <span
-                                    class="text-gray-500">(Optional)</span>
-                            </label>
-                            <textarea name="medical_history" rows="4"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                placeholder="Describe any past illnesses or medical conditions you have experienced (optional)"></textarea>
-                        </div>
+                        <!-- Role-specific Fields -->
+                        <!-- Pacilian Fields -->
+                        <div id="pacilian-fields">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-map-marker-alt mr-2 text-primary"></i>Address
+                                </label>
+                                <textarea name="address" rows="3"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    placeholder="Address"></textarea>
+                            </div>
 
-                        <button type="submit"
-                            class="w-full bg-primary text-white font-semibold py-3 px-4 rounded-lg hover:bg-primary/80 transition-all transform hover:scale-105 flex items-center justify-center">
-                            <i class="fas fa-user-plus mr-2"></i>
-                            Register as Pacilian
-                        </button>
-                    </form>
-
-                    <!-- Caregiver Form -->
-                    <form id="caregiver-form" method="post" action="" class="space-y-6 hidden">
-                        {% csrf_token %}
-                        <input type="hidden" name="role" value="caregiver">
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-envelope mr-2 text-primary"></i>Email
-                            </label>
-                            <input type="email" name="email" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                placeholder="email@example.com">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-lock mr-2 text-primary"></i>Password
-                            </label>
-                            <div class="relative">
-                                <input type="password" name="password" required
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all pr-12"
-                                    placeholder="Password">
-                                <button type="button" onclick="togglePassword(this)"
-                                    class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-primary">
-                                    <i class="fas fa-eye"></i>
-                                </button>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-notes-medical mr-2 text-primary"></i>Medical History
+                                    <span class="text-gray-500">(Optional)</span>
+                                </label>
+                                <textarea name="medical_history" rows="4"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    placeholder="Describe any past illnesses or medical conditions you have experienced (optional)"></textarea>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-user mr-2 text-primary"></i>Full Name
-                            </label>
-                            <input type="text" name="name" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                placeholder="Full name">
+                        <!-- Caregiver Fields -->
+                        <div id="caregiver-fields" class="hidden">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-hospital mr-2 text-primary"></i>Work Address
+                                </label>
+                                <textarea name="work_address" rows="3"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    placeholder="Work address"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-stethoscope mr-2 text-primary"></i>Speciality
+                                </label>
+                                <input type="text" name="speciality"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    placeholder="Example: General Practitioner, Cardiologist, etc.">
+                            </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-id-card mr-2 text-primary"></i>NIK
-                            </label>
-                            <input type="text" name="nik" required maxlength="16"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                placeholder="16 digit NIK" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-hospital mr-2 text-primary"></i>Work Address
-                            </label>
-                            <textarea name="work_address" required rows="3"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                placeholder="Work address"></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-phone mr-2 text-primary"></i>Phone Number
-                            </label>
-                            <input type="tel" name="phone" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                placeholder="08xxxxxxxxxx">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-stethoscope mr-2 text-primary"></i>Speciality
-                            </label>
-                            <input type="text" name="speciality" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                placeholder="Example: General Practitioner, Cardiologist, etc.">
-                        </div>
-
-                        <button type="submit"
+                        <button type="submit" id="submit-btn"
                             class="w-full bg-primary text-white font-semibold py-3 px-4 rounded-lg hover:bg-primary/80 transition-all transform hover:scale-105 flex items-center justify-center">
-                            <i class="fas fa-user-md mr-2"></i>
-                            Register as Caregiver
+                            <i class="fas fa-user-plus mr-2" id="submit-icon"></i>
+                            <span id="submit-text">Register as Pacilian</span>
                         </button>
                     </form>
 
@@ -232,45 +175,81 @@
         </div>
     </div>
 </div>
+
+
 {% endblock content %}
 
 {% block extra_js %}
 <script>
     function switchRole(role) {
-        const pacilianTab = document.getElementById('pacilian-tab');
-        const caregiverTab = document.getElementById('caregiver-tab');
-        const pacilianForm = document.getElementById('pacilian-form');
-        const caregiverForm = document.getElementById('caregiver-form');
+        const elements = {
+            pacilianTab: document.getElementById('pacilian-tab'),
+            caregiverTab: document.getElementById('caregiver-tab'),
+            pacilianFields: document.getElementById('pacilian-fields'),
+            caregiverFields: document.getElementById('caregiver-fields'),
+            roleInput: document.getElementById('role-input'),
+            submitIcon: document.getElementById('submit-icon'),
+            submitText: document.getElementById('submit-text')
+        };
+
+        const activeClasses = ['text-primary', 'border-b-2', 'border-primary'];
+        const inactiveClasses = ['text-secondary'];
 
         if (role === 'pacilian') {
-            pacilianTab.classList.add('text-primary', 'border-b-2', 'border-primary');
-            pacilianTab.classList.remove('text-secondary');
-            caregiverTab.classList.remove('text-primary', 'border-b-2', 'border-primary');
-            caregiverTab.classList.add('text-secondary');
-            pacilianForm.classList.remove('hidden');
-            caregiverForm.classList.add('hidden');
+            elements.pacilianTab.classList.add(...activeClasses);
+            elements.pacilianTab.classList.remove(...inactiveClasses);
+            elements.caregiverTab.classList.remove(...activeClasses);
+            elements.caregiverTab.classList.add(...inactiveClasses);
+
+            elements.pacilianFields.classList.remove('hidden');
+            elements.caregiverFields.classList.add('hidden');
+
+            elements.roleInput.value = 'pacilian';
+            elements.submitIcon.className = 'fas fa-user-plus mr-2';
+            elements.submitText.textContent = 'Register as Pacilian';
+
+            updateFieldRequirements('pacilian');
         } else {
-            caregiverTab.classList.add('text-primary', 'border-b-2', 'border-primary');
-            caregiverTab.classList.remove('text-secondary');
-            pacilianTab.classList.remove('text-primary', 'border-b-2', 'border-primary');
-            pacilianTab.classList.add('text-secondary');
-            caregiverForm.classList.remove('hidden');
-            pacilianForm.classList.add('hidden');
+            elements.caregiverTab.classList.add(...activeClasses);
+            elements.caregiverTab.classList.remove(...inactiveClasses);
+            elements.pacilianTab.classList.remove(...activeClasses);
+            elements.pacilianTab.classList.add(...inactiveClasses);
+
+            elements.caregiverFields.classList.remove('hidden');
+            elements.pacilianFields.classList.add('hidden');
+
+            elements.roleInput.value = 'caregiver';
+            elements.submitIcon.className = 'fas fa-user-md mr-2';
+            elements.submitText.textContent = 'Register as Caregiver';
+
+            updateFieldRequirements('caregiver');
+        }
+    }
+
+    function updateFieldRequirements(role) {
+        const addressField = document.querySelector('textarea[name="address"]');
+        const workAddressField = document.querySelector('textarea[name="work_address"]');
+        const specialityField = document.querySelector('input[name="speciality"]');
+
+        if (role === 'pacilian') {
+            if (addressField) addressField.required = true;
+            if (workAddressField) workAddressField.required = false;
+            if (specialityField) specialityField.required = false;
+        } else {
+            if (addressField) addressField.required = false;
+            if (workAddressField) workAddressField.required = true;
+            if (specialityField) specialityField.required = true;
         }
     }
 
     function togglePassword(button) {
         const input = button.parentElement.querySelector('input');
         const icon = button.querySelector('i');
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
+        const isPassword = input.type === 'password';
+
+        input.type = isPassword ? 'text' : 'password';
+        icon.classList.toggle('fa-eye', !isPassword);
+        icon.classList.toggle('fa-eye-slash', isPassword);
     }
 </script>
 {% endblock extra_js %}
