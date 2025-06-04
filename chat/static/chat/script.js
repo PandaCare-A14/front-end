@@ -1,8 +1,60 @@
-let socket = new WebSocket(`${CHAT_API_URL}/api/ws`);
-let currentRoomId = null;
-let currentRecipientId = null; // Store the recipient ID for the current room
+document.addEventListener("DOMContentLoaded", async () => {
+  async function getApiUrl() {
+    return await fetch("/chat/get-api-url/").then(response => response.text());
+  }
 
-let form = document.getElementById("chat-form");
+  async function getAccessToken() {
+    return await fetch("/chat/get-access-token/").then(response => response.text())
+  }
+
+  async function setUpWebsocket() {
+    let apiUrl = await getApiUrl();
+    let accessToken = await getAccessToken();
+
+    // Send access token through Sec-WebSocket-Protocol header because the WebSocket standards are unmaintained as hell
+    let socket = new WebSocket(`${apiUrl}/api/ws`, ["jwt-bearer", accessToken]);
+
+    let currentRoomId = null;
+    let currentRecipientId = null; // Store the recipient ID for the current room
+
+    let form = document.getElementById("chat-form");
+
+    // Handle form submission
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const input = document.getElementById("chat-message-input");
+      let message = input.value.trim();
+
+      if (message.length === 0) {
+        return;
+      }
+
+      let payload = {
+        "message_type": "message",
+        "content": message,
+        "recipient_id": currentRecipientId // Use the dynamically set recipient ID
+      };
+
+      socket.send(JSON.stringify(payload));
+      input.value = ""; // Clear input
+    });
+
+
+    if (socket.readyState == WebSocket.OPEN) {
+      socket.onmessage(ev => {
+        const data = JSON.parse(ev.data);
+
+        if (data.room_id === currentRoomId) {
+          renderMessages([data]);
+        }
+      })
+    }
+  }
+
+  setUpWebsocket();
+})
+
 
 // Select chatroom
 function selectRoom(roomId, recipientId, messages) {
@@ -34,31 +86,23 @@ function renderMessages(messages) {
 }
 
 // Handle form submission
-form.addEventListener("submit", function(e) {
-  e.preventDefault();
+// form.addEventListener("submit", function (e) {
+//   e.preventDefault();
+// 
+//   const input = document.getElementById("chat-message-input");
+//   let message = input.value.trim();
+// 
+//   if (message.length === 0) {
+//     return;
+//   }
+// 
+//   let payload = {
+//     "message_type": "message",
+//     "content": message,
+//     "recipient_id": currentRecipientId // Use the dynamically set recipient ID
+//   };
+// 
+//   socket.send(JSON.stringify(payload));
+//   input.value = ""; // Clear input
+// });
 
-  const input = document.getElementById("chat-message-input");
-  let message = input.value.trim();
-
-  if (message.length === 0) {
-    return;
-  }
-
-  let payload = {
-    "message_type": "message",
-    "content": message,
-    "recipient_id": currentRecipientId // Use the dynamically set recipient ID
-  };
-
-  socket.send(JSON.stringify(payload));
-  input.value = ""; // Clear input
-});
-
-// Handle incoming messages via WebSocket
-socket.onmessage = function(event) {
-  const data = JSON.parse(event.data);
-
-  if (data.room_id === currentRoomId) {
-    renderMessages([data]);
-  }
-};

@@ -1,7 +1,7 @@
 import requests
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
-from pandacare.settings import CHAT_API_URL
+from pandacare.settings import API_BASE_URL, CHAT_API_URL
 from .utils import process_chat_data
 
 
@@ -12,14 +12,10 @@ def render_chat(req: HttpRequest):
     if not jwt:
         return render(req, "chat/error.html", {"error": "Authentication required"})
 
-    print(jwt)
-
     res = requests.get(
         f"{CHAT_API_URL}/api/rest/chat/rooms",
         headers={"Authorization": f"Bearer {jwt}"},
     )
-
-    print(f"{res}")
 
     if not res.ok:
         return render(req, "chat/error.html", {"error": "Failed to fetch chat rooms"})
@@ -31,10 +27,22 @@ def render_chat(req: HttpRequest):
             req, "chat/error.html", {"error": "Invalid response from chat API"}
         )
 
-    chat_rooms_and_messages = process_chat_data(raw_room_data)
+    chat_rooms_and_messages = process_chat_data(jwt, raw_room_data)
 
-    return render(
+    http_res = render(
         req,
         "chat/chat.html",
-        {"chat_rooms": chat_rooms_and_messages, "user_id": req.user_id},
+        {"chat_rooms": chat_rooms_and_messages, "user_id": req.session["user_id"]},
     )
+
+    http_res.set_cookie(key="access_token", value=jwt, httponly=True)
+
+    return http_res
+
+
+def get_chat_api_url(req: HttpRequest) -> HttpResponse:
+    return HttpResponse(CHAT_API_URL.encode())
+
+
+def get_access_token(req: HttpRequest) -> HttpResponse:
+    return HttpResponse(req.session["access_token"].encode())

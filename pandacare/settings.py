@@ -19,6 +19,8 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+API_BASE_URL = os.environ["API_BASE_URL"]
+
 AUTH_API_URL = os.environ["AUTH_API_URL"]
 
 JWKS_URL = os.environ["JWKS_URL"]
@@ -63,6 +65,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "pandacare.middleware.AuthMiddleware",
 ]
 
 ROOT_URLCONF = "pandacare.urls"
