@@ -31,10 +31,6 @@ def process_chat_data(jwt: str, raw_data: dict):
             f"{API_BASE_URL}/api/doctors/{room_id}",
             f"{API_BASE_URL}/api/profile",
         ]
-        partner_profile: requests.Response = requests.get(
-            f"{API_BASE_URL}/api/doctors/{room_id}",
-            headers={"Authorization": f"Bearer {jwt}"},
-        )
 
         partner_profile_dict: dict[str, str] = partner_profile.json()
         partner_name = partner_profile_dict["name"]
